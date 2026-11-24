@@ -27,11 +27,15 @@ export function divideRounded(numerator: bigint, denominator: bigint): bigint {
   return negative ? -quotient : quotient;
 }
 
+function powerOfTen(exponent: number): bigint {
+  return BigInt(`1${"0".repeat(exponent)}`);
+}
+
 export function rescale(value: ExactDecimal, scale: number): bigint {
   if (value.scale <= scale) {
-    return value.digits * 10n ** BigInt(scale - value.scale);
+    return value.digits * powerOfTen(scale - value.scale);
   }
-  return divideRounded(value.digits, 10n ** BigInt(value.scale - scale));
+  return divideRounded(value.digits, powerOfTen(value.scale - scale));
 }
 
 export function toPlain(digits: bigint, scale: number): string {
