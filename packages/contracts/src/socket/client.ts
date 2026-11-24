@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { SymbolSchema } from "../primitives.ts";
+import { RequestedSymbolSchema } from "../primitives.ts";
 
-const symbols = z.array(SymbolSchema).min(1);
+const symbols = z.array(RequestedSymbolSchema).min(1).max(500);
 
 export const SubscribeMessageSchema = z.object({ type: z.literal("subscribe"), symbols });
 export const UnsubscribeMessageSchema = z.object({ type: z.literal("unsubscribe"), symbols });
