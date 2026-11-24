@@ -34,6 +34,11 @@ const fixtures: Fixture[] = [
     expected: "eslint(no-restricted-properties)",
   },
   {
+    file: "apps/web/src/integrations/lint-fixtures/effect-allowed.tsx",
+    tool: "oxlint",
+    expected: null,
+  },
+  {
     file: "packages/core/src/lint-fixtures/window-global.ts",
     tool: "oxlint",
     expected: "eslint(no-restricted-globals)",

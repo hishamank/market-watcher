@@ -4,5 +4,5 @@
     "types": ["node"]
   },
   "include": ["src"],
-  "exclude": ["src/lint-fixtures"]
+  "exclude": ["src/**/lint-fixtures"]
 }

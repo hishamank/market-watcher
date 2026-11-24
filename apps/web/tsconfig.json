@@ -11,5 +11,5 @@
     ]
   },
   "include": ["next-env.d.ts", "src", "next.config.ts", ".next/types/**/*.ts"],
-  "exclude": ["src/lint-fixtures"]
+  "exclude": ["src/**/lint-fixtures"]
 }
