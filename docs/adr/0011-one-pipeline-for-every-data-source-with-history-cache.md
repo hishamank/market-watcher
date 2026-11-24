@@ -9,8 +9,9 @@ Every data source, the simulator included, plugs into the same two interfaces fr
 - **Freshness:** 1D for 60 seconds during the regular session, 1W for 5 minutes, 1M and longer until the next close. While the market is closed, entries stay fresh until the next open.
 - **Size:** at most 500 entries, least recently used evicted first.
 - **In-flight sharing:** concurrent identical requests share one upstream call.
-- **Stale-while-revalidate:** an expired entry is served at once and refreshed in the background.
-- **Failure order:** each source in the chain, then any expired entry (marked with its age), then an error.
+- **Stale-while-revalidate:** an entry expired by less than its own freshness window (for 1D, between 60 and 120 seconds old) is served at once, unmarked, and refreshed in the background.
+- **Older entries:** an entry past that window is refreshed before responding.
+- **Failure order:** each source in the chain, then the expired entry marked with its age (the client shows an "as of" note), then an error. A response carries an age only when a refresh has actually failed.
 
 ## Consequences
 

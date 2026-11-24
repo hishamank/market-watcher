@@ -77,7 +77,7 @@ A quote's change, in money and percent, against the previous close.
 _Avoid_: daily change, today's performance
 
 **Range change**:
-The change from the first bar of a range to its last point, which on the live point moves with every tick.
+The change across a range up to its last point, which on the live point moves with every tick. It is measured from the previous close on 1D and from the first bar on every other range.
 _Avoid_: performance, return
 
 ## Watchlist
