@@ -31,12 +31,14 @@ Two isolated stacks, so verification never fights a developer's running servers:
 | Walk | `http://localhost:4000` | `http://localhost:3000` | you, below |
 | E2E | `http://localhost:4100` | `http://localhost:3100` | Playwright's own `webServer` config |
 
-Start the walk stack from the repo root, each in its own background shell, and keep the process IDs:
+Start the walk stack from the repo root, each in its own background shell under `setsid`, so each server and its children share one session:
 
 ```bash
-FEED=simulator SIM_SEED=42 PORT=4000 pnpm --filter ./apps/gateway dev
-NEXT_PUBLIC_GATEWAY_URL=http://localhost:4000 PORT=3000 pnpm --filter ./apps/web dev
+FEED=simulator SIM_SEED=42 PORT=4000 setsid pnpm --filter ./apps/gateway dev
+NEXT_PUBLIC_GATEWAY_URL=http://localhost:4000 PORT=3000 setsid pnpm --filter ./apps/web dev
 ```
+
+Keep each session ID: the `SID` column of `ps -eo pid,sid,args | grep 'pnpm --filter'`. `setsid` may fork, so `$!` is not always the session ID.
 
 The stack is ready when both checks in step 3 pass. If a port is already taken by a process you did not start, stop and report it. Never kill it.
 
@@ -90,7 +92,7 @@ Proof standard: drive the path a user takes. Do not call hooks, stores or test-o
 
 ## 5. Evidence
 
-Write everything to `.verify/<YYYYMMDD-HHMM>-<branch>/` at the repo root (git-ignored):
+Write everything to `.verify/<YYYYMMDD-HHMM>-<branch>/` at the repo root (git-ignored), with each `/` in the branch name replaced by `-` (`t/1-scaffold` becomes `t-1-scaffold`):
 
 - `report.md`: the report below.
 - One screenshot per Walk feature, named by feature ID (`G3-stale.png`), taken after the expected state appears.
@@ -117,7 +119,15 @@ The ticket is done only when every feature it touched is PASS. A FAIL means fix 
 
 ## 7. Cleanup
 
-Stop only the processes you started, by the process IDs from step 2. Never kill by name or port. Leave `.verify/` in place: the evidence must survive cleanup.
+Stop only the processes you started, by the session IDs from step 2. `pnpm`, Turborepo and `next dev` leave child processes behind, so stop the whole session, then confirm both ports are free:
+
+```bash
+pkill -TERM -s <gateway session ID>
+pkill -TERM -s <web session ID>
+ss -ltn | grep -E ':(3000|4000)\b' || echo ports-released
+```
+
+Never kill by name or port. Leave `.verify/` in place: the evidence must survive cleanup.
 
 ## Expo app
 
