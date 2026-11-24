@@ -49,6 +49,26 @@ const fixtures: Fixture[] = [
     expected: "eslint(no-restricted-imports)",
   },
   {
+    file: "apps/web/src/lint-fixtures/use-effect-alias.tsx",
+    tool: "oxlint",
+    expected: "eslint(no-restricted-imports)",
+  },
+  {
+    file: "apps/gateway/src/lint-fixtures/long-function.mts",
+    tool: "oxlint",
+    expected: "eslint(max-lines-per-function)",
+  },
+  {
+    file: "packages/core/src/lint-fixtures/scoped-native.ts",
+    tool: "oxlint",
+    expected: "eslint(no-restricted-imports)",
+  },
+  {
+    file: "apps/web/src/lint-fixtures/physical-important.tsx",
+    tool: "direction",
+    expected: 'physical utility "text-left"',
+  },
+  {
     file: "apps/web/src/lint-fixtures/physical-margin.tsx",
     tool: "direction",
     expected: 'physical utility "ml-2"',

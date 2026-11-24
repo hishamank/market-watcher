@@ -5,8 +5,7 @@ dist/
 build/
 coverage/
 .expo/
-.env
-.env.*
+.env*
 !.env.example
 .verify/
 .claude/settings.local.json

@@ -14,7 +14,7 @@
   },
   "overrides": [
     {
-      "files": ["apps/**/*.{ts,tsx,js,jsx,mjs}"],
+      "files": ["apps/**/*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}"],
       "rules": {
         "eslint/max-lines-per-function": [
           "error",
@@ -26,8 +26,8 @@
             "paths": [
               {
                 "name": "react",
-                "importNames": ["useEffect"],
-                "message": "useEffect lives only in core and in integrations/."
+                "importNames": ["useEffect", "default"],
+                "message": "useEffect lives only in core and in integrations/. Import hooks by name, not through a default React import."
               }
             ]
           }
@@ -67,6 +67,9 @@
                   "react-dom/*",
                   "react-native/*",
                   "@react-native/*",
+                  "@react-native-community/*",
+                  "@react-native-async-storage/*",
+                  "react-native-*",
                   "expo",
                   "expo-*",
                   "@expo/*"

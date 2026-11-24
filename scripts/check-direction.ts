@@ -25,7 +25,7 @@ function findPhysicalClasses(file: string): string[] {
     .flatMap((line, index) =>
       line
         .split(/[\s"'`{}()<>,;]+/)
-        .map((token) => token.split(":").at(-1)?.replace(/^!/, "") ?? "")
+        .map((token) => token.split(":").at(-1)?.replace(/^!|!$/g, "") ?? "")
         .filter((utility) => physical.test(utility))
         .map((utility) => `${file}:${index + 1}: physical utility "${utility}", use a logical one`),
     );
