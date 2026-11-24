@@ -10,6 +10,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@mini/contracts": "workspace:*",
     "fastify": "5.12.8"
   },
   "devDependencies": {
