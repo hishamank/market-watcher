@@ -90,9 +90,13 @@ function buildBars(
   const barMs = BAR_DURATION_MS[BAR_SIZE_BY_RANGE[range]];
   const { start, end } = rangeBounds(range, now, barMs);
   const bars: Bar[] = [];
-  for (let time = start; time <= end; time += barMs) {
-    const sampleTime = time < end ? time + barMs : now;
-    bars.push({ time, close: displayPriceAt(seed, symbol, sampleTime, basePrice) });
+  let time = start;
+  while (time < 0) time += barMs;
+  for (; time <= end; time += barMs) {
+    bars.push({ time, close: displayPriceAt(seed, symbol, time, basePrice) });
+  }
+  if (now > end) {
+    bars.push({ time: now, close: displayPriceAt(seed, symbol, now, basePrice) });
   }
   return bars;
 }

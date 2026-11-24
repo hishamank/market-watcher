@@ -103,16 +103,17 @@ describe("simulator cross-range boundaries, quotes and catalogue", () => {
   it("agrees across ranges on completed bar boundaries", async () => {
     const feed = makeFeed();
     const todayOpen = startOfUtcDay(FIXED_NOW);
-    const yesterdayOpen = todayOpen - DAY_MS;
 
     const yearSeries = await feed.history.history({ symbol: "NVDA", range: "1Y", now: FIXED_NOW });
     const monthSeries = await feed.history.history({ symbol: "NVDA", range: "1M", now: FIXED_NOW });
+    const daySeries = await feed.history.history({ symbol: "NVDA", range: "1D", now: FIXED_NOW });
 
-    const yesterdayDailyBar = yearSeries.bars.find((bar) => bar.time === yesterdayOpen);
-    const yesterdayLastHourBar = monthSeries.bars.find((bar) => bar.time === todayOpen - 3_600_000);
+    const closeAtOpen = (bars: typeof yearSeries.bars) =>
+      bars.find((bar) => bar.time === todayOpen)?.close;
 
-    expect(yesterdayDailyBar?.close).toBe(yearSeries.previousClose);
-    expect(yesterdayLastHourBar?.close).toBe(yearSeries.previousClose);
+    expect(closeAtOpen(yearSeries.bars)).toBe(yearSeries.previousClose);
+    expect(closeAtOpen(monthSeries.bars)).toBe(yearSeries.previousClose);
+    expect(closeAtOpen(daySeries.bars)).toBe(yearSeries.previousClose);
   });
 
   it("sets previousClose to the 00:00 UTC price and derives change from rounded display strings", async () => {
