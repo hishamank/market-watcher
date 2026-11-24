@@ -7,6 +7,7 @@ export const DecimalStringSchema = z.string().max(MAX_DECIMAL_LENGTH).regex(DECI
 export const PriceStringSchema = z.string().max(MAX_DECIMAL_LENGTH).regex(UNSIGNED_DECIMAL_PATTERN);
 export const EpochMsSchema = z.int().nonnegative();
 export const SymbolSchema = z.string().min(1).max(16);
+export const RequestedSymbolSchema = z.string().min(1).max(64);
 
 export const FeedModeSchema = z.enum(["simulated", "live"]);
 export const MarketStatusSchema = z.enum(["open", "closed"]);

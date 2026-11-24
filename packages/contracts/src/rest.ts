@@ -6,7 +6,7 @@ import {
   PriceStringSchema,
   SymbolSchema,
 } from "./primitives.ts";
-import { QuoteSchema } from "./quote.ts";
+import { BaselinePriceSchema, QuoteSchema } from "./quote.ts";
 import { BAR_SIZE_BY_RANGE, BarSizeSchema, RangeSchema } from "./range.ts";
 
 const envelope = { feedMode: FeedModeSchema, marketStatus: MarketStatusSchema };
@@ -33,7 +33,7 @@ export const SessionSchema = z
 const history = {
   ...envelope,
   symbol: SymbolSchema,
-  previousClose: PriceStringSchema,
+  previousClose: BaselinePriceSchema,
   bars: z.array(BarSchema),
   ageMs: z.int().nonnegative().optional(),
 };

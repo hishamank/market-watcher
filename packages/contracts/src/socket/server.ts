@@ -1,15 +1,23 @@
 import { z } from "zod";
-import { EpochMsSchema, FeedModeSchema, MarketStatusSchema, SymbolSchema } from "../primitives.ts";
+import {
+  EpochMsSchema,
+  FeedModeSchema,
+  MarketStatusSchema,
+  RequestedSymbolSchema,
+} from "../primitives.ts";
 import { QuoteSchema } from "../quote.ts";
 
 export const PROTOCOL_VERSION = 1;
 
-export const ErrorCodeSchema = z.enum([
-  "unknown_symbol",
-  "subscription_limit",
+export const SymbolErrorCodeSchema = z.enum(["unknown_symbol", "subscription_limit"]);
+export const PlainErrorCodeSchema = z.enum([
   "rate_limited",
   "invalid_message",
   "unsupported_version",
+]);
+export const ErrorCodeSchema = z.enum([
+  ...SymbolErrorCodeSchema.options,
+  ...PlainErrorCodeSchema.options,
 ]);
 
 export const WelcomeMessageSchema = z.object({
@@ -43,12 +51,15 @@ export const MarketStatusMessageSchema = z.object({
   marketStatus: MarketStatusSchema,
 });
 
-export const ErrorMessageSchema = z.object({
-  type: z.literal("error"),
-  code: ErrorCodeSchema,
-  message: z.string(),
-  symbols: z.array(SymbolSchema).optional(),
-});
+export const ErrorMessageSchema = z.discriminatedUnion("code", [
+  z.object({
+    type: z.literal("error"),
+    code: SymbolErrorCodeSchema,
+    message: z.string(),
+    symbols: z.array(RequestedSymbolSchema).min(1),
+  }),
+  z.object({ type: z.literal("error"), code: PlainErrorCodeSchema, message: z.string() }),
+]);
 
 export const ServerMessageSchema = z.discriminatedUnion("type", [
   WelcomeMessageSchema,
