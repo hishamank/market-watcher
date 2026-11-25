@@ -43,8 +43,23 @@ function pollDue(
   );
 }
 
+async function recordSnapshots(
+  { http, calendar, now }: AlpacaLiveOptions,
+  held: HeldQuotes,
+  symbols: readonly string[],
+): Promise<void> {
+  const moment = calendar.moment(now());
+  const quotes = await snapshotQuotes(http, symbols, moment, calendar.days());
+  const session = sessionOf(moment);
+  const finished = sessionOf(calendar.moment(now()));
+  if (finished !== session) {
+    throw new Error(`Alpaca snapshot for ${session} finished in ${finished}`);
+  }
+  quotes.forEach((quote) => held.record(quote, session));
+}
+
 export function createAlpacaLive(options: AlpacaLiveOptions): AlpacaLive {
-  const { http, calendar, now, warn } = options;
+  const { calendar, now, warn } = options;
   const order = new Map<string, number>();
   const counts = new Map<string, number>();
   const held = createHeldQuotes(now, (symbol) => order.has(symbol));
@@ -60,11 +75,10 @@ export function createAlpacaLive(options: AlpacaLiveOptions): AlpacaLive {
   };
   const stream = options.openStream(onTrade);
 
-  const requests = createSnapshotRequests(async (symbols) => {
-    const moment = calendar.moment(now());
-    const quotes = await snapshotQuotes(http, symbols, moment, calendar.days());
-    quotes.forEach((quote) => held.record(quote, sessionOf(moment)));
-  }, now);
+  const requests = createSnapshotRequests(
+    (symbols) => recordSnapshots(options, held, symbols),
+    now,
+  );
 
   const rebalance = (): void => {
     const next = pickStreamed({ order, counts }, streamed, STREAM_SYMBOL_LIMIT);

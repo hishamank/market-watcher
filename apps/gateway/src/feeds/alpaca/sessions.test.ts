@@ -1,16 +1,26 @@
 import type { Quote } from "@mini/contracts";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
-import { STATUS_CHECK_INTERVAL_MS } from "./config.ts";
+import { POLL_INTERVAL_MS, STATUS_CHECK_INTERVAL_MS } from "./config.ts";
+import type { Fetch } from "./http.ts";
 import {
   AFTER_HOURS_NOW,
   type AlpacaRig,
   authenticate,
+  type FakeAlpaca,
+  fixture,
   SESSION_NOW,
   startAlpaca,
 } from "./testing.ts";
 
+const PRE_OPEN = Date.parse("2025-06-25T13:29:59Z");
 const NEXT_SESSION_NOW = Date.parse("2025-06-25T13:31:00Z");
 const SESSION_CLOSE = Date.parse("2025-06-24T20:00:00Z");
+const SNAPSHOTS = "/v2/stocks/snapshots";
+
+interface Gate {
+  alpaca?: FakeAlpaca;
+  held?: Promise<void> | undefined;
+}
 
 let rig: AlpacaRig | undefined;
 
@@ -39,6 +49,35 @@ async function crossInto(current: AlpacaRig, time: number): Promise<void> {
   current.alpaca.failing.set("/v2/stocks/snapshots", 500);
   vi.setSystemTime(time);
   await vi.advanceTimersByTimeAsync(STATUS_CHECK_INTERVAL_MS);
+}
+
+function gatedFetch(gate: Gate): Fetch {
+  return async (url, init) => {
+    if (gate.alpaca === undefined) throw new Error("fake Alpaca is not ready");
+    const response = await gate.alpaca.fetch(url, init);
+    const held = gate.held;
+    if (held !== undefined && new URL(url).pathname === SNAPSHOTS) {
+      gate.held = undefined;
+      await held;
+    }
+    return response;
+  };
+}
+
+function holdNextSnapshot(gate: Gate): () => void {
+  let release = (): void => undefined;
+  gate.held = new Promise((resolve) => (release = resolve));
+  return release;
+}
+
+function answerOnceWithClose(alpaca: FakeAlpaca, close: number): void {
+  const recorded = JSON.parse(fixture("snapshots.json")) as Record<string, { dailyBar: object }>;
+  const aapl = recorded["AAPL"] as { dailyBar: object };
+  const body = JSON.stringify({ AAPL: { ...aapl, dailyBar: { ...aapl.dailyBar, c: close } } });
+  alpaca.routes.set(SNAPSHOTS, () => {
+    alpaca.routes.delete(SNAPSHOTS);
+    return body;
+  });
 }
 
 test("a trade after a failed open resync waits for the new session's baseline", async () => {
@@ -87,4 +126,42 @@ test("a failed close resync is retried, and the last trade is not served as the 
   };
   expect(quotes.at(-1)).toEqual(close);
   await expect(rig.feed.live.snapshot(["AAPL"])).resolves.toEqual([close]);
+});
+
+test("a snapshot started before the open and answered after it is discarded", async () => {
+  vi.setSystemTime(AFTER_HOURS_NOW);
+  const gate: Gate = {};
+  rig = await startAlpaca(
+    (alpaca) => {
+      alpaca.clock = "after-hours";
+      gate.alpaca = alpaca;
+    },
+    { fetch: gatedFetch(gate), now: () => Date.now() },
+  );
+  const quotes = await watchAapl(rig);
+  vi.setSystemTime(PRE_OPEN);
+  const release = holdNextSnapshot(gate);
+  answerOnceWithClose(rig.alpaca, 201.6);
+  const old = rig.feed.live.resync().then(
+    () => "resolved",
+    () => "rejected",
+  );
+
+  vi.setSystemTime(NEXT_SESSION_NOW);
+  await vi.advanceTimersByTimeAsync(STATUS_CHECK_INTERVAL_MS);
+  rig.sockets.last().push("stream-trade-next-session.json");
+  const boundary = quotes.length;
+  release();
+  await expect(old).resolves.toBe("rejected");
+
+  await vi.advanceTimersByTimeAsync(POLL_INTERVAL_MS);
+  expect(quotes.slice(boundary).some((quote) => quote.previousClose === "200.30")).toBe(false);
+  expect(quotes.at(-1)).toEqual({
+    symbol: "AAPL",
+    price: "205.00",
+    change: "3.50",
+    changePercent: "1.74",
+    previousClose: "201.50",
+    timestamp: Date.parse("2025-06-25T13:31:00.250Z"),
+  });
 });

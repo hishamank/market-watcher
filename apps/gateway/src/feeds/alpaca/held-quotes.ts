@@ -82,8 +82,7 @@ export function createHeldQuotes(
     record(quote, session) {
       record(quote, session);
       const trade = waiting.get(quote.symbol);
-      waiting.delete(quote.symbol);
-      if (trade !== undefined) apply(quote.symbol, trade);
+      if (trade !== undefined && apply(quote.symbol, trade)) waiting.delete(quote.symbol);
     },
     trade(symbol, trade) {
       const newest = (waiting.get(symbol)?.time ?? -Infinity) <= trade.time;
