@@ -74,11 +74,19 @@ function useChartData(parts: ChartParts | null, input: PriceChartInput, refs: Ov
 
   useEffect(() => {
     if (parts === null) return undefined;
-    const place = () => placeOverlays(parts, refs, latest.current);
+    let frame = 0;
+    const place = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => placeOverlays(parts, refs, latest.current));
+    };
     const timeScale = parts.api.timeScale();
+    const observer = new ResizeObserver(place);
+    observer.observe(parts.api.chartElement());
     timeScale.subscribeSizeChange(place);
     timeScale.subscribeVisibleLogicalRangeChange(place);
     return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
       timeScale.unsubscribeSizeChange(place);
       timeScale.unsubscribeVisibleLogicalRangeChange(place);
     };
