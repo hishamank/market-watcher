@@ -60,4 +60,5 @@ export type {
 export { useConnectionHealth } from "./hooks/use-connection-health.ts";
 export type { ConnectionHealth } from "./hooks/use-connection-health.ts";
 export { useSearch } from "./hooks/use-search.ts";
+export { useTrack } from "./hooks/use-track.ts";
 export type { SearchResult } from "./hooks/use-search.ts";
