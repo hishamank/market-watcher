@@ -1,3 +1,5 @@
+"use client";
+
 import type { MarketStatus } from "@mini/contracts";
 import { useCallback, useSyncExternalStore } from "react";
 import { useCore } from "../core-provider.tsx";

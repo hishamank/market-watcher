@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useSyncExternalStore } from "react";
 import { useCore } from "../core-provider.tsx";
 import type { ConnectionStatus } from "../realtime/socket-types.ts";

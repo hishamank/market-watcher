@@ -7,6 +7,7 @@ export interface QuoteStore {
   subscribe(symbol: string, listener: QuoteListener): () => void;
   upsert(quote: Quote): boolean;
   upsertMany(quotes: readonly Quote[]): void;
+  seed(quotes: readonly Quote[]): void;
 }
 
 export function createQuoteStore(): QuoteStore {
@@ -39,6 +40,16 @@ export function createQuoteStore(): QuoteStore {
     }
   }
 
+  function seed(incoming: readonly Quote[]): void {
+    for (const quote of incoming) {
+      const current = quotes.get(quote.symbol);
+      const unread = !listenersBySymbol.has(quote.symbol);
+      if (unread && (current === undefined || quote.timestamp > current.timestamp)) {
+        quotes.set(quote.symbol, quote);
+      }
+    }
+  }
+
   function getQuote(symbol: string): Quote | undefined {
     return quotes.get(symbol);
   }
@@ -62,5 +73,5 @@ export function createQuoteStore(): QuoteStore {
     };
   }
 
-  return { getQuote, subscribe, upsert, upsertMany };
+  return { getQuote, subscribe, upsert, upsertMany, seed };
 }

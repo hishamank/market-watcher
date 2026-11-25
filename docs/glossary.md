@@ -68,6 +68,10 @@ _Avoid_: period, timeframe, interval
 One point of price history: a symbol's price over one fixed slice of time within a range.
 _Avoid_: candle, data point, tick (which is live)
 
+**Live point**:
+The last point of a chart, at the time of the newest quote. The gateway's last bar is the live point when the history was fetched. On the device, a quote in the same bar-size slice replaces it, and a quote in a later slice adds a new one. Slices line up with the gateway's bars, and weekly slices start on Monday at 00:00 UTC. On 1D, only a quote inside the chart's session counts, from its open up to but not including its close.
+_Avoid_: current bar, latest candle
+
 **Previous close**:
 The last close of the session before the current one. Today's change is measured against it.
 _Avoid_: yesterday's close, open

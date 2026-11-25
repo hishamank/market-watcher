@@ -30,6 +30,49 @@ export type {
   SocketFactory,
   SocketMessageEvent,
 } from "./realtime/transport.ts";
+export { mergeLiveQuote, BAR_SIZE_MS } from "./history/merge-live-quote.ts";
+export type { LiveHistory } from "./history/merge-live-quote.ts";
+export { useHistory, useStock, useStockList, useStocks } from "./hooks/use-stocks.ts";
+export { useWatchlist } from "./hooks/use-watchlist.ts";
+export type { WatchlistResult } from "./hooks/use-watchlist.ts";
+export { refetchHistoryOnReconnect } from "./rest/history-refetch.ts";
+export {
+  buildRestBaseUrl,
+  createDefaultFetch,
+  createRestClient,
+  RestClientError,
+} from "./rest/rest-client.ts";
+export type {
+  AbortSignalLike,
+  HttpFetch,
+  HttpRequestInit,
+  HttpResponse,
+  RestClient,
+  RestClientErrorCode,
+  RestClientOptions,
+} from "./rest/rest-client.ts";
+export {
+  HISTORY_STALE_MS,
+  historyQueryOptions,
+  normaliseSymbols,
+  shouldRetryRestError,
+  STOCK_STALE_MS,
+  stockListQueryOptions,
+  stockQueryKeys,
+  stockQueryOptions,
+  stocksBySymbolsQueryOptions,
+} from "./rest/stock-queries.ts";
+export {
+  createWatchlistStore,
+  EMPTY_WATCHLIST,
+  parseWatchlist,
+  WATCHLIST_STORAGE_KEY,
+} from "./watchlist/watchlist-store.ts";
+export type {
+  WatchlistListener,
+  WatchlistSnapshot,
+  WatchlistStore,
+} from "./watchlist/watchlist-store.ts";
 
 export { createNoopAnalytics, track } from "./analytics/analytics.ts";
 export type { AnalyticsAdapter, AnalyticsEvent } from "./analytics/analytics.ts";

@@ -1,4 +1,5 @@
 import type { Quote } from "@mini/contracts";
+import { scheduleTimeout } from "../realtime/timers.ts";
 import type { AppLifecycle, LifecycleListener, LifecycleState } from "../platform/app-lifecycle.ts";
 import type { KeyValueListener, KeyValueStore } from "../platform/key-value-store.ts";
 import type { NetworkListener, NetworkState, NetworkStatus } from "../platform/network-status.ts";
@@ -91,4 +92,10 @@ export function makeQuote(
     previousClose,
     timestamp,
   };
+}
+
+export function settle(): Promise<void> {
+  return new Promise((resolve) => {
+    scheduleTimeout(resolve, 0);
+  });
 }

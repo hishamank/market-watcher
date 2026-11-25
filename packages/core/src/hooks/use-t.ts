@@ -1,3 +1,5 @@
+"use client";
+
 import { useCore } from "../core-provider.tsx";
 import type { Translate } from "../i18n/locales/en/index.ts";
 

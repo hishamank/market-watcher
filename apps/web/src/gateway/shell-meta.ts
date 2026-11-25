@@ -4,6 +4,7 @@ import {
   type FeedMode,
   type MarketStatus,
 } from "@mini/contracts";
+import { buildRestBaseUrl } from "@mini/core";
 import { cache } from "react";
 
 export interface ShellMeta {
@@ -17,7 +18,7 @@ export const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL ?? "http://localho
 
 async function fetchShellMeta(): Promise<ShellMeta> {
   try {
-    const response = await fetch(`${gatewayUrl}/stocks`, {
+    const response = await fetch(`${buildRestBaseUrl(gatewayUrl)}/stocks`, {
       cache: "no-store",
       signal: AbortSignal.timeout(SHELL_META_TIMEOUT_MS),
     });

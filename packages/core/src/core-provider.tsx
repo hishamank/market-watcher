@@ -1,3 +1,6 @@
+"use client";
+
+import { type QueryCache, type QueryClient, useQueryClient } from "@tanstack/react-query";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import {
   attachConnectionAnalytics,
@@ -13,6 +16,10 @@ import { createQuoteStore, type QuoteStore } from "./realtime/quote-store.ts";
 import { createSocketClient } from "./realtime/socket-client.ts";
 import type { SocketClient } from "./realtime/socket-types.ts";
 import { buildSocketUrl, createDefaultSocket, type SocketFactory } from "./realtime/transport.ts";
+import { refetchHistoryOnReconnect } from "./rest/history-refetch.ts";
+import { syncQuotesFromQueryCache } from "./rest/quote-cache-sync.ts";
+import { createRestClient, type HttpFetch, type RestClient } from "./rest/rest-client.ts";
+import { createWatchlistStore, type WatchlistStore } from "./watchlist/watchlist-store.ts";
 
 export interface CoreProviderProps {
   gatewayUrl: string;
@@ -20,6 +27,7 @@ export interface CoreProviderProps {
   network: NetworkStatus;
   lifecycle: AppLifecycle;
   socketFactory?: SocketFactory | undefined;
+  fetch?: HttpFetch | undefined;
   locale?: string | undefined;
   analytics?: AnalyticsAdapter | undefined;
   children: ReactNode;
@@ -31,7 +39,10 @@ export interface CoreContextValue {
   network: NetworkStatus;
   lifecycle: AppLifecycle;
   quoteStore: QuoteStore;
+  queryCache: QueryCache | undefined;
   socketClient: SocketClient;
+  restClient: RestClient;
+  watchlistStore: WatchlistStore;
   i18n: I18nService;
   analytics: AnalyticsAdapter;
   track: (event: AnalyticsEvent) => void;
@@ -39,6 +50,7 @@ export interface CoreContextValue {
 
 export function createCoreServices(
   platform: Omit<CoreProviderProps, "children">,
+  queryClient?: QueryClient,
 ): CoreContextValue {
   const quoteStore = createQuoteStore();
   const socketClient = createSocketClient({
@@ -56,7 +68,10 @@ export function createCoreServices(
     network: platform.network,
     lifecycle: platform.lifecycle,
     quoteStore,
+    queryCache: queryClient?.getQueryCache(),
     socketClient,
+    restClient: createRestClient({ gatewayUrl: platform.gatewayUrl, fetch: platform.fetch }),
+    watchlistStore: createWatchlistStore(platform.storage),
     i18n,
     analytics,
     track: (event) => analytics.track(event),
@@ -66,7 +81,8 @@ export function createCoreServices(
 const CoreContext = createContext<CoreContextValue | null>(null);
 
 export function CoreProvider({ children, ...platform }: CoreProviderProps) {
-  const [value] = useState<CoreContextValue>(() => createCoreServices(platform));
+  const queryClient = useQueryClient();
+  const [value] = useState<CoreContextValue>(() => createCoreServices(platform, queryClient));
 
   useEffect(() => {
     const unsubscribe = attachConnectionAnalytics(value.socketClient, value.analytics);
@@ -76,6 +92,13 @@ export function CoreProvider({ children, ...platform }: CoreProviderProps) {
       value.socketClient.stop();
     };
   }, [value]);
+
+  useEffect(() => {
+    if (value.queryCache === undefined) return undefined;
+    return syncQuotesFromQueryCache(value.queryCache, value.quoteStore);
+  }, [value]);
+
+  useEffect(() => refetchHistoryOnReconnect(value.socketClient, queryClient), [value, queryClient]);
 
   return <CoreContext value={value}>{children}</CoreContext>;
 }

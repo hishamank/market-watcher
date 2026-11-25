@@ -16,10 +16,12 @@
     "intl-pluralrules": "^2.0.1"
   },
   "devDependencies": {
+    "@tanstack/react-query": "5.108.4",
     "@types/react": "19.3.1",
     "react": "19.3.0"
   },
   "peerDependencies": {
+    "@tanstack/react-query": "^5.108.4",
     "react": "^19.3.0"
   }
 }
