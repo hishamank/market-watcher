@@ -1,6 +1,6 @@
 import { RestErrorResponseSchema } from "@mini/contracts";
 import { afterEach, describe, expect, it } from "vitest";
-import { parseTrustProxy } from "../app.ts";
+import { parseRateLimitMax, parseTrustProxy } from "../app.ts";
 import { REST_RATE_LIMIT_MAX } from "./limits.ts";
 import { type RestGateway, startRestGateway, TEST_ORIGIN } from "./testing.ts";
 
@@ -112,6 +112,13 @@ describe("REST rate limit and trustProxy", () => {
     }
     expect(parseTrustProxy("127.0.0.1")).toBe("127.0.0.1");
     expect(parseTrustProxy("127.0.0.1, 10.0.0.0/8")).toEqual(["127.0.0.1", "10.0.0.0/8"]);
+  });
+
+  it("falls back to the default REST limit for an invalid or overflowing REST_RATE_LIMIT_MAX", () => {
+    for (const value of [undefined, "", "0", "-5", "1.5", "invalid", "9".repeat(309)]) {
+      expect(parseRateLimitMax(value)).toBeUndefined();
+    }
+    expect(parseRateLimitMax(" 500 ")).toEqual({ max: 500, timeWindow: 60_000 });
   });
 
   it("returns the structured 404 error body for unknown routes", async () => {

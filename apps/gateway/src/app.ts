@@ -7,7 +7,7 @@ import { registerRestPlugins, type RestRateLimitOptions } from "./rest/plugins.t
 import { restRoute } from "./rest/route.ts";
 import { socketRoute } from "./socket/route.ts";
 
-export { parseTrustProxy } from "./rest/plugins.ts";
+export { parseRateLimitMax, parseTrustProxy } from "./rest/plugins.ts";
 
 export interface AppOptions {
   feed: Feed;

@@ -40,6 +40,13 @@ export function parseTrustProxy(
   return items.length === 1 ? (items[0] ?? false) : items;
 }
 
+export function parseRateLimitMax(value: string | undefined): RestRateLimitOptions | undefined {
+  const trimmed = value?.trim();
+  if (trimmed === undefined || !/^[1-9]\d*$/.test(trimmed)) return undefined;
+  const max = Number(trimmed);
+  return Number.isSafeInteger(max) ? { max, timeWindow: REST_RATE_LIMIT_WINDOW_MS } : undefined;
+}
+
 export function registerRestPlugins(app: FastifyInstance, options: RestPluginsOptions): void {
   registerErrorHandlers(app, options.feed, options.feedMode, options.now);
 
