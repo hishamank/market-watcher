@@ -5,8 +5,7 @@ dist/
 build/
 coverage/
 .expo/
-.env
-.env.*
+.env*
 !.env.example
 .verify/
 .claude/settings.local.json
@@ -15,3 +14,5 @@ coverage/
 
 # Local-only notes
 docs/history/
+next-env.d.ts
+*.tsbuildinfo

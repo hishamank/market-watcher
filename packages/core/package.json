@@ -1,0 +1,20 @@
+{
+  "name": "@mini/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p .",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.1",
+    "react": "19.3.0"
+  },
+  "peerDependencies": {
+    "react": "^19.3.0"
+  }
+}

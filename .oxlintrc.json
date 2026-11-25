@@ -1,0 +1,94 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "react"],
+  "jsPlugins": ["./tooling/oxlint/no-comments.js"],
+  "categories": {
+    "correctness": "error"
+  },
+  "ignorePatterns": ["**/next-env.d.ts", "**/.next/**"],
+  "rules": {
+    "local/no-comments": "error",
+    "eslint/max-lines": ["error", { "max": 200, "skipBlankLines": false, "skipComments": false }],
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "error"
+  },
+  "overrides": [
+    {
+      "files": ["apps/**/*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}"],
+      "rules": {
+        "eslint/max-lines-per-function": [
+          "error",
+          { "max": 80, "skipBlankLines": false, "skipComments": false, "IIFEs": true }
+        ],
+        "eslint/no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "react",
+                "importNames": ["useEffect", "default"],
+                "message": "useEffect lives only in core and in integrations/. Import hooks by name, not through a default React import."
+              }
+            ]
+          }
+        ],
+        "eslint/no-restricted-properties": [
+          "error",
+          {
+            "object": "React",
+            "property": "useEffect",
+            "message": "useEffect lives only in core and in integrations/."
+          }
+        ]
+      }
+    },
+    {
+      "files": ["apps/*/src/integrations/**"],
+      "rules": {
+        "eslint/no-restricted-imports": "off",
+        "eslint/no-restricted-properties": "off"
+      }
+    },
+    {
+      "files": ["packages/core/**"],
+      "rules": {
+        "eslint/no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              { "name": "next", "message": "Core is platform-agnostic: no Next.js." },
+              { "name": "react-dom", "message": "Core is platform-agnostic: no DOM." },
+              { "name": "react-native", "message": "Core is platform-agnostic: no React Native." }
+            ],
+            "patterns": [
+              {
+                "group": [
+                  "next/*",
+                  "react-dom/*",
+                  "react-native/*",
+                  "@react-native/*",
+                  "@react-native-community/*",
+                  "@react-native-async-storage/*",
+                  "react-native-*",
+                  "expo",
+                  "expo-*",
+                  "@expo/*"
+                ],
+                "message": "Core is platform-agnostic: platform pieces arrive through CoreProvider."
+              }
+            ]
+          }
+        ],
+        "eslint/no-restricted-globals": [
+          "error",
+          { "name": "window", "message": "Core has no DOM." },
+          { "name": "document", "message": "Core has no DOM." },
+          { "name": "navigator", "message": "Core has no DOM." },
+          { "name": "localStorage", "message": "Core has no DOM: use the storage interface." },
+          { "name": "sessionStorage", "message": "Core has no DOM: use the storage interface." },
+          { "name": "location", "message": "Core has no DOM." }
+        ]
+      }
+    }
+  ]
+}
