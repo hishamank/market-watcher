@@ -8,13 +8,20 @@ export const gatewayUrl = `http://localhost:${gatewayPort}`;
 export const gatewayPidFile = join(tmpdir(), `mini-e2e-gateway-${gatewayPort}.pid`);
 
 const repoRoot = fileURLToPath(new URL("../../../..", import.meta.url));
+const e2eRestRateLimitMax = "100000";
 
 export function startGateway(detached: boolean): ChildProcess {
   return spawn("pnpm", ["--filter", "./apps/gateway", "start"], {
     cwd: repoRoot,
     detached,
     stdio: detached ? "ignore" : "inherit",
-    env: { ...process.env, PORT: String(gatewayPort), FEED: "simulator", SIM_SEED: "42" },
+    env: {
+      ...process.env,
+      PORT: String(gatewayPort),
+      FEED: "simulator",
+      SIM_SEED: "42",
+      REST_RATE_LIMIT_MAX: e2eRestRateLimitMax,
+    },
   });
 }
 

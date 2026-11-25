@@ -9,22 +9,43 @@ function browserStorage(): Storage | null {
 }
 
 export function createLocalStorageStore(): KeyValueStore {
+  const knownKeys = new Set<string>();
   return {
-    getItem: async (key) => browserStorage()?.getItem(key) ?? null,
+    getItem: async (key) => {
+      knownKeys.add(key);
+      try {
+        return browserStorage()?.getItem(key) ?? null;
+      } catch {
+        return null;
+      }
+    },
     setItem: async (key, value) => {
-      browserStorage()?.setItem(key, value);
+      knownKeys.add(key);
+      try {
+        browserStorage()?.setItem(key, value);
+      } catch {
+        return;
+      }
     },
     removeItem: async (key) => {
-      browserStorage()?.removeItem(key);
+      knownKeys.add(key);
+      try {
+        browserStorage()?.removeItem(key);
+      } catch {
+        return;
+      }
     },
     subscribe(listener) {
       if (typeof window === "undefined") {
         return () => {};
       }
       const onStorage = (event: StorageEvent) => {
-        if (event.key !== null && event.storageArea === browserStorage()) {
+        if (event.storageArea !== browserStorage()) return;
+        if (event.key !== null) {
           listener(event.key);
+          return;
         }
+        for (const key of knownKeys) listener(key);
       };
       window.addEventListener("storage", onStorage);
       return () => window.removeEventListener("storage", onStorage);

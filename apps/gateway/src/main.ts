@@ -1,4 +1,4 @@
-import { buildApp, parseTrustProxy } from "./app.ts";
+import { buildApp, parseRateLimitMax, parseTrustProxy } from "./app.ts";
 import { createSimulatorFeed } from "./feeds/index.ts";
 import { parseAllowedOrigins } from "./socket/admission.ts";
 
@@ -11,11 +11,13 @@ if (feedName !== "simulator") {
 const seed = process.env["SIM_SEED"];
 const feed = createSimulatorFeed(seed === undefined ? {} : { seed });
 const port = Number(process.env["PORT"] ?? 4000);
+const rateLimit = parseRateLimitMax(process.env["REST_RATE_LIMIT_MAX"]);
 const app = buildApp({
   feed,
   feedMode: "simulated",
   allowedOrigins: parseAllowedOrigins(process.env["ALLOWED_ORIGINS"]),
   trustProxy: parseTrustProxy(process.env["TRUST_PROXY"]),
+  ...(rateLimit !== undefined ? { rateLimit } : {}),
 });
 app.addHook("onClose", async () => feed.close());
 
