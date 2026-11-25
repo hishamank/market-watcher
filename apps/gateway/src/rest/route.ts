@@ -17,6 +17,7 @@ import type { CatalogueEntry, Feed, HistorySource } from "../feeds/types.ts";
 import type { Warn } from "../hub/quote-book.ts";
 import { RestError } from "./errors.ts";
 import { createHistoryCache, type HistoryCache } from "./history-cache.ts";
+import { handleStockSearch } from "./search-catalogue.ts";
 
 export interface RestRouteOptions {
   feed: Feed;
@@ -184,6 +185,7 @@ export async function restRoute(app: FastifyInstance, options: RestRouteOptions)
   };
 
   app.get("/stocks", (request) => handleStockList(request, ctx));
+  app.get("/stocks/search", (request) => handleStockSearch(request, ctx));
   app.get("/stocks/:symbol", (request) => handleStockDetail(request, ctx));
   app.get("/stocks/:symbol/history", (request) => handleStockHistory(request, ctx));
 }

@@ -103,12 +103,23 @@ export function ChevronStartIcon({ className = "" }: IconProps) {
   return <StrokeIcon className={`rtl:-scale-x-100 ${className}`} path="M15 5l-7 7 7 7" />;
 }
 
-export function SearchIcon({ className }: IconProps) {
+export function SearchIcon({
+  className,
+  size = "size-[24px]",
+}: IconProps & { size?: string | undefined }) {
   return (
     <StrokeIcon
       className={className}
-      size="size-[24px]"
+      size={size}
       path="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"
     />
   );
+}
+
+export function CloseIcon({ className }: IconProps) {
+  return <StrokeIcon className={className} path="M6 6l12 12M18 6l-12 12" />;
+}
+
+export function SpinnerIcon({ className }: IconProps) {
+  return <StrokeIcon className={className} path="M12 3a9 9 0 1 0 9 9" />;
 }

@@ -1,4 +1,6 @@
 export const searchStrings = {
+  "search.open": "Search",
+  "search.dialogLabel": "Search stocks",
   "search.placeholder": "Search symbol or company",
   "search.clear": "Clear",
   "search.idle.title": "Find a stock",

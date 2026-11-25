@@ -14,6 +14,8 @@
   --animate-skeleton: skeleton 1.2s ease-in-out infinite;
   --animate-banner-in: banner-in var(--duration-base) var(--ease-standard) both;
   --animate-star-on: star-on var(--duration-fast) var(--ease-standard) both;
+  --animate-sheet-in: sheet-in var(--duration-slow) var(--ease-standard) both;
+  --animate-fade-in: fade-in var(--duration-fast) var(--ease-standard) both;
 
   @keyframes flash {
     from {
@@ -40,6 +42,19 @@
   @keyframes star-on {
     from {
       transform: scale(0.85);
+    }
+  }
+
+  @keyframes sheet-in {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
     }
   }
 }

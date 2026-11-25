@@ -56,3 +56,6 @@ export type {
   ChaosFailureRateView,
   ChaosToggleView,
 } from "./hooks/use-chaos-controls.ts";
+
+export { useSearch } from "./hooks/use-search.ts";
+export type { SearchResult } from "./hooks/use-search.ts";

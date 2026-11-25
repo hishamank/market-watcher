@@ -61,9 +61,15 @@ export interface RestClientOptions {
   fetch?: HttpFetch | undefined;
 }
 
-interface ResponseSchema<T> {
+export interface ResponseSchema<T> {
   safeParse(value: unknown): { success: true; data: T } | { success: false };
 }
+
+export type RestRequester = <T>(
+  path: string,
+  schema: ResponseSchema<T>,
+  signal?: AbortSignalLike,
+) => Promise<T>;
 
 interface GlobalWithFetch {
   fetch?: HttpFetch;
@@ -103,11 +109,11 @@ function toError(status: number, payload: unknown): RestClientError {
   return new RestClientError(status, "invalid_response", `Unexpected gateway response ${status}`);
 }
 
-export function createRestClient(options: RestClientOptions): RestClient {
+export function createRestRequester(options: RestClientOptions): RestRequester {
   const baseUrl = buildRestBaseUrl(options.gatewayUrl);
   const fetchFn = options.fetch ?? createDefaultFetch();
 
-  async function request<T>(
+  return async function request<T>(
     path: string,
     schema: ResponseSchema<T>,
     signal?: AbortSignalLike,
@@ -131,8 +137,11 @@ export function createRestClient(options: RestClientOptions): RestClient {
       throw new RestClientError(response.status, "invalid_response", "Unexpected gateway response");
     }
     return parsed.data;
-  }
+  };
+}
 
+export function createRestClient(options: RestClientOptions): RestClient {
+  const request = createRestRequester(options);
   const segment = (value: string) => encodeURIComponent(value);
 
   return {

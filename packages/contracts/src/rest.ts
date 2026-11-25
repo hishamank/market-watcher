@@ -63,6 +63,26 @@ export const HistoryResponseSchema = z.discriminatedUnion("range", [
 ]);
 
 export const MAX_STOCKS_QUERY_SYMBOLS = 100;
+export const MAX_SEARCH_QUERY_LENGTH = 100;
+export const MAX_SEARCH_RESULTS = 10;
+
+export const SearchMatchSchema = z.object({
+  symbol: SymbolSchema,
+  name: z.string(),
+});
+
+export const SearchResponseSchema = z.object({
+  ...envelope,
+  results: z.array(SearchMatchSchema).max(MAX_SEARCH_RESULTS),
+});
+
+export const SearchQuerySchema = z.object({
+  q: z
+    .string()
+    .max(MAX_SEARCH_QUERY_LENGTH)
+    .transform((value) => value.trim())
+    .pipe(z.string().min(1)),
+});
 
 export const RestErrorCodeSchema = z.enum([
   "invalid_request",
@@ -113,3 +133,6 @@ export type RestErrorResponse = z.infer<typeof RestErrorResponseSchema>;
 export type StockListQuery = z.infer<typeof StockListQuerySchema>;
 export type StockSymbolParams = z.infer<typeof StockSymbolParamsSchema>;
 export type HistoryQuery = z.infer<typeof HistoryQuerySchema>;
+export type SearchQuery = z.infer<typeof SearchQuerySchema>;
+export type SearchMatch = z.infer<typeof SearchMatchSchema>;
+export type SearchResponse = z.infer<typeof SearchResponseSchema>;
