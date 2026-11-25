@@ -1,0 +1,109 @@
+import { describe, expect, it } from "vitest";
+import { aaplQuote } from "./fixtures.ts";
+import { BAR_SIZE_BY_RANGE, RANGES } from "./range.ts";
+import {
+  type HistoryResponse,
+  HistoryResponseSchema,
+  StockDetailResponseSchema,
+  StockListResponseSchema,
+} from "./rest.ts";
+
+const roundTrip = (value: unknown): unknown => JSON.parse(JSON.stringify(value));
+
+const dayHistory: HistoryResponse = {
+  feedMode: "simulated",
+  marketStatus: "open",
+  symbol: "AAPL",
+  range: "1D",
+  barSize: "5m",
+  session: { open: 1_764_000_000_000, close: 1_764_023_400_000 },
+  previousClose: "190.00",
+  bars: [
+    { time: 1_764_000_000_000, close: "189.10" },
+    { time: 1_764_000_300_000, close: "187.42" },
+  ],
+};
+
+const yearHistory: HistoryResponse = {
+  feedMode: "live",
+  marketStatus: "closed",
+  symbol: "AAPL",
+  range: "1Y",
+  barSize: "1d",
+  previousClose: "190.00",
+  bars: [{ time: 1_732_000_000_000, close: "0.9950" }],
+  ageMs: 75_000,
+};
+
+describe("stock list and detail", () => {
+  it("accepts the R01 gateway stub body", () => {
+    const stub = { feedMode: "simulated", marketStatus: "open", stocks: [] };
+    expect(StockListResponseSchema.parse(stub)).toEqual(stub);
+  });
+
+  it("round-trips a list", () => {
+    const list = {
+      feedMode: "live",
+      marketStatus: "closed",
+      stocks: [{ symbol: "AAPL", name: "Apple Inc.", quote: aaplQuote }],
+    };
+    expect(StockListResponseSchema.parse(roundTrip(list))).toEqual(list);
+  });
+
+  it("round-trips a detail", () => {
+    const detail = {
+      feedMode: "simulated",
+      marketStatus: "open",
+      stock: { symbol: "AAPL", name: "Apple Inc.", quote: aaplQuote },
+    };
+    expect(StockDetailResponseSchema.parse(roundTrip(detail))).toEqual(detail);
+  });
+
+  it("rejects a response without the feed mode", () => {
+    expect(StockListResponseSchema.safeParse({ marketStatus: "open", stocks: [] }).success).toBe(
+      false,
+    );
+  });
+});
+
+describe("history", () => {
+  it.each([
+    ["1D", dayHistory],
+    ["1Y with an age", yearHistory],
+  ])("round-trips %s", (_name, history) => {
+    expect(HistoryResponseSchema.parse(roundTrip(history))).toEqual(history);
+  });
+
+  it.each(RANGES.filter((range) => range !== "1D"))("accepts %s at its bar size", (range) => {
+    const history = { ...yearHistory, range, barSize: BAR_SIZE_BY_RANGE[range] };
+    expect(HistoryResponseSchema.safeParse(history).success).toBe(true);
+  });
+
+  it("maps every range to its bar size", () => {
+    expect(BAR_SIZE_BY_RANGE).toEqual({
+      "1D": "5m",
+      "1W": "30m",
+      "1M": "1h",
+      "3M": "1d",
+      "1Y": "1d",
+      "5Y": "1w",
+    });
+  });
+
+  it.each([
+    ["1D without a session", { ...dayHistory, session: undefined }],
+    ["1D at a daily bar size", { ...dayHistory, barSize: "1d" }],
+    ["1W at a daily bar size", { ...yearHistory, range: "1W", barSize: "1d" }],
+    ["a session that closes before it opens", { ...dayHistory, session: { open: 2, close: 1 } }],
+    ["an unknown range", { ...yearHistory, range: "2Y" }],
+    ["a float close", { ...yearHistory, bars: [{ time: 1, close: 0.995 }] }],
+    ["a negative age", { ...yearHistory, ageMs: -1 }],
+  ])("rejects %s", (_name, value) => {
+    expect(HistoryResponseSchema.safeParse(value).success).toBe(false);
+  });
+
+  it("narrows to a session on 1D", () => {
+    const history = HistoryResponseSchema.parse(dayHistory);
+    expect(history.range === "1D" && history.session.open).toBe(1_764_000_000_000);
+  });
+});
