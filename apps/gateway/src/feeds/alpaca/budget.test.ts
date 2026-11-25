@@ -87,3 +87,18 @@ test("a 429 pauses every snapshot path for a full minute", async () => {
   expect(calls.filter((call) => call.at < SESSION_NOW + SLOW_BATCH_MS + MINUTE_MS)).toHaveLength(1);
   expect(calls.length).toBeGreaterThan(1);
 });
+
+test("at most 180 data requests reach Alpaca in a minute, and the next minute gets more", async () => {
+  rig = await startAlpaca(undefined, { now: () => Date.now() });
+  const calls = () => rig?.alpaca.calls("/v2/stocks/snapshots").length ?? 0;
+  expect(calls()).toBe(1);
+
+  const symbols = Array.from({ length: 200 }, (_, index) => `C${index + 1}`);
+  const results = await Promise.allSettled(symbols.map((s) => rig?.feed.live.snapshot([s])));
+  expect(calls()).toBe(180);
+  expect(results.filter((result) => result.status === "rejected")).toHaveLength(21);
+
+  vi.setSystemTime(SESSION_NOW + MINUTE_MS);
+  await expect(rig.feed.live.snapshot(["NEXT"])).resolves.toHaveLength(1);
+  expect(calls()).toBe(181);
+});
