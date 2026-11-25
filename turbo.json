@@ -4,7 +4,7 @@
     "dev": {
       "cache": false,
       "persistent": true,
-      "passThroughEnv": ["PORT", "FEED", "SIM_SEED", "NEXT_PUBLIC_GATEWAY_URL"]
+      "passThroughEnv": ["PORT", "FEED", "SIM_SEED", "NEXT_PUBLIC_GATEWAY_URL", "ALLOWED_ORIGINS"]
     },
     "build": {
       "dependsOn": ["^build"],
