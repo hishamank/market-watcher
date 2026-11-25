@@ -58,6 +58,20 @@ function createRecorder(now: () => number, isSubscribed: (symbol: string) => boo
   };
 }
 
+function takeDue(
+  symbols: readonly string[],
+  latest: ReadonlyMap<string, Held>,
+  attempted: Map<string, number>,
+  now: number,
+): string[] {
+  const recent = (at: number | undefined) => at !== undefined && at > now - SNAPSHOT_REUSE_MS;
+  const due = symbols.filter(
+    (symbol) => !recent(latest.get(symbol)?.at) && !recent(attempted.get(symbol)),
+  );
+  due.forEach((symbol) => attempted.set(symbol, now));
+  return due;
+}
+
 export function createAlpacaLive(options: AlpacaLiveOptions): AlpacaLive {
   const { http, calendar, now, warn } = options;
   const order = new Map<string, number>();
@@ -119,11 +133,7 @@ export function createAlpacaLive(options: AlpacaLiveOptions): AlpacaLive {
       if (order.has(symbol)) rebalance();
     },
     async snapshot(symbols) {
-      const recent = (at: number | undefined) => at !== undefined && at > now() - SNAPSHOT_REUSE_MS;
-      const due = symbols.filter(
-        (symbol) => !recent(latest.get(symbol)?.at) && !recent(attempted.get(symbol)),
-      );
-      due.forEach((symbol) => attempted.set(symbol, now()));
+      const due = takeDue(symbols, latest, attempted, now());
       if (due.length > 0) await fetchQuotes(due);
       return symbols.flatMap((symbol) => latest.get(symbol)?.quote ?? []);
     },
