@@ -1,4 +1,4 @@
-import type { AlpacaConfig } from "./config.ts";
+import { type AlpacaConfig, REQUEST_TIMEOUT_MS } from "./config.ts";
 
 export type Fetch = (url: string, init: RequestInit) => Promise<Response>;
 export type Api = "trading" | "data";
@@ -50,14 +50,25 @@ export function createAlpacaHttp(config: AlpacaConfig, fetchImpl: Fetch): Alpaca
   return {
     async get(api, path, params = {}, signal) {
       const base = api === "trading" ? config.tradingUrl : config.dataUrl;
-      const response = await fetchImpl(buildUrl(base, path, params), {
-        headers,
-        ...(signal !== undefined ? { signal } : {}),
-      });
-      if (!response.ok) {
-        throw new AlpacaHttpError(response.status, path);
+      const deadline = new AbortController();
+      const timer = setTimeout(
+        () =>
+          deadline.abort(new Error(`Alpaca did not answer ${path} in ${REQUEST_TIMEOUT_MS} ms`)),
+        REQUEST_TIMEOUT_MS,
+      );
+      const signals = signal === undefined ? [deadline.signal] : [signal, deadline.signal];
+      try {
+        const response = await fetchImpl(buildUrl(base, path, params), {
+          headers,
+          signal: AbortSignal.any(signals),
+        });
+        if (!response.ok) {
+          throw new AlpacaHttpError(response.status, path);
+        }
+        return parseExactJson(await response.text());
+      } finally {
+        clearTimeout(timer);
       }
-      return parseExactJson(await response.text());
     },
   };
 }

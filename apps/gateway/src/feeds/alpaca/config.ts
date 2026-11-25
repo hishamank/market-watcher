@@ -12,6 +12,7 @@ export const REQUEST_BUDGET = 180;
 export const BUDGET_WINDOW_MS = 60_000;
 export const BACKOFF_BASE_MS = 5_000;
 export const BACKOFF_MAX_MS = 60_000;
+export const REQUEST_TIMEOUT_MS = 4_000;
 
 export const DEFAULT_TRADING_URL = "https://paper-api.alpaca.markets";
 export const DEFAULT_DATA_URL = "https://data.alpaca.markets";

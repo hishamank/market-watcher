@@ -72,7 +72,8 @@ test("history passes the abort signal through to Alpaca", async () => {
   });
   await expect(request).rejects.toThrow("superseded");
   const bars = rig.alpaca.requests.find(({ url }) => url.pathname === "/v2/stocks/bars");
-  expect(bars?.signal).toBe(controller.signal);
+  expect(bars?.signal?.aborted).toBe(true);
+  expect(bars?.signal?.reason).toBe(controller.signal.reason);
 });
 
 function endlessPages(pagesWithToken: number): (url: URL) => string {
