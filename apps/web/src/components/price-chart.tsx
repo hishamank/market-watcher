@@ -1,6 +1,12 @@
 import type { Direction } from "@mini/core";
-import type { RefObject } from "react";
-import { Skeleton } from "./skeleton.tsx";
+import type { KeyboardEvent, RefObject } from "react";
+import {
+  ChartAsOf,
+  ChartError,
+  ChartReadout,
+  ChartSkeleton,
+  type ChartReadoutValue,
+} from "./chart-states.tsx";
 
 export type ChartState = "loading" | "ready" | "error";
 
@@ -10,6 +16,11 @@ export interface PriceChartProps {
   drawn: boolean;
   label: string;
   previousCloseLabel: string | undefined;
+  asOfLabel: string | undefined;
+  readout: ChartReadoutValue | undefined;
+  onRetry: () => void;
+  onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
+  onBlur: () => void;
   containerRef: RefObject<HTMLDivElement | null>;
   livePointRef: RefObject<HTMLSpanElement | null>;
   previousCloseRef: RefObject<HTMLSpanElement | null>;
@@ -21,47 +32,41 @@ const pointTones: Record<Direction, string> = {
   flat: "text-chart-gain-line",
 };
 
-function ChartSkeleton() {
-  return (
-    <div className="absolute inset-0 flex flex-col">
-      <Skeleton className="flex-1 rounded-lg" />
-      <span className="flex h-[24px] items-center justify-between">
-        <Skeleton className="h-[10px] w-[40px]" />
-        <Skeleton className="h-[10px] w-[40px]" />
-        <Skeleton className="h-[10px] w-[56px]" />
-      </span>
-    </div>
-  );
-}
-
 export function PriceChart(props: PriceChartProps) {
   const { state, direction, drawn } = props;
-  const showSkeleton = !drawn || state === "loading";
+  const showSkeleton = state === "loading" || (state === "ready" && !drawn);
+  const showChart = state === "ready" && drawn;
   return (
-    <div className="pt-[36px]">
+    <div dir="ltr" className="relative pt-[36px]">
+      <div className="absolute start-0 end-0 top-0 h-[36px]">
+        {showChart && props.asOfLabel !== undefined ? <ChartAsOf label={props.asOfLabel} /> : null}
+        <ChartReadout value={showChart ? props.readout : undefined} />
+      </div>
       <div
-        dir="ltr"
-        role="img"
+        role="application"
         aria-label={props.label}
+        tabIndex={showChart ? 0 : undefined}
+        onKeyDown={props.onKeyDown}
+        onBlur={props.onBlur}
         data-testid="price-chart"
         data-state={state}
         data-direction={direction}
-        className="relative h-[200px] md:h-[344px]"
+        className="relative h-[200px] rounded-lg md:h-[344px]"
       >
         <div
           ref={props.containerRef}
-          className={`absolute inset-0 ${showSkeleton ? "invisible" : ""}`}
+          className={`absolute inset-0 ${showChart ? "" : "invisible"}`}
         />
         <span
           ref={props.livePointRef}
           data-testid="chart-last-price"
           aria-hidden="true"
-          className={`pointer-events-none invisible absolute start-0 top-0 ${pointTones[direction]} ${showSkeleton ? "hidden" : ""}`}
+          className={`pointer-events-none invisible absolute start-0 top-0 ${pointTones[direction]} ${showChart ? "" : "hidden"}`}
         >
           <span className="absolute size-[20px] -translate-1/2 rounded-full bg-current opacity-[0.22]" />
           <span className="absolute size-[8px] -translate-1/2 rounded-full bg-current" />
         </span>
-        {props.previousCloseLabel === undefined || showSkeleton ? null : (
+        {props.previousCloseLabel === undefined || !showChart ? null : (
           <span
             ref={props.previousCloseRef}
             className="pointer-events-none invisible absolute end-0 top-0 rounded-pill border border-border bg-surface px-8 py-2 text-numeric-axis text-text-secondary"
@@ -70,6 +75,7 @@ export function PriceChart(props: PriceChartProps) {
           </span>
         )}
         {showSkeleton ? <ChartSkeleton /> : null}
+        {state === "error" ? <ChartError onRetry={props.onRetry} /> : null}
       </div>
     </div>
   );

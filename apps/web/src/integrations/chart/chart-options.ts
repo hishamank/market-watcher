@@ -4,6 +4,7 @@ import type {
   AreaSeriesPartialOptions,
   ChartOptions,
   DeepPartial,
+  LineStyle,
   TickMarkFormatter,
 } from "lightweight-charts";
 
@@ -23,16 +24,26 @@ export function lineColor(theme: Theme, direction: Direction): string {
   return direction === "down" ? chart[theme].lossLine : chart[theme].gainLine;
 }
 
-export function seriesOptions(theme: Theme, direction: Direction): AreaSeriesPartialOptions {
-  const line = lineColor(theme, direction);
+const SOLID: LineStyle = 0;
+
+export function seriesOptions(
+  theme: Theme,
+  direction: Direction,
+  muted: boolean,
+): AreaSeriesPartialOptions {
+  const line = muted ? color[theme].textMuted : lineColor(theme, direction);
   return {
     lineColor: line,
     lineWidth: 2,
-    topColor: withAlpha(line, chartArea.topOpacity),
-    bottomColor: withAlpha(line, chartArea.bottomOpacity),
+    topColor: withAlpha(line, muted ? 0 : chartArea.topOpacity),
+    bottomColor: withAlpha(line, muted ? 0 : chartArea.bottomOpacity),
     priceLineVisible: false,
     lastValueVisible: false,
-    crosshairMarkerVisible: false,
+    crosshairMarkerVisible: true,
+    crosshairMarkerRadius: 5,
+    crosshairMarkerBorderWidth: 2,
+    crosshairMarkerBorderColor: chart[theme].crosshair,
+    crosshairMarkerBackgroundColor: color[theme].surface,
   };
 }
 
@@ -55,7 +66,7 @@ export function themeOptions(theme: Theme, fontFamily: string): DeepPartial<Char
     },
     grid: { vertLines: { visible: false }, horzLines: { color: chart[theme].grid } },
     crosshair: {
-      vertLine: { color: chart[theme].crosshair, labelVisible: false },
+      vertLine: { color: chart[theme].crosshair, width: 1, style: SOLID, labelVisible: false },
       horzLine: { visible: false, labelVisible: false },
     },
     timeScale: { borderVisible: false },

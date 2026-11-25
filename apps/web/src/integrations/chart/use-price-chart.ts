@@ -14,6 +14,7 @@ import {
   type OverlayState,
 } from "./chart-parts.ts";
 import { liveTail, sessionSlots, toChartPoints, type ChartPoint } from "./chart-points.ts";
+import { useChartScrub, type ScrubHandles, type ScrubListener } from "./use-chart-scrub.ts";
 
 export interface PriceChartInput {
   readonly datasetKey: string;
@@ -22,13 +23,16 @@ export interface PriceChartInput {
   readonly session: Session | undefined;
   readonly previousClose: string | undefined;
   readonly direction: Direction;
+  readonly muted: boolean;
   readonly formatters: ChartFormatters;
+  readonly onScrub: ScrubListener;
 }
 
 export interface PriceChartHandles {
   readonly containerRef: RefObject<HTMLDivElement | null>;
   readonly overlays: OverlayRefs;
   readonly drawn: boolean;
+  readonly scrub: ScrubHandles;
 }
 
 function fitRange(parts: ChartParts, slotCount: number) {
@@ -42,10 +46,14 @@ interface Applied {
   points: ChartPoint[];
 }
 
-function useChartData(parts: ChartParts | null, input: PriceChartInput, refs: OverlayRefs) {
+function useChartData(
+  parts: ChartParts | null,
+  input: PriceChartInput,
+  refs: OverlayRefs,
+  latestRef: RefObject<OverlayState>,
+) {
   const applied = useRef<Applied>({ key: "", points: [] });
-  const latest = useRef<OverlayState>({ points: [], previousClose: undefined });
-  const { datasetKey, bars, range, session, previousClose } = input;
+  const { datasetKey, bars, range, session, previousClose, muted } = input;
   useEffect(() => {
     if (parts === null) return undefined;
     const points = toChartPoints(bars, range);
@@ -64,20 +72,21 @@ function useChartData(parts: ChartParts | null, input: PriceChartInput, refs: Ov
     const state = {
       points,
       previousClose: previousClose === undefined ? undefined : Number(previousClose),
+      livePoint: !muted,
     };
-    latest.current = state;
+    latestRef.current = state;
     const place = () => placeOverlays(parts, refs, state);
     place();
     const frame = requestAnimationFrame(place);
     return () => cancelAnimationFrame(frame);
-  }, [parts, datasetKey, bars, range, session, previousClose, refs]);
+  }, [parts, datasetKey, bars, range, session, previousClose, muted, refs, latestRef]);
 
   useEffect(() => {
     if (parts === null) return undefined;
     let frame = 0;
     const place = () => {
       cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => placeOverlays(parts, refs, latest.current));
+      frame = requestAnimationFrame(() => placeOverlays(parts, refs, latestRef.current));
     };
     const timeScale = parts.api.timeScale();
     const observer = new ResizeObserver(place);
@@ -90,7 +99,7 @@ function useChartData(parts: ChartParts | null, input: PriceChartInput, refs: Ov
       timeScale.unsubscribeSizeChange(place);
       timeScale.unsubscribeVisibleLogicalRangeChange(place);
     };
-  }, [parts, refs]);
+  }, [parts, refs, latestRef]);
 }
 
 function useChartStyle(
@@ -99,7 +108,7 @@ function useChartStyle(
   theme: Theme,
   input: PriceChartInput,
 ) {
-  const { direction, formatters, range } = input;
+  const { direction, muted, formatters, range } = input;
   useEffect(() => {
     const container = containerRef.current;
     if (parts === null || container === null) return;
@@ -108,8 +117,8 @@ function useChartStyle(
   }, [parts, containerRef, theme, formatters, range]);
 
   useEffect(() => {
-    parts?.area.applyOptions(seriesOptions(theme, direction));
-  }, [parts, theme, direction]);
+    parts?.area.applyOptions(seriesOptions(theme, direction, muted));
+  }, [parts, theme, direction, muted]);
 }
 
 function usePreviousCloseLine(
@@ -149,12 +158,14 @@ export function usePriceChart(input: PriceChartInput): PriceChartHandles {
   const containerRef = useRef<HTMLDivElement>(null);
   const livePoint = useRef<HTMLSpanElement>(null);
   const previousClose = useRef<HTMLSpanElement>(null);
+  const latestRef = useRef<OverlayState>({ points: [], previousClose: undefined, livePoint: true });
   const [overlays] = useState<OverlayRefs>(() => ({ livePoint, previousClose }));
   const theme: Theme = useMediaQuery("(prefers-color-scheme: dark)") ? "dark" : "light";
   const parts = useChartParts(containerRef);
   useChartStyle(parts, containerRef, theme, input);
   usePreviousCloseLine(parts, theme, input.previousClose);
-  useChartData(parts, input, overlays);
+  useChartData(parts, input, overlays, latestRef);
+  const scrub = useChartScrub(parts, latestRef, input.datasetKey, input.onScrub);
   useDisposeChart(parts);
-  return { containerRef, overlays, drawn: parts !== null };
+  return { containerRef, overlays, drawn: parts !== null, scrub };
 }

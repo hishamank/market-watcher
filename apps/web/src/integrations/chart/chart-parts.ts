@@ -17,6 +17,7 @@ export interface OverlayRefs {
 export interface OverlayState {
   points: readonly ChartPoint[];
   previousClose: number | undefined;
+  livePoint: boolean;
 }
 
 export function useChartParts(containerRef: RefObject<HTMLDivElement | null>): ChartParts | null {
@@ -43,12 +44,17 @@ export function useDisposeChart(parts: ChartParts | null) {
   useEffect(() => () => parts?.api.remove(), [parts]);
 }
 
-function placeLivePoint(parts: ChartParts, node: HTMLSpanElement | null, point?: ChartPoint) {
+function placeLivePoint(
+  parts: ChartParts,
+  node: HTMLSpanElement | null,
+  point: ChartPoint | undefined,
+  shown: boolean,
+) {
   if (node === null) return;
   node.dataset.price = point?.close ?? "";
   const x = point === undefined ? null : parts.api.timeScale().timeToCoordinate(point.time);
   const y = point === undefined ? null : parts.area.priceToCoordinate(point.value);
-  node.style.visibility = x === null || y === null ? "hidden" : "visible";
+  node.style.visibility = !shown || x === null || y === null ? "hidden" : "visible";
   node.style.transform = `translate(${x ?? 0}px, ${y ?? 0}px)`;
 }
 
@@ -60,6 +66,6 @@ function placePreviousClose(parts: ChartParts, node: HTMLSpanElement | null, pri
 }
 
 export function placeOverlays(parts: ChartParts, refs: OverlayRefs, state: OverlayState) {
-  placeLivePoint(parts, refs.livePoint.current, state.points.at(-1));
+  placeLivePoint(parts, refs.livePoint.current, state.points.at(-1), state.livePoint);
   placePreviousClose(parts, refs.previousClose.current, state.previousClose);
 }
