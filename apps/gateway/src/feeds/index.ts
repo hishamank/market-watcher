@@ -23,3 +23,10 @@ export {
   type SimulatorFeed,
   type SimulatorOptions,
 } from "./simulator/index.ts";
+
+export {
+  AlpacaStartupError,
+  type AlpacaFeed,
+  createAlpacaFeed,
+  loadAlpacaFeed,
+} from "./alpaca/index.ts";
