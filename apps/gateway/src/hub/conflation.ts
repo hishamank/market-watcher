@@ -22,6 +22,7 @@ export function flushMember(
   }
   const quotes = [...member.changed].flatMap((symbol) => latest.get(symbol) ?? []);
   member.changed.clear();
+  if (quotes.length === 0) return "idle";
   member.peer.send({ type: "quotes", quotes });
   return "sent";
 }

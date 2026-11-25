@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest";
 import { buildApp } from "../../app.ts";
-import { type Gateway, startGateway } from "../../socket/testing.ts";
+import { fakeTimers, type Gateway, startGateway } from "../../socket/testing.ts";
 import type { AlpacaFeed } from "./index.ts";
 import {
   AFTER_HOURS_NOW,
@@ -20,7 +20,7 @@ afterEach(async () => {
 });
 
 async function startLive(rig: AlpacaRig): Promise<Gateway<AlpacaFeed>> {
-  gateway = await startGateway(rig.feed, false, "live");
+  gateway = await startGateway(rig.feed, false, "live", rig.now);
   return gateway;
 }
 
@@ -132,5 +132,46 @@ test("REST after hours serves Live, Market closed, the last close and the last s
   } finally {
     await app.close();
     rig.feed.close();
+  }
+});
+
+test("at the close subscribers wait for the closing tick through a snapshot outage", async () => {
+  vi.useFakeTimers(fakeTimers());
+  try {
+    let time = SESSION_NOW;
+    const rig = await startAlpaca(undefined, { now: () => time });
+    const live = await startLive(rig);
+    const alice = await live.connect();
+    alice.send({ type: "subscribe", requestId: 1, symbols: ["AAPL"] });
+    expect((await alice.next("snapshot")).quotes).toMatchObject([{ price: "201.56" }]);
+    authenticate(rig.sockets.last());
+    rig.sockets.last().push("stream-trades.json");
+    const close = Date.parse("2025-06-24T20:00:00Z");
+    time = close;
+    rig.alpaca.clock = "after-hours";
+    rig.alpaca.failing.set("/v2/stocks/snapshots", 500);
+    const bob = await live.connect();
+    expect(await bob.next("welcome")).toMatchObject({ marketStatus: "closed" });
+    bob.send({ type: "subscribe", requestId: 2, symbols: ["AAPL"] });
+    expect(await bob.next("snapshot")).toMatchObject({ requestId: 2, quotes: [] });
+    expect(bob.all("error")).toMatchObject([
+      { code: "unavailable", requestId: 2, symbols: ["AAPL"] },
+    ]);
+    rig.sockets.last().push("stream-trades.json");
+    await vi.advanceTimersByTimeAsync(250);
+    for (const client of [alice, bob]) {
+      await client.settle();
+      expect(client.all("quotes")).toEqual([]);
+    }
+    rig.alpaca.failing.clear();
+    time += 5_001;
+    await vi.advanceTimersByTimeAsync(1_000);
+    for (const client of [alice, bob]) {
+      expect((await client.next("quotes")).quotes).toMatchObject([
+        { price: "201.50", timestamp: close },
+      ]);
+    }
+  } finally {
+    vi.useRealTimers();
   }
 });

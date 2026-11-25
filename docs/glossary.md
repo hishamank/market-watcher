@@ -47,7 +47,7 @@ Every symbol the current feed mode can price. It is the universe for search and 
 _Avoid_: universe, asset list, symbol list
 
 **Quote**:
-What is currently known about one symbol's price: price, change and percent change against the previous close, and the time it was observed.
+What is currently known about one symbol's price: price, change and percent change against the previous close, and the time it was observed. Its timestamp places it in a trading phase. Opening and closing quotes carry the session open and close times respectively.
 _Avoid_: price (as a noun for the whole record), ticker data
 
 **Snapshot**:

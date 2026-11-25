@@ -160,6 +160,7 @@ export function authenticate(socket: FakeSocket): void {
 }
 
 export interface AlpacaRig {
+  readonly now: () => number;
   readonly feed: AlpacaFeed;
   readonly alpaca: FakeAlpaca;
   readonly sockets: FakeSockets;
@@ -174,13 +175,14 @@ export async function startAlpaca(
   setup(alpaca);
   const sockets = createFakeSockets();
   const warnings: string[] = [];
+  const now = deps.now ?? (() => SESSION_NOW);
   const feed = await createAlpacaFeed(TEST_CONFIG, {
     fetch: alpaca.fetch,
     openSocket: sockets.open,
-    now: () => SESSION_NOW,
+    now,
     random: () => 1,
     warn: (_detail, message) => void warnings.push(message),
     ...deps,
   });
-  return { feed, alpaca, sockets, warnings };
+  return { feed, alpaca, sockets, warnings, now };
 }

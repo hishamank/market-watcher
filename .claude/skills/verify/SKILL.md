@@ -142,7 +142,7 @@ The owner's manual run, from the repo root:
 5. Open `/`. Expect:
    - **G1:** the badge reads "Live", and `data-feed-mode="live"` is in the server-rendered HTML.
    - **G2:** outside 09:30 to 16:00 New York time on a trading day, including pre-market and after-hours, "Market closed" shows, `data-market-status="closed"`, and prices hold the last close without ticking. During the session the label is gone and streamed prices tick.
-     Known limitation: if Alpaca was unreachable at the close, a stock can show its last intraday trade under "Market closed" until the adapter's resync succeeds (#52). Record it as a note, not a G2 failure.
+     If Alpaca is unreachable at the close, a new subscription gets `unavailable` and its snapshot omits the symbol. An already open screen holds its last real trade. On recovery both subscriptions receive the closing quote as a tick (#52, ADR 0044).
    - **C1:** `/?debug=1` shows no chaos panel.
 6. Open a stock and switch through every range. Each chart draws, and 1D covers the regular session only.
 

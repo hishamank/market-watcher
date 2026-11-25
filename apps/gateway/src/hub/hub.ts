@@ -19,6 +19,7 @@ import {
   whenWritable,
 } from "./member.ts";
 import { createQuoteBook, type QuoteBook, type Warn } from "./quote-book.ts";
+import { adopt, expire } from "./quote-watchers.ts";
 import { planSubscribe } from "./subscribe-plan.ts";
 import { sendAnswer, type SubscribeRequest, withDeadline } from "./subscribe-reply.ts";
 import { createUpstream, type Upstream } from "./upstream.ts";
@@ -57,16 +58,6 @@ function release(symbols: readonly string[], parts: Parts): void {
   void parts.upstream.reconcile(symbols);
 }
 
-function adopt(quotes: readonly Quote[], watchers: Watchers): void {
-  for (const quote of quotes) {
-    for (const member of watchers.of(quote.symbol)) {
-      if (member.unquoted.delete(quote.symbol)) {
-        member.changed.add(quote.symbol);
-      }
-    }
-  }
-}
-
 async function answerSubscribe(
   member: Member,
   request: SubscribeRequest,
@@ -81,11 +72,15 @@ async function answerSubscribe(
   watchers.add(member, plan.added);
   const ready = upstream
     .reconcile(plan.accepted)
-    .then(() => book.fetch(plan.accepted))
+    .then(() => {
+      expire(book, watchers);
+      return book.fetch(plan.accepted);
+    })
     .then((quotes) => adopt(quotes, watchers));
   await withDeadline(ready, REPLY_DEADLINE_MS);
   await whenWritable(member);
   if (isOpen()) {
+    expire(book, watchers);
     const unavailable = sendAnswer(member.peer, request.requestId, plan, book.latest);
     unavailable.forEach((symbol) => member.unquoted.add(symbol));
   }
@@ -110,6 +105,7 @@ async function refuseSubscribe(peer: Peer, requestId: RequestId, parts: Parts): 
 }
 
 function retryUpstream(parts: Parts): void {
+  expire(parts.book, parts.watchers);
   parts.upstream.retry();
   const unquoted = [...parts.members.values()].flatMap((member) => [...member.unquoted]);
   adopt(
@@ -123,7 +119,7 @@ export function createHub({ feed, now, warn }: HubOptions): Hub {
   const members = new Map<Peer, Member>();
   const watchers = createWatchers((symbol, count) => feed.live.watchCount?.(symbol, count));
   const upstream = createUpstream(feed.live, watchers.isWatched, warn);
-  const book = createQuoteBook(feed.live, watchers.isWatched, warn);
+  const book = createQuoteBook(feed.live, feed.calendar, now, watchers.isWatched, warn);
   const parts: Parts = { members, feed, watchers, upstream, book, warn, leave };
 
   function onQuote(quote: Quote): void {
@@ -150,6 +146,7 @@ export function createHub({ feed, now, warn }: HubOptions): Hub {
   }
 
   function flush(): void {
+    expire(book, watchers);
     wakeWritable(members.values());
     for (const member of flushAll(members.values(), book.latest, now())) {
       void leave(member.peer);
@@ -162,9 +159,10 @@ export function createHub({ feed, now, warn }: HubOptions): Hub {
   }
 
   const stopQuotes = feed.live.onQuote(onQuote);
-  const stopStatus = feed.calendar.onStatusChange((marketStatus) =>
-    broadcast({ type: "market_status", marketStatus }),
-  );
+  const stopStatus = feed.calendar.onStatusChange((marketStatus) => {
+    expire(book, watchers);
+    broadcast({ type: "market_status", marketStatus });
+  });
   const timers = [
     setInterval(flush, FLUSH_INTERVAL_MS),
     setInterval(() => sendHeartbeats(members.values(), now()), HEARTBEAT_INTERVAL_MS),

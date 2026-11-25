@@ -49,6 +49,8 @@ async function startSlowAlpaca(): Promise<{ alpaca: FakeAlpaca; calls: Call[] }>
 async function watchLikeTheHub(current: AlpacaRig, seconds: number): Promise<void> {
   const book = createQuoteBook(
     current.feed.live,
+    current.feed.calendar,
+    current.now,
     () => true,
     () => undefined,
   );

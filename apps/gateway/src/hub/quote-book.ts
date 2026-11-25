@@ -1,10 +1,12 @@
 import type { Quote } from "@mini/contracts";
-import type { LiveFeed } from "../feeds/types.ts";
+import type { LiveFeed, MarketCalendar } from "../feeds/types.ts";
+import { isCurrentQuote, phaseStart } from "./quote-phase.ts";
 
 export type Warn = (detail: object, message: string) => void;
 
 export interface QuoteBook {
   readonly latest: ReadonlyMap<string, Quote>;
+  expire(): string[];
   remember(quote: Quote): boolean;
   fetch(symbols: readonly string[]): Promise<Quote[]>;
   refresh(symbols: readonly string[]): Promise<Quote[]>;
@@ -12,8 +14,21 @@ export interface QuoteBook {
   close(): void;
 }
 
+function expireBefore(latest: Map<string, Quote>, floor: number): string[] {
+  const dropped: string[] = [];
+  for (const [symbol, quote] of latest) {
+    if (quote.timestamp < floor) {
+      latest.delete(symbol);
+      dropped.push(symbol);
+    }
+  }
+  return dropped;
+}
+
 export function createQuoteBook(
   live: LiveFeed,
+  calendar: MarketCalendar,
+  now: () => number,
   isWatched: (symbol: string) => boolean,
   warn: Warn,
 ): QuoteBook {
@@ -23,7 +38,11 @@ export function createQuoteBook(
 
   function remember(quote: Quote): boolean {
     const current = latest.get(quote.symbol);
-    if (!isWatched(quote.symbol) || (current && current.timestamp > quote.timestamp)) {
+    if (
+      !isWatched(quote.symbol) ||
+      !isCurrentQuote(quote, calendar, now()) ||
+      (current && current.timestamp > quote.timestamp)
+    ) {
       return false;
     }
     latest.set(quote.symbol, quote);
@@ -69,6 +88,7 @@ export function createQuoteBook(
 
   return {
     latest,
+    expire: () => expireBefore(latest, phaseStart(calendar, now())),
     remember,
     fetch,
     refresh: (symbols) => fetch(symbols.filter((symbol) => !inFlight.has(symbol))),

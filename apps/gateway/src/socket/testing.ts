@@ -75,10 +75,12 @@ export async function startGateway<F extends Feed = FakeFeed>(
   feed: F = createFakeFeed({ recordCalls: true }) as unknown as F,
   logger: FastifyServerOptions["logger"] = false,
   feedMode: FeedMode = "simulated",
+  now: () => number = () => Date.now(),
 ): Promise<Gateway<F>> {
   const app = buildApp({
     feed,
     feedMode,
+    now,
     allowedOrigins: new Set([ALLOWED_ORIGIN]),
     logger,
   });
