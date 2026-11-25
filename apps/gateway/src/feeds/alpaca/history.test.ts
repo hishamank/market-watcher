@@ -37,7 +37,7 @@ test("1D covers the regular session across pages, with the previous close", asyn
   const bars = rig.alpaca.calls("/v2/stocks/bars");
   expect(bars).toHaveLength(2);
   expect(bars[0]?.searchParams.get("start")).toBe("2025-06-24T13:30:00.000Z");
-  expect(bars[1]?.searchParams.get("page_token")).toBe("QUFQTHxNfDIwMjUtMDYtMjRUMTM6MzU6MDBa");
+  expect(bars[1]?.searchParams.get("page_token")).toBe("page-2");
   expect(series).toEqual({
     bars: [
       { time: Date.parse("2025-06-24T13:30:00Z"), close: "201.00" },

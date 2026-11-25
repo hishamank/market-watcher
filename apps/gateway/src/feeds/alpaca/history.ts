@@ -7,21 +7,22 @@ import type { AlpacaHttp } from "./http.ts";
 import { displayPrice, type TradingDay } from "./quotes.ts";
 import { fetchSnapshots, quoteFromSnapshot } from "./snapshots.ts";
 
+const MINUTE_MS = 60_000;
 const DAY_MS = 86_400_000;
 
 interface RangePlan {
   readonly timeframe: string;
   readonly lookbackMs: number;
-  readonly intraday: boolean;
+  readonly intradayBarMs?: number;
 }
 
 export const RANGE_PLANS: Record<Range, RangePlan> = {
-  "1D": { timeframe: "5Min", lookbackMs: 0, intraday: true },
-  "1W": { timeframe: "30Min", lookbackMs: 7 * DAY_MS, intraday: true },
-  "1M": { timeframe: "1Hour", lookbackMs: 30 * DAY_MS, intraday: true },
-  "3M": { timeframe: "1Day", lookbackMs: 90 * DAY_MS, intraday: false },
-  "1Y": { timeframe: "1Day", lookbackMs: 365 * DAY_MS, intraday: false },
-  "5Y": { timeframe: "1Week", lookbackMs: 5 * 365 * DAY_MS, intraday: false },
+  "1D": { timeframe: "5Min", lookbackMs: 0, intradayBarMs: 5 * MINUTE_MS },
+  "1W": { timeframe: "30Min", lookbackMs: 7 * DAY_MS, intradayBarMs: 30 * MINUTE_MS },
+  "1M": { timeframe: "1Hour", lookbackMs: 30 * DAY_MS, intradayBarMs: 60 * MINUTE_MS },
+  "3M": { timeframe: "1Day", lookbackMs: 90 * DAY_MS },
+  "1Y": { timeframe: "1Day", lookbackMs: 365 * DAY_MS },
+  "5Y": { timeframe: "1Week", lookbackMs: 5 * 365 * DAY_MS },
 };
 
 function parseBars(body: unknown, symbol: string): { bars: Bar[]; next: string | undefined } {
@@ -62,8 +63,8 @@ async function fetchBars(http: AlpacaHttp, request: HistoryRequest, start: numbe
   return bars;
 }
 
-function inSessions(bar: Bar, days: readonly TradingDay[]): boolean {
-  return days.some((day) => bar.time >= day.open && bar.time < day.close);
+function inSessions(bar: Bar, barMs: number, days: readonly TradingDay[]): boolean {
+  return days.some((day) => bar.time + barMs > day.open && bar.time < day.close);
 }
 
 export function createAlpacaHistory(http: AlpacaHttp, calendar: AlpacaCalendar): HistorySource {
@@ -82,7 +83,8 @@ export function createAlpacaHistory(http: AlpacaHttp, calendar: AlpacaCalendar):
         throw new Error(`Alpaca has no previous close for ${request.symbol}`);
       }
       const days = request.range === "1D" ? [moment.day] : calendar.days();
-      const kept = plan.intraday ? bars.filter((bar) => inSessions(bar, days)) : bars;
+      const barMs = plan.intradayBarMs;
+      const kept = barMs === undefined ? bars : bars.filter((bar) => inSessions(bar, barMs, days));
       const series = { bars: kept, previousClose: quote.previousClose };
       if (request.range === "1D") {
         return { ...series, session: { open: moment.day.open, close: moment.day.close } };
