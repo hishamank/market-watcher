@@ -1,4 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest";
+import { buildApp } from "../../app.ts";
 import { type Gateway, startGateway } from "../../socket/testing.ts";
 import type { AlpacaFeed } from "./index.ts";
 import {
@@ -6,6 +7,7 @@ import {
   type AlpacaRig,
   assetsFor,
   authenticate,
+  SESSION_NOW,
   startAlpaca,
 } from "./testing.ts";
 
@@ -23,7 +25,8 @@ async function startLive(rig: AlpacaRig): Promise<Gateway<AlpacaFeed>> {
 }
 
 test("an upstream snapshot failure answers unavailable, then the first quote ticks in", async () => {
-  const rig = await startAlpaca();
+  const startedAt = Date.now();
+  const rig = await startAlpaca(undefined, { now: () => SESSION_NOW + Date.now() - startedAt });
   const live = await startLive(rig);
   const client = await live.connect();
   rig.alpaca.failing.set("/v2/stocks/snapshots", 500);
@@ -43,7 +46,7 @@ test("an upstream snapshot failure answers unavailable, then the first quote tic
   rig.alpaca.failing.clear();
   const tick = await client.next("quotes");
   expect(tick.quotes).toMatchObject([{ symbol: "MSFT", price: "490.10", previousClose: "486.00" }]);
-});
+}, 15_000);
 
 test("welcome says Live and Market closed after hours, with the last close as the price", async () => {
   const rig = await startAlpaca((alpaca) => (alpaca.clock = "after-hours"), {
@@ -92,4 +95,42 @@ test("a second watcher promotes a polled symbol to the stream through the hub", 
   await vi.waitFor(() => expect(rig.sockets.last().trades()).toContain("T31"));
   alice.send({ type: "unsubscribe", symbols: ["T31"] });
   await vi.waitFor(() => expect(rig.sockets.last().trades()).toContain("T30"));
+});
+
+test("REST after hours serves Live, Market closed, the last close and the last session", async () => {
+  const rig = await startAlpaca((alpaca) => (alpaca.clock = "after-hours"), {
+    now: () => AFTER_HOURS_NOW,
+  });
+  const app = buildApp({
+    feed: rig.feed,
+    feedMode: "live",
+    allowedOrigins: new Set(),
+    logger: false,
+    now: () => AFTER_HOURS_NOW,
+  });
+  try {
+    const list = (await app.inject("/stocks")).json();
+    expect(list).toMatchObject({ feedMode: "live", marketStatus: "closed" });
+    expect(list.stocks).toContainEqual(
+      expect.objectContaining({
+        symbol: "AAPL",
+        quote: expect.objectContaining({ price: "201.50" }),
+      }),
+    );
+    const history = (await app.inject("/stocks/AAPL/history?range=1D")).json();
+    expect(history).toMatchObject({
+      feedMode: "live",
+      marketStatus: "closed",
+      barSize: "5m",
+      previousClose: "200.30",
+      session: {
+        open: Date.parse("2025-06-24T13:30:00Z"),
+        close: Date.parse("2025-06-24T20:00:00Z"),
+      },
+    });
+    expect(history.bars).toHaveLength(3);
+  } finally {
+    await app.close();
+    rig.feed.close();
+  }
 });

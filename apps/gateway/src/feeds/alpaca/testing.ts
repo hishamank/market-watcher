@@ -23,15 +23,18 @@ export interface FakeAlpaca {
   readonly fetch: Fetch;
   readonly requests: { url: URL; signal: AbortSignal | undefined }[];
   readonly failing: Map<string, number>;
+  readonly omitted: Set<string>;
   clock: "open" | "after-hours";
   assets: string;
   calls(path: string): URL[];
 }
 
-function snapshotsFor(symbols: readonly string[]): string {
+function snapshotsFor(symbols: readonly string[], omitted: ReadonlySet<string>): string {
   const recorded = JSON.parse(fixture("snapshots.json")) as Record<string, unknown>;
   const body = Object.fromEntries(
-    symbols.map((symbol) => [symbol, recorded[symbol] ?? recorded["AAPL"]]),
+    symbols
+      .filter((symbol) => !omitted.has(symbol))
+      .map((symbol) => [symbol, recorded[symbol] ?? recorded["AAPL"]]),
   );
   return JSON.stringify(body);
 }
@@ -46,7 +49,7 @@ function respond(alpaca: FakeAlpaca, url: URL): string {
     case "/v2/assets":
       return alpaca.assets;
     case "/v2/stocks/snapshots":
-      return snapshotsFor((params.get("symbols") ?? "").split(","));
+      return snapshotsFor((params.get("symbols") ?? "").split(","), alpaca.omitted);
     case "/v2/stocks/bars":
       if (params.get("timeframe") === "5Min") {
         return fixture(
@@ -63,6 +66,7 @@ export function createFakeAlpaca(): FakeAlpaca {
   const alpaca: FakeAlpaca = {
     requests: [],
     failing: new Map(),
+    omitted: new Set(),
     clock: "open",
     assets: fixture("assets.json"),
     calls: (path) =>

@@ -131,13 +131,30 @@ test("reconnects with backoff and resubscribes the whole set after auth", async 
   expect(rig.warnings).toContain("Alpaca stream sent an error");
 });
 
-test("a failed snapshot rejects, and a reused one costs no request", async () => {
+test("a failed snapshot rejects once, then waits 5 s before asking Alpaca again", async () => {
   rig = await startAlpaca();
-  const before = rig.alpaca.calls("/v2/stocks/snapshots").length;
+  const calls = () => rig?.alpaca.calls("/v2/stocks/snapshots").length ?? 0;
+  const before = calls();
   await expect(rig.feed.live.snapshot(["AAPL"])).resolves.toHaveLength(1);
   await expect(rig.feed.live.snapshot(["AAPL"])).resolves.toHaveLength(1);
-  expect(rig.alpaca.calls("/v2/stocks/snapshots")).toHaveLength(before + 1);
+  expect(calls()).toBe(before + 1);
 
-  rig.alpaca.failing.set("/v2/stocks/snapshots", 500);
-  await expect(rig.feed.live.snapshot(["MSFT"])).rejects.toThrow("HTTP 500");
+  rig.alpaca.failing.set("/v2/stocks/snapshots", 429);
+  await expect(rig.feed.live.snapshot(["MSFT"])).rejects.toThrow("HTTP 429");
+  await expect(rig.feed.live.snapshot(["MSFT"])).resolves.toEqual([]);
+  expect(calls()).toBe(before + 2);
+});
+
+test("a symbol Alpaca has no data for is asked about at most once per 5 s", async () => {
+  let now = SESSION_NOW;
+  rig = await startAlpaca((alpaca) => alpaca.omitted.add("NODATA"), { now: () => now });
+  const calls = () => rig?.alpaca.calls("/v2/stocks/snapshots").length ?? 0;
+  const before = calls();
+  await expect(rig.feed.live.snapshot(["NODATA"])).resolves.toEqual([]);
+  await expect(rig.feed.live.snapshot(["NODATA"])).resolves.toEqual([]);
+  expect(calls()).toBe(before + 1);
+
+  now += 5_000;
+  await rig.feed.live.snapshot(["NODATA"]);
+  expect(calls()).toBe(before + 2);
 });

@@ -63,6 +63,7 @@ export function createAlpacaLive(options: AlpacaLiveOptions): AlpacaLive {
   const order = new Map<string, number>();
   const counts = new Map<string, number>();
   const { latest, listeners, record } = createRecorder(now, (symbol) => order.has(symbol));
+  const attempted = new Map<string, number>();
   let streamed = new Set<string>();
   let sequence = 0;
 
@@ -118,10 +119,12 @@ export function createAlpacaLive(options: AlpacaLiveOptions): AlpacaLive {
       if (order.has(symbol)) rebalance();
     },
     async snapshot(symbols) {
-      const fresh = (symbol: string) =>
-        (latest.get(symbol)?.at ?? -Infinity) > now() - SNAPSHOT_REUSE_MS;
-      const missing = symbols.filter((symbol) => !fresh(symbol));
-      if (missing.length > 0) await fetchQuotes(missing);
+      const recent = (at: number | undefined) => at !== undefined && at > now() - SNAPSHOT_REUSE_MS;
+      const due = symbols.filter(
+        (symbol) => !recent(latest.get(symbol)?.at) && !recent(attempted.get(symbol)),
+      );
+      due.forEach((symbol) => attempted.set(symbol, now()));
+      if (due.length > 0) await fetchQuotes(due);
       return symbols.flatMap((symbol) => latest.get(symbol)?.quote ?? []);
     },
     onQuote(listener) {
