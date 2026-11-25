@@ -1,9 +1,10 @@
 import type { Bar, Range } from "@mini/contracts";
 import type { HistoryRequest, HistorySeries, HistorySource } from "../types.ts";
 import type { AlpacaCalendar } from "./calendar.ts";
-import { DATA_FEED, MAX_BAR_PAGES } from "./config.ts";
+import { DATA_FEED } from "./config.ts";
 import { epochMs, isFields, list, nested, text } from "./fields.ts";
 import type { AlpacaHttp } from "./http.ts";
+import { fetchBarPages } from "./pages.ts";
 import { displayPrice, type TradingDay } from "./quotes.ts";
 import { fetchSnapshots, quoteFromSnapshot } from "./snapshots.ts";
 
@@ -25,42 +26,27 @@ export const RANGE_PLANS: Record<Range, RangePlan> = {
   "5Y": { timeframe: "1Week", lookbackMs: 5 * 365 * DAY_MS },
 };
 
-function parseBars(body: unknown, symbol: string): { bars: Bar[]; next: string | undefined } {
+function parseBars(body: unknown, symbol: string): Bar[] {
   const fields = isFields(body) ? body : {};
-  const bars = list(nested(fields, "bars")?.[symbol]).flatMap((item) => {
+  return list(nested(fields, "bars")?.[symbol]).flatMap((item) => {
     const time = isFields(item) ? epochMs(text(item, "t")) : undefined;
     const raw = isFields(item) ? text(item, "c") : undefined;
     const close = raw === undefined ? undefined : displayPrice(raw);
     return time === undefined || close === undefined ? [] : [{ time, close }];
   });
-  return { bars, next: text(fields, "next_page_token") };
 }
 
 async function fetchBars(http: AlpacaHttp, request: HistoryRequest, start: number): Promise<Bar[]> {
-  const bars: Bar[] = [];
-  let pageToken: string | undefined;
-  for (let page = 0; page < MAX_BAR_PAGES; page += 1) {
-    const body = await http.get(
-      "data",
-      "/v2/stocks/bars",
-      {
-        symbols: request.symbol,
-        timeframe: RANGE_PLANS[request.range].timeframe,
-        start: new Date(start).toISOString(),
-        limit: "10000",
-        adjustment: "split",
-        feed: DATA_FEED,
-        sort: "asc",
-        page_token: pageToken,
-      },
-      request.signal,
-    );
-    const parsed = parseBars(body, request.symbol);
-    bars.push(...parsed.bars);
-    pageToken = parsed.next;
-    if (pageToken === undefined) break;
-  }
-  return bars;
+  const params = {
+    symbols: request.symbol,
+    timeframe: RANGE_PLANS[request.range].timeframe,
+    start: new Date(start).toISOString(),
+    adjustment: "split",
+    feed: DATA_FEED,
+    sort: "asc",
+  };
+  const bodies = await fetchBarPages(http, params, request.signal);
+  return bodies.flatMap((body) => parseBars(body, request.symbol));
 }
 
 function inSessions(bar: Bar, barMs: number, days: readonly TradingDay[]): boolean {

@@ -24,6 +24,7 @@ export interface FakeAlpaca {
   readonly requests: { url: URL; signal: AbortSignal | undefined }[];
   readonly failing: Map<string, number>;
   readonly omitted: Set<string>;
+  readonly routes: Map<string, (url: URL) => string>;
   clock: "open" | "after-hours";
   assets: string;
   calls(path: string): URL[];
@@ -67,6 +68,7 @@ export function createFakeAlpaca(): FakeAlpaca {
     requests: [],
     failing: new Map(),
     omitted: new Set(),
+    routes: new Map(),
     clock: "open",
     assets: fixture("assets.json"),
     calls: (path) =>
@@ -82,7 +84,8 @@ export function createFakeAlpaca(): FakeAlpaca {
       if (status !== undefined) {
         return new Response("{}", { status });
       }
-      return new Response(respond(alpaca, url), { status: 200 });
+      const route = alpaca.routes.get(url.pathname);
+      return new Response(route ? route(url) : respond(alpaca, url), { status: 200 });
     },
   };
   return alpaca;

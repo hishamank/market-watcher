@@ -74,3 +74,27 @@ test("history passes the abort signal through to Alpaca", async () => {
   const bars = rig.alpaca.requests.find(({ url }) => url.pathname === "/v2/stocks/bars");
   expect(bars?.signal).toBe(controller.signal);
 });
+
+function endlessPages(pagesWithToken: number): (url: URL) => string {
+  return (url) => {
+    const page = Number(url.searchParams.get("page_token") ?? "0");
+    const time = new Date(Date.parse("2025-06-20T13:30:00Z") + page * 1_800_000).toISOString();
+    const next = page + 1 < pagesWithToken ? String(page + 1) : null;
+    return JSON.stringify({ bars: { AAPL: [{ t: time, c: 201 }] }, next_page_token: next });
+  };
+}
+
+test("history follows short pages to the last token", async () => {
+  rig = await startAlpaca((alpaca) => alpaca.routes.set("/v2/stocks/bars", endlessPages(9)));
+  const series = await rig.feed.history.history({ symbol: "AAPL", range: "1W", now: SESSION_NOW });
+  expect(rig.alpaca.calls("/v2/stocks/bars")).toHaveLength(9);
+  expect(series.bars).toHaveLength(9);
+});
+
+test("history rejects when ten short pages still carry a token, so nothing truncated is cached", async () => {
+  rig = await startAlpaca((alpaca) => alpaca.routes.set("/v2/stocks/bars", endlessPages(1_000)));
+  await expect(
+    rig.feed.history.history({ symbol: "AAPL", range: "1W", now: SESSION_NOW }),
+  ).rejects.toThrow("more pages");
+  expect(rig.alpaca.calls("/v2/stocks/bars")).toHaveLength(10);
+});
