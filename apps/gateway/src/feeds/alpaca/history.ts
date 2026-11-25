@@ -1,12 +1,12 @@
 import type { Bar, Range } from "@mini/contracts";
 import type { HistoryRequest, HistorySeries, HistorySource } from "../types.ts";
 import type { AlpacaCalendar } from "./calendar.ts";
+import { snapshotQuotes } from "./baselines.ts";
 import { DATA_FEED } from "./config.ts";
 import { epochMs, isFields, list, nested, text } from "./fields.ts";
 import type { AlpacaHttp } from "./http.ts";
-import { fetchBarPages } from "./pages.ts";
 import { displayPrice, type TradingDay } from "./quotes.ts";
-import { fetchSnapshots, quoteFromSnapshot } from "./snapshots.ts";
+import { fetchBarPages } from "./pages.ts";
 
 const MINUTE_MS = 60_000;
 const DAY_MS = 86_400_000;
@@ -59,12 +59,11 @@ export function createAlpacaHistory(http: AlpacaHttp, calendar: AlpacaCalendar):
       const plan = RANGE_PLANS[request.range];
       const moment = calendar.moment(request.now);
       const start = request.range === "1D" ? moment.day.open : request.now - plan.lookbackMs;
-      const [bars, snapshots] = await Promise.all([
+      const [bars, quotes] = await Promise.all([
         fetchBars(http, request, start),
-        fetchSnapshots(http, [request.symbol], request.signal),
+        snapshotQuotes(http, [request.symbol], moment, calendar.days(), request.signal),
       ]);
-      const snapshot = snapshots.get(request.symbol);
-      const quote = snapshot && quoteFromSnapshot(request.symbol, snapshot, moment);
+      const quote = quotes.get(request.symbol);
       if (quote === undefined) {
         throw new Error(`Alpaca has no previous close for ${request.symbol}`);
       }

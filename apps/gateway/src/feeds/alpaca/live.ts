@@ -1,11 +1,11 @@
 import type { Quote } from "@mini/contracts";
 import type { LiveFeed } from "../types.ts";
+import { snapshotQuotes } from "./baselines.ts";
 import type { AlpacaCalendar } from "./calendar.ts";
 import { POLL_INTERVAL_MS, SNAPSHOT_REUSE_MS, STREAM_SYMBOL_LIMIT } from "./config.ts";
 import type { AlpacaHttp } from "./http.ts";
 import { buildQuote } from "./quotes.ts";
 import { pickStreamed, sameSet } from "./ranking.ts";
-import { fetchSnapshots, quoteFromSnapshot } from "./snapshots.ts";
 import type { TradeStream } from "./stream.ts";
 
 export interface AlpacaLiveOptions {
@@ -94,12 +94,8 @@ export function createAlpacaLive(options: AlpacaLiveOptions): AlpacaLive {
   const stream = options.openStream(onTrade);
 
   const fetchQuotes = async (symbols: readonly string[]): Promise<void> => {
-    const snapshots = await fetchSnapshots(http, symbols);
-    const moment = calendar.moment(now());
-    for (const [symbol, snapshot] of snapshots) {
-      const quote = quoteFromSnapshot(symbol, snapshot, moment);
-      if (quote !== undefined) record(quote);
-    }
+    const quotes = await snapshotQuotes(http, symbols, calendar.moment(now()), calendar.days());
+    quotes.forEach((quote) => record(quote));
   };
 
   const rebalance = (): void => {

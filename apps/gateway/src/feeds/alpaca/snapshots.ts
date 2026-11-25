@@ -5,7 +5,7 @@ import type { AlpacaHttp } from "./http.ts";
 import { newYorkDate } from "./new-york.ts";
 import { buildQuote, type TradingDay } from "./quotes.ts";
 
-interface DailyBar {
+export interface DailyBar {
   readonly date: string;
   readonly close: string;
 }
@@ -19,6 +19,7 @@ export interface SymbolSnapshot {
   readonly trade?: Trade;
   readonly daily?: DailyBar;
   readonly previousDaily?: DailyBar;
+  readonly previousSession?: DailyBar;
 }
 
 export interface MarketMoment {
@@ -26,7 +27,7 @@ export interface MarketMoment {
   readonly open: boolean;
 }
 
-function dailyBar(fields: Fields | undefined): DailyBar | undefined {
+export function dailyBar(fields: Fields | undefined): DailyBar | undefined {
   const time = epochMs(fields && text(fields, "t"));
   const close = fields && text(fields, "c");
   return time === undefined || close === undefined ? undefined : { date: newYorkDate(time), close };
@@ -52,15 +53,21 @@ export function parseSnapshot(value: unknown): SymbolSnapshot {
   };
 }
 
+function dailyBars(snapshot: SymbolSnapshot): (DailyBar | undefined)[] {
+  return [snapshot.daily, snapshot.previousDaily, snapshot.previousSession];
+}
+
+export function baselineBar(snapshot: SymbolSnapshot, day: TradingDay): DailyBar | undefined {
+  return dailyBars(snapshot).find((bar) => bar !== undefined && bar.date < day.date);
+}
+
 export function quoteFromSnapshot(
   symbol: string,
   snapshot: SymbolSnapshot,
   { day, open }: MarketMoment,
 ): Quote | undefined {
-  const bars = [snapshot.daily, snapshot.previousDaily];
-  const sessionBar = bars.find((bar) => bar?.date === day.date);
-  const baseBar = bars.find((bar) => bar !== undefined && bar.date < day.date);
-  const baseline = baseBar?.close ?? sessionBar?.close;
+  const sessionBar = dailyBars(snapshot).find((bar) => bar?.date === day.date);
+  const baseline = baselineBar(snapshot, day)?.close;
   if (baseline === undefined) {
     return undefined;
   }
