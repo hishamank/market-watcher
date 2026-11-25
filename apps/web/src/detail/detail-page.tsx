@@ -12,10 +12,11 @@ import { ConnectedPriceChart } from "./connected-price-chart.tsx";
 import { ConnectedDetailFacts } from "./connected-detail-facts.tsx";
 import { ListPane } from "./list-pane.tsx";
 import { scrubFor, type ScrubSelection } from "./scrub-selection.ts";
+import { useTrackStockOpened } from "../integrations/use-track-stock-opened.ts";
 import { useRangeParam } from "./use-range-param.ts";
 
 function DetailCard({ symbol }: { symbol: string }) {
-  const { range, selectRange } = useRangeParam();
+  const { range, selectRange } = useRangeParam(symbol);
   const query = useStock(symbol);
   const [selection, setSelection] = useState<ScrubSelection>();
   const scrub = scrubFor(selection, range);
@@ -52,6 +53,7 @@ function DetailCard({ symbol }: { symbol: string }) {
 
 export function DetailPage({ symbol }: { symbol: string }) {
   const t = useT();
+  useTrackStockOpened(symbol);
   return (
     <main className="flex flex-1 flex-col pb-24 md:p-24">
       <div className="mx-auto flex w-full items-start gap-24 md:max-w-[720px] xl:max-w-[1392px]">
