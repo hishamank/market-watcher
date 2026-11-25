@@ -2,6 +2,7 @@ import type { ClientMessage, FeedMode, MarketStatus } from "@mini/contracts";
 import type { AppLifecycle } from "../platform/app-lifecycle.ts";
 import type { NetworkStatus } from "../platform/network-status.ts";
 import type { ChaosSnapshot } from "./chaos-state-store.ts";
+import type { ConnectionHealthRecorder } from "./connection-health.ts";
 import type { QuoteStore } from "./quote-store.ts";
 import type { SocketFactory } from "./transport.ts";
 
@@ -18,6 +19,7 @@ export type ReconnectListener = () => void;
 export interface SocketClientOptions {
   url: string;
   quoteStore: QuoteStore;
+  health?: ConnectionHealthRecorder | undefined;
   network: NetworkStatus;
   lifecycle?: AppLifecycle | undefined;
   socketFactory?: SocketFactory | undefined;

@@ -57,5 +57,7 @@ export type {
   ChaosToggleView,
 } from "./hooks/use-chaos-controls.ts";
 
+export { useConnectionHealth } from "./hooks/use-connection-health.ts";
+export type { ConnectionHealth } from "./hooks/use-connection-health.ts";
 export { useSearch } from "./hooks/use-search.ts";
 export type { SearchResult } from "./hooks/use-search.ts";

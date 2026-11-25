@@ -18,4 +18,10 @@ export const chaosStrings = {
   "chaos.historyFailures.all": "100%",
   "chaos.secondsLeft_one": "{{count}} s",
   "chaos.secondsLeft_other": "{{count}} s",
+  "chaos.health.reconnects": "Reconnects",
+  "chaos.health.fps": "Frames per second",
+  "chaos.health.latency": "Latency",
+  "chaos.health.latencyValue": "{{value}} ms",
+  "chaos.health.skipped": "Skipped frames",
+  "chaos.health.none": "—",
 } as const;

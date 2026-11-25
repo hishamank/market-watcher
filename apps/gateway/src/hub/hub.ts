@@ -38,6 +38,7 @@ export interface Hub {
   unsubscribe(peer: Peer, symbols: readonly string[]): Promise<void>;
   broadcast(message: ServerMessage): void;
   marketStatus(): MarketStatus;
+  stats(): { connections: number; upstreamSymbols: number };
   close(): Promise<void>;
 }
 
@@ -184,6 +185,7 @@ export function createHub({ feed, now, warn }: HubOptions): Hub {
       inOrder(peer, (member) => release(watchers.remove(member, symbols), parts)),
     broadcast,
     marketStatus: () => feed.calendar.status(now()),
+    stats: () => ({ connections: members.size, upstreamSymbols: watchers.symbolCount() }),
     async close() {
       timers.forEach(clearInterval);
       stopQuotes();

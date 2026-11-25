@@ -1,12 +1,13 @@
 "use client";
 
-import { useChaosControls } from "@mini/core";
+import { useChaosControls, useConnectionHealth } from "@mini/core";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useOfflineControl } from "../platform/offline-context.tsx";
 import { ChaosPanelView } from "./chaos-panel-view.tsx";
 
 function ConnectedChaosPanel({ onClose }: { onClose: () => void }) {
   const chaos = useChaosControls();
+  const health = useConnectionHealth();
   const { offline, setOffline } = useOfflineControl();
   return (
     <ChaosPanelView
@@ -15,6 +16,7 @@ function ConnectedChaosPanel({ onClose }: { onClose: () => void }) {
       historyLatency={chaos.historyLatency}
       historyFailureRate={chaos.historyFailureRate}
       forceClosed={chaos.forceClosed}
+      health={health}
       onClose={onClose}
       onDrop={chaos.dropConnection}
       onFreeze={chaos.freezeFeed}

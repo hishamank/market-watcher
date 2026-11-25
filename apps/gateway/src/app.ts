@@ -2,6 +2,7 @@ import websocket from "@fastify/websocket";
 import type { FeedMode } from "@mini/contracts";
 import Fastify, { type FastifyInstance, type FastifyServerOptions } from "fastify";
 import type { Feed, HistorySource } from "./feeds/types.ts";
+import { createHub } from "./hub/hub.ts";
 import { MAX_MESSAGE_BYTES } from "./hub/limits.ts";
 import { registerRestPlugins, type RestRateLimitOptions } from "./rest/plugins.ts";
 import { restRoute } from "./rest/route.ts";
@@ -33,6 +34,14 @@ export function buildApp({
   ...options
 }: AppOptions): FastifyInstance {
   const app = Fastify({ logger, trustProxy });
+  const hub = createHub({
+    feed: options.feed,
+    now,
+    warn: (detail, message) => app.log.warn(detail, message),
+  });
+  app.register(async (hubScope) => {
+    hubScope.addHook("onClose", () => hub.close());
+  });
   registerRestPlugins(app, {
     ...options,
     now,
@@ -42,11 +51,12 @@ export function buildApp({
     feed: options.feed,
     feedMode: options.feedMode,
     now,
+    connectionStats: hub.stats,
     ...(historyFallbacks !== undefined ? { historyFallbacks } : {}),
     ...(historyCacheMaxEntries !== undefined ? { historyCacheMaxEntries } : {}),
     ...(historySourceTimeoutMs !== undefined ? { historySourceTimeoutMs } : {}),
   });
   app.register(websocket, { options: { maxPayload: MAX_MESSAGE_BYTES } });
-  app.register(socketRoute, { ...options, now });
+  app.register(socketRoute, { ...options, now, hub });
   return app;
 }

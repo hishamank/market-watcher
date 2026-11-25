@@ -5,6 +5,7 @@ export interface Watchers {
   isWatched(symbol: string): boolean;
   add(member: Member, symbols: readonly string[]): void;
   remove(member: Member, symbols: readonly string[]): string[];
+  symbolCount(): number;
 }
 
 export function createWatchers(): Watchers {
@@ -41,5 +42,6 @@ export function createWatchers(): Watchers {
     isWatched: (symbol) => bySymbol.has(symbol),
     add,
     remove,
+    symbolCount: () => bySymbol.size,
   };
 }

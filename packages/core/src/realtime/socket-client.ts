@@ -134,6 +134,7 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
 
   const frameContext = {
     quoteStore: options.quoteStore,
+    health: options.health,
     subscriptions,
     gate,
     onValidFrame: () => connection.resetSilenceTimer(),

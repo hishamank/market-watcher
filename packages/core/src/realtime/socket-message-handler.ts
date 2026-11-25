@@ -6,6 +6,7 @@ import {
   type MarketStatus,
   type ServerMessage,
 } from "@mini/contracts";
+import type { ConnectionHealthRecorder } from "./connection-health.ts";
 import type { QuoteStore } from "./quote-store.ts";
 import type { RecoveryGate } from "./recovery-gate.ts";
 import type { SubscriptionManager } from "./subscription-manager.ts";
@@ -20,6 +21,7 @@ export interface FrameHandlerContext {
   quoteStore: QuoteStore;
   subscriptions: SubscriptionManager;
   gate: RecoveryGate;
+  health: ConnectionHealthRecorder | undefined;
   onValidFrame(): void;
   onWelcome(info: WelcomeInfo): void;
   onMarketStatus(marketStatus: MarketStatus): void;
@@ -31,6 +33,7 @@ export interface FrameHandlerContext {
 function handleParsedMessage(message: ServerMessage, ctx: FrameHandlerContext): void {
   switch (message.type) {
     case "welcome":
+      ctx.health?.welcome(message.serverTime);
       ctx.onWelcome({
         heartbeatIntervalMs: message.heartbeatIntervalMs,
         feedMode: message.feedMode,
@@ -45,9 +48,11 @@ function handleParsedMessage(message: ServerMessage, ctx: FrameHandlerContext): 
       ctx.onSnapshotsSettled();
       return;
     case "quotes":
+      ctx.health?.quotes(message.quotes);
       ctx.quoteStore.upsertMany(message.quotes);
       return;
     case "heartbeat":
+      ctx.health?.heartbeat(message.serverTime, message.skippedFrames);
       return;
     case "market_status":
       ctx.onMarketStatus(message.marketStatus);
