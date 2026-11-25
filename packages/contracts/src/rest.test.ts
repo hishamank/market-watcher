@@ -2,10 +2,15 @@ import { describe, expect, it } from "vitest";
 import { aaplQuote } from "./fixtures.ts";
 import { BAR_SIZE_BY_RANGE, RANGES } from "./range.ts";
 import {
+  HistoryQuerySchema,
   type HistoryResponse,
   HistoryResponseSchema,
+  MAX_STOCKS_QUERY_SYMBOLS,
+  RestErrorResponseSchema,
   StockDetailResponseSchema,
+  StockListQuerySchema,
   StockListResponseSchema,
+  StockSymbolParamsSchema,
 } from "./rest.ts";
 
 const roundTrip = (value: unknown): unknown => JSON.parse(JSON.stringify(value));
@@ -105,5 +110,50 @@ describe("history", () => {
   it("narrows to a session on 1D", () => {
     const history = HistoryResponseSchema.parse(dayHistory);
     expect(history.range === "1D" && history.session.open).toBe(1_764_000_000_000);
+  });
+});
+
+describe("REST inputs and errors", () => {
+  it("parses stock list query symbols and rejects oversized lists", () => {
+    expect(StockListQuerySchema.parse({})).toEqual({ symbols: undefined });
+    expect(StockListQuerySchema.parse({ symbols: "" })).toEqual({ symbols: [] });
+    expect(StockListQuerySchema.parse({ symbols: " AAPL , MSFT , " })).toEqual({
+      symbols: ["AAPL", "MSFT"],
+    });
+    const tooMany = Array.from({ length: MAX_STOCKS_QUERY_SYMBOLS + 1 }, (_, i) => `S${i}`).join(
+      ",",
+    );
+    expect(StockListQuerySchema.safeParse({ symbols: tooMany }).success).toBe(false);
+    expect(StockListQuerySchema.safeParse({ symbols: ["AAPL"] }).success).toBe(false);
+  });
+
+  it("validates stock params and history query range", () => {
+    expect(StockSymbolParamsSchema.parse({ symbol: "BRK.B" })).toEqual({ symbol: "BRK.B" });
+    expect(StockSymbolParamsSchema.safeParse({ symbol: "" }).success).toBe(false);
+    expect(HistoryQuerySchema.parse({})).toEqual({ range: "1D" });
+    expect(HistoryQuerySchema.parse({ range: "1Y" })).toEqual({ range: "1Y" });
+    expect(HistoryQuerySchema.safeParse({ range: "2Y" }).success).toBe(false);
+    expect(HistoryQuerySchema.safeParse({ range: "" }).success).toBe(false);
+  });
+
+  it("round-trips REST error responses and rejects missing fields", () => {
+    const body = {
+      feedMode: "simulated",
+      marketStatus: "open",
+      error: { code: "rate_limited", message: "Too many requests" },
+    };
+    expect(RestErrorResponseSchema.parse(roundTrip(body))).toEqual(body);
+    expect(
+      RestErrorResponseSchema.safeParse({
+        feedMode: "simulated",
+        marketStatus: "open",
+        error: { code: "unknown_code", message: "nope" },
+      }).success,
+    ).toBe(false);
+    expect(
+      RestErrorResponseSchema.safeParse({
+        error: { code: "not_found", message: "Missing envelope" },
+      }).success,
+    ).toBe(false);
   });
 });

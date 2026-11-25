@@ -1,0 +1,6 @@
+export const REST_RATE_LIMIT_MAX = 120;
+export const REST_RATE_LIMIT_WINDOW_MS = 60_000;
+export const HISTORY_CACHE_MAX_ENTRIES = 500;
+export const FRESHNESS_1D_MS = 60_000;
+export const FRESHNESS_1W_MS = 5 * 60_000;
+export const HISTORY_SOURCE_TIMEOUT_MS = 5_000;

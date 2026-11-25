@@ -4,7 +4,7 @@ import { createFakeFeed } from "./hub/fake-feed.ts";
 import { startGateway } from "./socket/testing.ts";
 
 describe("GET /stocks", () => {
-  it("reports the simulated feed with an open market", async () => {
+  it("reports the simulated feed with an open market and default stocks", async () => {
     const app = buildApp({
       feed: createFakeFeed(),
       feedMode: "simulated",
@@ -13,10 +13,15 @@ describe("GET /stocks", () => {
     });
     const response = await app.inject({ method: "GET", url: "/stocks" });
     expect(response.statusCode).toBe(200);
-    expect(response.json()).toEqual({
+    expect(response.json()).toMatchObject({
       feedMode: "simulated",
       marketStatus: "open",
-      stocks: [],
+      stocks: [
+        { symbol: "AAPL", name: "AAPL Inc." },
+        { symbol: "MSFT", name: "MSFT Inc." },
+        { symbol: "NVDA", name: "NVDA Inc." },
+        { symbol: "SPY", name: "SPY Inc." },
+      ],
     });
     await app.close();
   });

@@ -4,6 +4,7 @@ import {
   FeedModeSchema,
   MarketStatusSchema,
   PriceStringSchema,
+  RequestedSymbolSchema,
   SymbolSchema,
 } from "./primitives.ts";
 import { BaselinePriceSchema, QuoteSchema } from "./quote.ts";
@@ -61,9 +62,54 @@ export const HistoryResponseSchema = z.discriminatedUnion("range", [
   MultiDayHistorySchema,
 ]);
 
+export const MAX_STOCKS_QUERY_SYMBOLS = 100;
+
+export const RestErrorCodeSchema = z.enum([
+  "invalid_request",
+  "not_found",
+  "origin_not_allowed",
+  "rate_limited",
+  "unavailable",
+  "internal_error",
+]);
+
+export const RestErrorResponseSchema = z.object({
+  ...envelope,
+  error: z.object({
+    code: RestErrorCodeSchema,
+    message: z.string().min(1),
+  }),
+});
+
+export const StockListQuerySchema = z.object({
+  symbols: z
+    .string()
+    .transform((value) =>
+      value
+        .split(",")
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0),
+    )
+    .pipe(z.array(RequestedSymbolSchema).max(MAX_STOCKS_QUERY_SYMBOLS))
+    .optional(),
+});
+
+export const StockSymbolParamsSchema = z.object({
+  symbol: RequestedSymbolSchema,
+});
+
+export const HistoryQuerySchema = z.object({
+  range: RangeSchema.default("1D"),
+});
+
 export type Stock = z.infer<typeof StockSchema>;
 export type StockListResponse = z.infer<typeof StockListResponseSchema>;
 export type StockDetailResponse = z.infer<typeof StockDetailResponseSchema>;
 export type Bar = z.infer<typeof BarSchema>;
 export type Session = z.infer<typeof SessionSchema>;
 export type HistoryResponse = z.infer<typeof HistoryResponseSchema>;
+export type RestErrorCode = z.infer<typeof RestErrorCodeSchema>;
+export type RestErrorResponse = z.infer<typeof RestErrorResponseSchema>;
+export type StockListQuery = z.infer<typeof StockListQuerySchema>;
+export type StockSymbolParams = z.infer<typeof StockSymbolParamsSchema>;
+export type HistoryQuery = z.infer<typeof HistoryQuerySchema>;
