@@ -76,6 +76,7 @@ export function createHeldQuotes(
       return held?.session === session && held.at > since;
     },
     stale: (symbol, session) => {
+      if (waiting.get(symbol)?.session !== session) waiting.delete(symbol);
       const held = latest.get(symbol);
       return waiting.has(symbol) || (held !== undefined && held.session !== session);
     },

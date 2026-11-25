@@ -165,3 +165,20 @@ test("a snapshot started before the open and answered after it is discarded", as
     timestamp: Date.parse("2025-06-25T13:31:00.250Z"),
   });
 });
+
+test("a waiting trade expires with its session, so the symbol is not polled after the close", async () => {
+  vi.setSystemTime(SESSION_NOW);
+  rig = await startAlpaca((alpaca) => alpaca.omitted.add("AAPL"), { now: () => Date.now() });
+  await watchAapl(rig);
+  rig.sockets.last().push("stream-trades.json");
+  const calls = (): number => rig?.alpaca.calls(SNAPSHOTS).length ?? 0;
+  const waiting = calls();
+  await vi.advanceTimersByTimeAsync(2 * POLL_INTERVAL_MS);
+  expect(calls()).toBeGreaterThan(waiting);
+
+  vi.setSystemTime(SESSION_CLOSE + 1_000);
+  await vi.advanceTimersByTimeAsync(STATUS_CHECK_INTERVAL_MS + POLL_INTERVAL_MS);
+  const closed = calls();
+  await vi.advanceTimersByTimeAsync(6 * POLL_INTERVAL_MS);
+  expect(calls()).toBe(closed);
+});
