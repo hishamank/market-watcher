@@ -121,7 +121,7 @@ function retryUpstream(parts: Parts): void {
 
 export function createHub({ feed, now, warn }: HubOptions): Hub {
   const members = new Map<Peer, Member>();
-  const watchers = createWatchers();
+  const watchers = createWatchers((symbol, count) => feed.live.watchCount?.(symbol, count));
   const upstream = createUpstream(feed.live, watchers.isWatched, warn);
   const book = createQuoteBook(feed.live, watchers.isWatched, warn);
   const parts: Parts = { members, feed, watchers, upstream, book, warn, leave };
