@@ -1,4 +1,4 @@
-import { RestClientError, useStock, useT } from "@mini/core";
+import { RestClientError, useStock, useT, useTrack } from "@mini/core";
 import type { Range, Stock } from "@mini/contracts";
 import { radius, space } from "@mini/tokens";
 import { Stack, useRouter } from "expo-router";
@@ -7,6 +7,7 @@ import { StyleSheet, View } from "react-native";
 import { EmptyState } from "../components/empty-state.tsx";
 import { RangeTabs } from "../components/range-tabs.tsx";
 import { SkeletonBlock } from "../components/skeleton.tsx";
+import { useTrackStockOpened } from "../integrations/use-track-stock-opened.ts";
 import { ConnectedDetailFacts } from "./connected-detail-facts.tsx";
 import { ConnectedDetailHeader } from "./connected-detail-header.tsx";
 import { ConnectedPriceChart } from "./connected-price-chart.tsx";
@@ -15,6 +16,12 @@ import type { ScrubSelection } from "./scrub.ts";
 function DetailContent({ stock }: { stock: Stock }) {
   const [range, setRange] = useState<Range>("1D");
   const [selection, setSelection] = useState<ScrubSelection | undefined>(undefined);
+  const track = useTrack();
+  const selectRange = (next: Range) => {
+    if (next === range) return;
+    track({ name: "range_changed", symbol: stock.symbol, range: next });
+    setRange(next);
+  };
   return (
     <View style={styles.content}>
       <ConnectedDetailHeader stock={stock} range={range} selection={selection} />
@@ -24,7 +31,7 @@ function DetailContent({ stock }: { stock: Stock }) {
         selection={selection}
         onScrub={(index) => setSelection(index === undefined ? undefined : { range, index })}
       />
-      <RangeTabs range={range} onSelect={setRange} />
+      <RangeTabs range={range} onSelect={selectRange} />
       <ConnectedDetailFacts stock={stock} />
     </View>
   );
@@ -79,6 +86,7 @@ function DetailFailure({
 
 export function DetailScreen({ symbol }: { symbol: string }) {
   const query = useStock(symbol);
+  useTrackStockOpened(symbol);
   const stock = query.data?.stock;
   return (
     <>
