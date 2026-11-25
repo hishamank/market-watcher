@@ -1,1 +1,58 @@
 @import "tailwindcss";
+@import "./theme.css";
+
+@theme {
+  --animate-flash: flash var(--duration-flash) var(--ease-standard) both;
+  --animate-skeleton: skeleton 1.2s ease-in-out infinite;
+  --animate-banner-in: banner-in var(--duration-base) var(--ease-standard) both;
+  --animate-star-on: star-on var(--duration-fast) var(--ease-standard) both;
+
+  @keyframes flash {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes skeleton {
+    50% {
+      opacity: 0.55;
+    }
+  }
+
+  @keyframes banner-in {
+    from {
+      opacity: 0;
+      transform: translateY(-100%);
+    }
+  }
+
+  @keyframes star-on {
+    from {
+      transform: scale(0.85);
+    }
+  }
+}
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+}

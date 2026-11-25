@@ -4,18 +4,25 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "theme": "node scripts/generate-theme.ts",
+    "dev": "pnpm theme && next dev",
+    "build": "pnpm theme && next build",
     "start": "next start",
     "typecheck": "next typegen && tsc -p .",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests --dir src",
+    "e2e": "playwright test"
   },
   "dependencies": {
+    "@mini/contracts": "workspace:*",
+    "@mini/core": "workspace:*",
+    "@mini/tokens": "workspace:*",
+    "@tanstack/react-query": "5.108.4",
     "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.65.1",
     "@tailwindcss/postcss": "4.3.5",
     "@types/react": "19.3.1",
     "@types/react-dom": "19.3.0",

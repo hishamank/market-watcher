@@ -10,6 +10,13 @@
       }
     ]
   },
-  "include": ["next-env.d.ts", "src", "next.config.ts", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "src",
+    "e2e",
+    "next.config.ts",
+    "playwright.config.ts",
+    ".next/types/**/*.ts"
+  ],
   "exclude": ["src/**/lint-fixtures"]
 }

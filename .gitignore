@@ -16,3 +16,6 @@ coverage/
 docs/history/
 next-env.d.ts
 *.tsbuildinfo
+apps/web/src/app/theme.css
+test-results/
+playwright-report/
