@@ -1,0 +1,36 @@
+import type { ClientMessage, FeedMode, MarketStatus } from "@mini/contracts";
+import type { AppLifecycle } from "../platform/app-lifecycle.ts";
+import type { NetworkStatus } from "../platform/network-status.ts";
+import type { QuoteStore } from "./quote-store.ts";
+import type { SocketFactory } from "./transport.ts";
+
+export type ConnectionStatus = "connecting" | "connected" | "stale" | "offline";
+
+export type StatusListener = () => void;
+
+export type ReconnectListener = () => void;
+
+export interface SocketClientOptions {
+  url: string;
+  quoteStore: QuoteStore;
+  network: NetworkStatus;
+  lifecycle?: AppLifecycle | undefined;
+  socketFactory?: SocketFactory | undefined;
+  random?: (() => number) | undefined;
+  onWarning?: ((message: string, detail?: unknown) => void) | undefined;
+  unsubscribeDelayMs?: number | undefined;
+  backgroundGraceMs?: number | undefined;
+}
+
+export interface SocketClient {
+  start(): void;
+  stop(): void;
+  getStatus(): ConnectionStatus;
+  subscribeStatus(listener: StatusListener): () => void;
+  acquireSymbol(symbol: string): () => void;
+  retryNow(): void;
+  send(message: ClientMessage): boolean;
+  getMarketStatus(): MarketStatus | null;
+  getFeedMode(): FeedMode | null;
+  subscribeReconnect(listener: ReconnectListener): () => void;
+}
