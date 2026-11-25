@@ -1,4 +1,4 @@
-import { buildApp } from "./app.ts";
+import { buildApp, parseTrustProxy } from "./app.ts";
 import { createSimulatorFeed } from "./feeds/index.ts";
 import { parseAllowedOrigins } from "./socket/admission.ts";
 
@@ -15,6 +15,7 @@ const app = buildApp({
   feed,
   feedMode: "simulated",
   allowedOrigins: parseAllowedOrigins(process.env["ALLOWED_ORIGINS"]),
+  trustProxy: parseTrustProxy(process.env["TRUST_PROXY"]),
 });
 app.addHook("onClose", async () => feed.close());
 
