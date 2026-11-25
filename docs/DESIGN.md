@@ -232,7 +232,7 @@ Each component lists its anatomy, states, spacing, motion and test IDs.
 - **States.**
   - Ticking up or down: the flash ring on the pill. `data-direction` on the price is `up`, `down` or `flat`.
   - Flat: dash icon, "0.00 (0.00%)", `color.flat` on `color.fill`.
-  - Stale: price in `color.textMuted`, pill in `color.textMuted` on `color.fill`, arrow and sign kept, no flash.
+  - Stale: price in `color.textMuted`, pill in `color.textSecondary` on `color.fill` (muted text on fill fails AA in light), arrow and sign kept, no flash.
   - Hovered: `color.hover` background.
   - Focused: focus outline on the link area, inset by 2 px.
   - Current (1440 px list pane): `color.fill` background and `aria-current`.
