@@ -29,7 +29,7 @@ Two isolated stacks, so verification never fights a developer's running servers:
 | Use | Gateway | Web | Started by |
 | --- | --- | --- | --- |
 | Walk | `http://localhost:4000` | `http://localhost:3000` | you, below |
-| E2E | `http://localhost:4100` | `http://localhost:3100` | Playwright's own `webServer` config |
+| E2E | `http://localhost:4100` | `http://localhost:3100` | Playwright's own `webServer` config. Set `E2E_GATEWAY_PORT` and `E2E_WEB_PORT` to run beside another worktree's suite |
 
 Start the walk stack from the repo root, each in its own background shell under `setsid`, so each server and its children share one session:
 
