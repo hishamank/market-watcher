@@ -7,6 +7,7 @@ import {
   RequestIdSchema,
 } from "../primitives.ts";
 import { QuoteSchema } from "../quote.ts";
+import { HistoryFailureRateSchema } from "./client.ts";
 
 export const PROTOCOL_VERSION = 1;
 
@@ -55,6 +56,25 @@ export const MarketStatusMessageSchema = z.object({
   marketStatus: MarketStatusSchema,
 });
 
+export const ChaosToggleStateSchema = z.object({
+  enabled: z.boolean(),
+  revertsAt: EpochMsSchema.nullable(),
+});
+
+export const ChaosFailureRateStateSchema = z.object({
+  rate: HistoryFailureRateSchema,
+  revertsAt: EpochMsSchema.nullable(),
+});
+
+export const ChaosStateMessageSchema = z.object({
+  type: z.literal("chaos_state"),
+  serverTime: EpochMsSchema,
+  tickSpike: ChaosToggleStateSchema,
+  historyLatency: ChaosToggleStateSchema,
+  historyFailureRate: ChaosFailureRateStateSchema,
+  forceClosed: ChaosToggleStateSchema,
+});
+
 export const ErrorMessageSchema = z.discriminatedUnion("code", [
   z.object({
     type: z.literal("error"),
@@ -78,6 +98,7 @@ export const ServerMessageSchema = z.discriminatedUnion("type", [
   QuotesMessageSchema,
   HeartbeatMessageSchema,
   MarketStatusMessageSchema,
+  ChaosStateMessageSchema,
   ErrorMessageSchema,
 ]);
 
@@ -88,5 +109,8 @@ export type SnapshotMessage = z.infer<typeof SnapshotMessageSchema>;
 export type QuotesMessage = z.infer<typeof QuotesMessageSchema>;
 export type HeartbeatMessage = z.infer<typeof HeartbeatMessageSchema>;
 export type MarketStatusMessage = z.infer<typeof MarketStatusMessageSchema>;
+export type ChaosToggleState = z.infer<typeof ChaosToggleStateSchema>;
+export type ChaosFailureRateState = z.infer<typeof ChaosFailureRateStateSchema>;
+export type ChaosStateMessage = z.infer<typeof ChaosStateMessageSchema>;
 export type ErrorMessage = z.infer<typeof ErrorMessageSchema>;
 export type ServerMessage = z.infer<typeof ServerMessageSchema>;

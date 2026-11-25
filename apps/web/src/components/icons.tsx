@@ -71,6 +71,20 @@ export function AlertIcon({ className }: IconProps) {
   );
 }
 
+export function BoltIcon({ className }: IconProps) {
+  return <StrokeIcon className={className} path="M13 2 4.5 13.5H12L11 22l8.5-11.5H12L13 2z" />;
+}
+
+export function ClockIcon({ className }: IconProps) {
+  return (
+    <StrokeIcon
+      className={className}
+      size="size-[14px]"
+      path="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"
+    />
+  );
+}
+
 const directionPaths = {
   up: "M5 1 9.5 9h-9z",
   down: "M5 9 .5 1h9z",

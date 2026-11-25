@@ -98,3 +98,12 @@ export { createI18n } from "./i18n/create-i18n.ts";
 export type { I18nService } from "./i18n/create-i18n.ts";
 export type { MessageKey, Translate, TranslationValues } from "./i18n/locales/en/index.ts";
 export type { MarketStatusListener } from "./realtime/socket-types.ts";
+
+export { useChaosControls } from "./hooks/use-chaos-controls.ts";
+export type {
+  ChaosControlsResult,
+  ChaosFailureRateView,
+  ChaosToggleView,
+} from "./hooks/use-chaos-controls.ts";
+export type { ChaosSnapshot } from "./realtime/chaos-state-store.ts";
+export type { ChaosStateListener } from "./realtime/socket-types.ts";

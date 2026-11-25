@@ -1,4 +1,4 @@
-import type { MarketStatus, Quote, RequestId } from "@mini/contracts";
+import type { MarketStatus, Quote, RequestId, ServerMessage } from "@mini/contracts";
 import type { Feed } from "../feeds/types.ts";
 import { flushAll, sendHeartbeats } from "./conflation.ts";
 import {
@@ -36,6 +36,7 @@ export interface Hub {
   subscribe(peer: Peer, request: SubscribeRequest): Promise<void>;
   refuse(peer: Peer, requestId: RequestId): Promise<void>;
   unsubscribe(peer: Peer, symbols: readonly string[]): Promise<void>;
+  broadcast(message: ServerMessage): void;
   marketStatus(): MarketStatus;
   close(): Promise<void>;
 }
@@ -155,9 +156,13 @@ export function createHub({ feed, now, warn }: HubOptions): Hub {
     }
   }
 
+  function broadcast(message: ServerMessage): void {
+    members.forEach((_member, peer) => peer.send(message));
+  }
+
   const stopQuotes = feed.live.onQuote(onQuote);
   const stopStatus = feed.calendar.onStatusChange((marketStatus) =>
-    members.forEach((_member, peer) => peer.send({ type: "market_status", marketStatus })),
+    broadcast({ type: "market_status", marketStatus }),
   );
   const timers = [
     setInterval(flush, FLUSH_INTERVAL_MS),
@@ -177,6 +182,7 @@ export function createHub({ feed, now, warn }: HubOptions): Hub {
     refuse: (peer, requestId) => refuseSubscribe(peer, requestId, parts),
     unsubscribe: (peer, symbols) =>
       inOrder(peer, (member) => release(watchers.remove(member, symbols), parts)),
+    broadcast,
     marketStatus: () => feed.calendar.status(now()),
     async close() {
       timers.forEach(clearInterval);

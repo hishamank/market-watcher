@@ -1,4 +1,5 @@
 import {
+  type ChaosStateMessage,
   type ErrorMessage,
   parseServerFrame,
   type FeedMode,
@@ -22,6 +23,7 @@ export interface FrameHandlerContext {
   onValidFrame(): void;
   onWelcome(info: WelcomeInfo): void;
   onMarketStatus(marketStatus: MarketStatus): void;
+  onChaosState(message: ChaosStateMessage): void;
   onSnapshotsSettled(): void;
   onWarning(message: string, detail?: unknown): void;
 }
@@ -49,6 +51,9 @@ function handleParsedMessage(message: ServerMessage, ctx: FrameHandlerContext): 
       return;
     case "market_status":
       ctx.onMarketStatus(message.marketStatus);
+      return;
+    case "chaos_state":
+      ctx.onChaosState(message);
       return;
     case "error":
       handleError(message, ctx);

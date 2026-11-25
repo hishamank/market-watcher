@@ -3,6 +3,8 @@ export type TimerHandle = unknown;
 interface GlobalRuntime {
   setTimeout: (callback: () => void, delayMs: number) => TimerHandle;
   clearTimeout: (handle: TimerHandle) => void;
+  setInterval: (callback: () => void, intervalMs: number) => TimerHandle;
+  clearInterval: (handle: TimerHandle) => void;
   console?: {
     warn?: (...args: unknown[]) => void;
   };
@@ -18,6 +20,14 @@ export function scheduleTimeout(callback: () => void, delayMs: number): TimerHan
 
 export function cancelTimeout(handle: TimerHandle): void {
   getGlobalRuntime().clearTimeout(handle);
+}
+
+export function scheduleInterval(callback: () => void, intervalMs: number): TimerHandle {
+  return getGlobalRuntime().setInterval(callback, intervalMs);
+}
+
+export function cancelInterval(handle: TimerHandle): void {
+  getGlobalRuntime().clearInterval(handle);
 }
 
 export function logWarning(message: string, detail?: unknown): void {

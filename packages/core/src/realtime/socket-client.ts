@@ -1,4 +1,5 @@
 import type { FeedMode, MarketStatus } from "@mini/contracts";
+import { createChaosStateStore } from "./chaos-state-store.ts";
 import { createManagedConnection } from "./socket-connection.ts";
 import { createPlatformBridge } from "./socket-lifecycle.ts";
 import { createRecoveryGate } from "./recovery-gate.ts";
@@ -17,21 +18,19 @@ import { createDefaultSocket } from "./transport.ts";
 
 const DEFAULT_BACKGROUND_GRACE_MS = 10_000;
 
-function notifyAll(listeners: ReadonlySet<() => void>): void {
-  for (const listener of Array.from(listeners)) {
-    listener();
-  }
-}
+const notifyAll = (listeners: ReadonlySet<() => void>): void =>
+  Array.from(listeners).forEach((listener) => listener());
 
-function addListener(listeners: Set<() => void>, listener: () => void): () => void {
+const addListener = (listeners: Set<() => void>, listener: () => void): (() => void) => {
   listeners.add(listener);
   return () => listeners.delete(listener);
-}
+};
 
 export function createSocketClient(options: SocketClientOptions): SocketClient {
   const statusListeners = new Set<StatusListener>();
   const marketStatusListeners = new Set<MarketStatusListener>();
   const reconnectListeners = new Set<ReconnectListener>();
+  const chaosStore = createChaosStateStore();
   const gate = createRecoveryGate();
 
   let status: ConnectionStatus = "connecting";
@@ -91,22 +90,20 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
     connection.scheduleReconnect();
   }
 
-  function clearSession(): void {
+  const clearSession = (): void => {
     connection.close();
     subscriptions.resetSession();
     gate.reset();
-  }
-
-  function openFreshSocket(): void {
+  };
+  const openFreshSocket = (): void => {
     gate.reset();
     connection.open();
-  }
-
-  function resumeOnline(): void {
+  };
+  const resumeOnline = (): void => {
     connection.resetBackoff();
     setStatus(hasEverWelcomed ? "stale" : "connecting");
     openFreshSocket();
-  }
+  };
 
   const platform = createPlatformBridge({
     network: options.network,
@@ -148,6 +145,7 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
       connection.setHeartbeatInterval(info.heartbeatIntervalMs);
     },
     onMarketStatus: setMarketStatus,
+    onChaosState: chaosStore.update,
     onSnapshotsSettled: checkConnected,
     onWarning: options.onWarning ?? logWarning,
   };
@@ -193,6 +191,8 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
     send: (message) => connection.send(message),
     getMarketStatus: () => marketStatus,
     subscribeMarketStatus: (listener) => addListener(marketStatusListeners, listener),
+    getChaosState: chaosStore.get,
+    subscribeChaosState: chaosStore.subscribe,
     getFeedMode: () => feedMode,
     subscribeReconnect: (listener) => addListener(reconnectListeners, listener),
   };

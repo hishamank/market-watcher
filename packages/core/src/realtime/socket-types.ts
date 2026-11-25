@@ -1,6 +1,7 @@
 import type { ClientMessage, FeedMode, MarketStatus } from "@mini/contracts";
 import type { AppLifecycle } from "../platform/app-lifecycle.ts";
 import type { NetworkStatus } from "../platform/network-status.ts";
+import type { ChaosSnapshot } from "./chaos-state-store.ts";
 import type { QuoteStore } from "./quote-store.ts";
 import type { SocketFactory } from "./transport.ts";
 
@@ -9,6 +10,8 @@ export type ConnectionStatus = "connecting" | "connected" | "stale" | "offline";
 export type StatusListener = () => void;
 
 export type MarketStatusListener = () => void;
+
+export type ChaosStateListener = () => void;
 
 export type ReconnectListener = () => void;
 
@@ -34,6 +37,8 @@ export interface SocketClient {
   send(message: ClientMessage): boolean;
   getMarketStatus(): MarketStatus | null;
   subscribeMarketStatus(listener: MarketStatusListener): () => void;
+  getChaosState(): ChaosSnapshot | null;
+  subscribeChaosState(listener: ChaosStateListener): () => void;
   getFeedMode(): FeedMode | null;
   subscribeReconnect(listener: ReconnectListener): () => void;
 }

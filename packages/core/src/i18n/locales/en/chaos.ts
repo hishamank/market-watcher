@@ -13,6 +13,9 @@ export const chaosStrings = {
   "chaos.historyLatencyHelp": "Adds 2 seconds",
   "chaos.forceClosed": "Force market closed",
   "chaos.historyFailures": "History failures",
+  "chaos.historyFailures.off": "Off",
+  "chaos.historyFailures.half": "50%",
+  "chaos.historyFailures.all": "100%",
   "chaos.secondsLeft_one": "{{count}} s",
   "chaos.secondsLeft_other": "{{count}} s",
 } as const;

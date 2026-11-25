@@ -14,3 +14,8 @@ export const CONNECTIONS_PER_IP = 10;
 export const CLOSE_UNSUPPORTED_VERSION = 1002;
 export const CLOSE_INTERNAL_ERROR = 1011;
 export const CLOSE_SLOW_CONSUMER = 1013;
+export const CLOSE_CHAOS_DROP = 1000;
+
+export const CHAOS_REVERT_MS = 60_000;
+export const CHAOS_TICK_SPIKE_MULTIPLIER = 20;
+export const CHAOS_HISTORY_LATENCY_MS = 2_000;

@@ -91,7 +91,7 @@ test("upstream starts at the first watcher and stops after the last leaves", asy
 test("a malformed message gets invalid_message and the socket stays open", async () => {
   const client = await gateway.connect();
   client.socket.send("not json");
-  client.send({ type: "chaos", action: "drop" });
+  client.socket.send(JSON.stringify({ type: "subscribe", requestId: 1, symbols: [] }));
   await expect(client.next("error")).resolves.toMatchObject({ code: "invalid_message" });
   await expect(client.next("error")).resolves.toMatchObject({ code: "invalid_message" });
   client.send({ type: "subscribe", requestId: 8, symbols: ["SPY"] });

@@ -11,6 +11,7 @@ import {
   PING_INTERVAL_MS,
 } from "../hub/limits.ts";
 import { createAdmission } from "./admission.ts";
+import { createChaosController } from "./chaos.ts";
 import { startLiveness } from "./liveness.ts";
 import { closeWithDeadline, openSession } from "./session.ts";
 
@@ -44,9 +45,14 @@ function welcome(socket: WebSocket, hub: Hub, options: SocketOptions): void {
 export async function socketRoute(app: FastifyInstance, options: SocketOptions): Promise<void> {
   const warn: Warn = (detail, message) => app.log.warn(detail, message);
   const hub = createHub({ feed: options.feed, now: options.now, warn });
+  const chaos =
+    options.feedMode === "simulated"
+      ? createChaosController({ feed: options.feed, now: options.now, broadcast: hub.broadcast })
+      : null;
   const admission = createAdmission(options.allowedOrigins);
   const stopLiveness = startLiveness(app.websocketServer, PING_INTERVAL_MS);
   app.addHook("onClose", async () => {
+    chaos?.close();
     stopLiveness();
     await hub.close();
   });
@@ -62,7 +68,7 @@ export async function socketRoute(app: FastifyInstance, options: SocketOptions):
         return;
       }
       welcome(socket, hub, options);
-      openSession(socket, hub, options.now, warn);
+      openSession(socket, hub, chaos, options.now, warn);
     },
   );
 }

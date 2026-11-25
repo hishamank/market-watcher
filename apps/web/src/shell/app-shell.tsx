@@ -1,9 +1,10 @@
 "use client";
 
 import { useConnectionStatus, useMarketStatus } from "@mini/core";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import type { ShellMeta } from "../gateway/shell-meta.ts";
 import { AppHeader } from "./app-header.tsx";
+import { ChaosPanel } from "./chaos-panel.tsx";
 import { ConnectionBanner } from "./connection-banner.tsx";
 
 export interface AppShellProps {
@@ -25,6 +26,11 @@ export function AppShell({ meta, children }: AppShellProps) {
       <AppHeader feedMode={meta.feedMode} marketStatus={marketStatus} />
       <ConnectionBanner status={status} onRetry={retryNow} />
       <div className="flex flex-1 flex-col">{children}</div>
+      {meta.feedMode === "simulated" ? (
+        <Suspense fallback={null}>
+          <ChaosPanel />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

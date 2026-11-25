@@ -21,6 +21,14 @@ const serverMessages: ServerMessage[] = [
   { type: "heartbeat", serverTime: 1_764_000_005_000, skippedFrames: 3 },
   { type: "market_status", marketStatus: "closed" },
   {
+    type: "chaos_state",
+    serverTime: 1_764_000_000_000,
+    tickSpike: { enabled: false, revertsAt: null },
+    historyLatency: { enabled: true, revertsAt: 1_764_000_060_000 },
+    historyFailureRate: { rate: 50, revertsAt: 1_764_000_060_000 },
+    forceClosed: { enabled: false, revertsAt: null },
+  },
+  {
     type: "error",
     code: "unknown_symbol",
     message: "Unknown symbols",
@@ -108,6 +116,28 @@ describe("invalid frames", () => {
     ["an unknown feed mode", { ...serverMessages[0], feedMode: "mixed" }],
     ["a negative skipped count", { type: "heartbeat", serverTime: 1, skippedFrames: -1 }],
     ["a market status of halted", { type: "market_status", marketStatus: "halted" }],
+    [
+      "a chaos state with an invalid failure rate",
+      {
+        type: "chaos_state",
+        serverTime: 1_764_000_000_000,
+        tickSpike: { enabled: false, revertsAt: null },
+        historyLatency: { enabled: false, revertsAt: null },
+        historyFailureRate: { rate: 30, revertsAt: null },
+        forceClosed: { enabled: false, revertsAt: null },
+      },
+    ],
+    [
+      "a chaos state with a negative revert timestamp",
+      {
+        type: "chaos_state",
+        serverTime: 1_764_000_000_000,
+        tickSpike: { enabled: true, revertsAt: -1 },
+        historyLatency: { enabled: false, revertsAt: null },
+        historyFailureRate: { rate: 0, revertsAt: null },
+        forceClosed: { enabled: false, revertsAt: null },
+      },
+    ],
     ["a snapshot without a request ID", { type: "snapshot", quotes: [] }],
     [
       "an unavailable error without symbols",
