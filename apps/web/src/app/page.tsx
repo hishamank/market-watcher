@@ -1,9 +1,15 @@
+import { createRestClient, stockListQueryOptions } from "@mini/core";
+import { gatewayUrl } from "../gateway/shell-meta.ts";
+import { ListPage } from "../list/list-page.tsx";
 import { PrefetchBoundary } from "../query/prefetch-boundary.tsx";
 
-export default function HomePage() {
+const rest = createRestClient({ gatewayUrl });
+
+export default async function HomePage({ searchParams }: PageProps<"/">) {
+  const { view } = await searchParams;
   return (
-    <PrefetchBoundary>
-      <main className="flex flex-1 flex-col px-16 md:px-24" />
+    <PrefetchBoundary prefetch={(client) => client.prefetchQuery(stockListQueryOptions(rest))}>
+      <ListPage view={view === "watchlist" ? "watchlist" : "all"} />
     </PrefetchBoundary>
   );
 }

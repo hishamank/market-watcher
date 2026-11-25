@@ -15,6 +15,7 @@ export interface ChangePillProps {
   flashKey: number | undefined;
   testId: string;
   large?: boolean;
+  percentClassName?: string;
 }
 
 const tones: Record<Direction, string> = {
@@ -25,6 +26,7 @@ const tones: Record<Direction, string> = {
 
 export function ChangePill(props: ChangePillProps) {
   const { change, changePercent, stale, flash, flashKey, testId, large = false } = props;
+  const percent = ` (${formatSignedPercent(changePercent)})`;
   const direction = directionOf(change);
   const size = large ? "px-10 py-[3px] text-label leading-[18px]" : "px-8 py-2 text-numeric-change";
   return (
@@ -35,7 +37,14 @@ export function ChangePill(props: ChangePillProps) {
       className={`relative inline-flex items-center gap-[5px] rounded-pill whitespace-nowrap ${size} ${stale ? "bg-fill text-text-secondary" : tones[direction]}`}
     >
       <DirectionIcon direction={direction} />
-      {`${formatSignedAmount(change)} (${formatSignedPercent(changePercent)})`}
+      {props.percentClassName === undefined ? (
+        `${formatSignedAmount(change)}${percent}`
+      ) : (
+        <>
+          {formatSignedAmount(change)}
+          <span className={props.percentClassName}>{percent}</span>
+        </>
+      )}
       {flash === undefined ? null : (
         <span
           key={flashKey}

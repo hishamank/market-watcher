@@ -1,15 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-
-function collectConsoleProblems(page: Page): string[] {
-  const problems: string[] = [];
-  page.on("console", (message) => {
-    if (message.type() === "error" || message.type() === "warning") {
-      problems.push(message.text());
-    }
-  });
-  page.on("pageerror", (error) => problems.push(error.message));
-  return problems;
-}
+import { collectConsoleProblems } from "./support/console.ts";
 
 interface ConnectionRecord {
   status: string | null;
@@ -174,4 +164,33 @@ test("G2 and C3 force closed and global controls sync countdowns across tabs and
   await second.close();
   expect(problems).toEqual([]);
   expect(secondProblems).toEqual([]);
+});
+
+test("C2 tick spike keeps the socket at most 4 quotes frames per second", async ({ page }) => {
+  test.setTimeout(30_000);
+  const quotesFrames: number[] = [];
+  page.on("websocket", (socket) => {
+    socket.on("framereceived", (frame) => {
+      if ((JSON.parse(String(frame.payload)) as { type: string }).type === "quotes") {
+        quotesFrames.push(Date.now());
+      }
+    });
+  });
+  await page.goto("/?debug=1");
+  await expect(page.getByTestId("app-root")).toHaveAttribute("data-connection", "connected");
+  const spike = page.getByTestId("chaos-tick-spike");
+  await spike.click();
+  await expect(spike).toHaveAttribute("aria-checked", "true");
+  try {
+    await page.waitForTimeout(1_000);
+    const windowSeconds = 6;
+    const start = Date.now();
+    await page.waitForTimeout(windowSeconds * 1_000);
+    const inWindow = quotesFrames.filter((at) => at >= start && at < start + windowSeconds * 1_000);
+    expect(inWindow.length).toBeGreaterThan(windowSeconds);
+    expect(inWindow.length).toBeLessThanOrEqual(4 * windowSeconds + 1);
+  } finally {
+    await spike.click();
+    await expect(spike).toHaveAttribute("aria-checked", "false");
+  }
 });

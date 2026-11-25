@@ -17,6 +17,7 @@
     "@mini/core": "workspace:*",
     "@mini/tokens": "workspace:*",
     "@tanstack/react-query": "5.108.4",
+    "@tanstack/react-virtual": "3.14.28",
     "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0"

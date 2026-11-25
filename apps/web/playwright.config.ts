@@ -1,8 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
+import { gatewayUrl } from "./e2e/support/gateway-process.ts";
 
-const gatewayPort = 4100;
 const webPort = 3100;
-const gatewayUrl = `http://localhost:${gatewayPort}`;
+const chromium = devices["Desktop Chrome"];
 
 export default defineConfig({
   testDir: "./e2e",
@@ -14,12 +14,19 @@ export default defineConfig({
     baseURL: `http://localhost:${webPort}`,
     trace: "retain-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    { name: "chromium", use: chromium, testIgnore: /gateway-down/ },
+    {
+      name: "gateway-down",
+      use: chromium,
+      testMatch: /gateway-down/,
+      dependencies: ["chromium"],
+    },
+  ],
   webServer: [
     {
-      command: "pnpm --filter ./apps/gateway start",
+      command: "node apps/web/e2e/support/run-gateway.ts",
       cwd: "../..",
-      env: { PORT: String(gatewayPort), FEED: "simulator", SIM_SEED: "42" },
       url: `${gatewayUrl}/stocks`,
       reuseExistingServer: false,
     },

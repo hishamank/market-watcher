@@ -1,4 +1,5 @@
 export const listStrings = {
+  "list.view.label": "View",
   "list.view.all": "All",
   "list.view.watchlist": "Watchlist",
   "list.error.title": "Couldn't load stocks",
@@ -6,4 +7,12 @@ export const listStrings = {
   "list.error.retry": "Retry",
   "list.count_one": "{{count}} stock",
   "list.count_other": "{{count}} stocks",
+  "list.column.name": "Name",
+  "list.column.symbol": "Symbol",
+  "list.column.price": "Price",
+  "list.column.change": "Day change",
+  "list.column.changePercent": "Day change %",
+  "list.column.previousClose": "Previous close",
+  "list.column.lastUpdate": "Last update",
+  "list.lastUpdate": "{{time}} ET",
 } as const;
