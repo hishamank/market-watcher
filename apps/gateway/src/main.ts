@@ -28,6 +28,7 @@ const selected = await selectFeed(process.env["FEED"] ?? "simulator").catch((err
 });
 const { feed } = selected;
 const port = Number(process.env["PORT"] ?? 4000);
+const host = process.env["HOST"] ?? "localhost";
 const rateLimit = parseRateLimitMax(process.env["REST_RATE_LIMIT_MAX"]);
 const app = buildApp({
   feed,
@@ -38,5 +39,5 @@ const app = buildApp({
 });
 app.addHook("onClose", async () => feed.close());
 
-await app.listen({ port, host: "localhost" });
-console.log(`gateway listening on http://localhost:${port}`);
+await app.listen({ port, host });
+console.log(`gateway listening on http://${host}:${port}`);

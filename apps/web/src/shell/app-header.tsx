@@ -1,6 +1,7 @@
 import type { FeedMode, MarketStatus } from "@mini/contracts";
 import { useT } from "@mini/core";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { ChevronStartIcon } from "../components/icons.tsx";
 import { FeedModeBadge } from "./feed-mode-badge.tsx";
 import { MarketClosedLabel } from "./market-closed-label.tsx";
@@ -9,9 +10,10 @@ export interface AppHeaderProps {
   feedMode: FeedMode | null;
   marketStatus: MarketStatus | null;
   showBack: boolean;
+  search?: ReactNode;
 }
 
-export function AppHeader({ feedMode, marketStatus, showBack }: AppHeaderProps) {
+export function AppHeader({ feedMode, marketStatus, showBack, search }: AppHeaderProps) {
   const t = useT();
   return (
     <header className="flex min-h-[64px] items-center gap-8 ps-16 pe-6 md:min-h-[72px] md:gap-12 md:border-b md:border-border md:px-24">
@@ -34,6 +36,7 @@ export function AppHeader({ feedMode, marketStatus, showBack }: AppHeaderProps) 
           {marketStatus === "closed" ? <MarketClosedLabel /> : null}
         </div>
       </div>
+      {search}
     </header>
   );
 }

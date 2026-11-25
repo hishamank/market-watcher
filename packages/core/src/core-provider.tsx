@@ -19,6 +19,7 @@ import { buildSocketUrl, createDefaultSocket, type SocketFactory } from "./realt
 import { refetchHistoryOnReconnect } from "./rest/history-refetch.ts";
 import { syncQuotesFromQueryCache } from "./rest/quote-cache-sync.ts";
 import { createRestClient, type HttpFetch, type RestClient } from "./rest/rest-client.ts";
+import { createSearchFetcher, type SearchFetcher } from "./rest/search-query.ts";
 import { createWatchlistStore, type WatchlistStore } from "./watchlist/watchlist-store.ts";
 
 export interface CoreProviderProps {
@@ -42,6 +43,7 @@ export interface CoreContextValue {
   queryCache: QueryCache | undefined;
   socketClient: SocketClient;
   restClient: RestClient;
+  searchStocks: SearchFetcher;
   watchlistStore: WatchlistStore;
   i18n: I18nService;
   analytics: AnalyticsAdapter;
@@ -71,6 +73,7 @@ export function createCoreServices(
     queryCache: queryClient?.getQueryCache(),
     socketClient,
     restClient: createRestClient({ gatewayUrl: platform.gatewayUrl, fetch: platform.fetch }),
+    searchStocks: createSearchFetcher({ gatewayUrl: platform.gatewayUrl, fetch: platform.fetch }),
     watchlistStore: createWatchlistStore(platform.storage),
     i18n,
     analytics,

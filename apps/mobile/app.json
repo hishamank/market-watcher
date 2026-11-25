@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "Mini Trading",
+    "slug": "mini-trading",
+    "scheme": "minitrading",
+    "version": "0.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "plugins": ["expo-router", "expo-status-bar"],
+    "experiments": {
+      "reactCompiler": true
+    }
+  }
+}

@@ -159,11 +159,71 @@ The docs do not settle these, so the adapter uses a documented default and the r
 
 ## Expo app
 
-Not built yet. This section is filled in by the first Expo ticket and must cover:
+The mobile app runs in Expo Go on a real phone. No agent tool here can tap a phone, so the owner walks mobile features by hand, following the steps below, and reports in the same table. Every control and value the steps name has a `testID` from [`docs/feature-map.md`](../../../docs/feature-map.md), ready for a device driver such as Maestro if one is ever added (it is not a dependency today).
 
-- Launching Expo against the walk gateway in simulator mode, and the doctor check.
-- How to drive the app: Expo Go on a device or simulator, and the tool used to tap by `testID` and take screenshots.
-- Recipes for background and foreground (M4) and offline.
-- Mapping of features M1 to M5 to checks, in the same report format.
+### Launch
 
-Until then, mobile features are reported as BLOCKED.
+The phone and the computer must be on the same Wi-Fi network. Find the computer's LAN IP first: `ipconfig getifaddr en0` on macOS, `hostname -I | awk '{print $1}'` on Linux.
+
+Start the walk gateway on all interfaces, from the repo root, in its own terminal. Use the `pnpm --filter` form: `pnpm dev` runs through Turborepo, which does not pass `HOST` through.
+
+```bash
+HOST=0.0.0.0 ALLOWED_ORIGINS=http://localhost:3000,http://<LAN IP>:4000 \
+  FEED=simulator SIM_SEED=42 PORT=4000 pnpm --filter ./apps/gateway dev
+```
+
+- `HOST=0.0.0.0` lets the phone reach the gateway.
+- `ALLOWED_ORIGINS` must list `http://<LAN IP>:4000`. React Native's WebSocket sends an `Origin` header made from the socket URL, on both iOS and Android, and the gateway refuses origins it does not know. Without it, prices load over REST but never tick. Setting the variable replaces the default list, so keep `http://localhost:3000` in it for the web walk.
+
+Start Expo in a second terminal, with the gateway's LAN address baked into the bundle. It prints a QR code.
+
+```bash
+EXPO_PUBLIC_GATEWAY_URL=http://<LAN IP>:4000 pnpm --filter ./apps/mobile start
+```
+
+`EXPO_PUBLIC_GATEWAY_URL` is read when Metro bundles, so after changing it, restart with `pnpm --filter ./apps/mobile start --clear`. A value set only on the command line does not survive the restart: repeat it, as in `EXPO_PUBLIC_GATEWAY_URL=http://<LAN IP>:4000 pnpm --filter ./apps/mobile start --clear`. Without it the app uses `http://localhost:4000`, which only works in a simulator on the same machine.
+
+An agent starting these itself (to check the bundle, not to walk) uses the `setsid` pattern from step 2, adds `CI=1` to `expo start`, and uses a spare `--port` if 8081 is taken.
+
+### Doctor
+
+Read-only checks, in this order. Each one rules out a layer before the next:
+
+1. On the computer: `curl -sf http://<LAN IP>:4000/stocks | grep -q '"feedMode":"simulated"' && echo gateway-lan-ok`. If this fails, the gateway is not bound to the LAN: check `HOST=0.0.0.0`.
+2. On the computer, the socket handshake with the phone's origin must answer `101`. A `403` means `ALLOWED_ORIGINS` is missing the LAN origin.
+
+   ```bash
+   curl -s -o /dev/null --max-time 2 -w "%{http_code}\n" -H "Origin: http://<LAN IP>:4000" \
+     -H "Connection: Upgrade" -H "Upgrade: websocket" -H "Sec-WebSocket-Version: 13" \
+     -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" "http://<LAN IP>:4000/ws?v=1"
+   ```
+
+3. On the computer: `curl -s http://localhost:8081/status` prints `packager-status:running`. If Expo was started with `--port`, use that port instead of 8081.
+4. **On the phone's browser**, open `http://<LAN IP>:4000/stocks`. It must show JSON containing `"feedMode":"simulated"`. If the computer passes steps 1 and 2 and the phone fails here, the problem is the network, not the app: a different Wi-Fi, a guest network that isolates clients, or the computer's firewall blocking Node.
+
+### Open in Expo Go
+
+Install Expo Go from the App Store or Play Store; it must be the build for SDK 58. Scan the QR code (the Camera app on iOS, Expo Go itself on Android). The first load bundles for a few seconds. A red error screen is a FAIL for every feature: copy its text into the report.
+
+### Walk
+
+Follow each feature's steps in the feature map and observe the expected result. For each one, take a phone screenshot after the expected state appears and save it in the run's `.verify/` folder, named by feature ID (`M2-ticks.png`). Note anything Expo Go's console or the Metro terminal prints in red.
+
+| Feature | What to do and see |
+| --- | --- |
+| M1 | The app opens on **Markets**, with Markets and Watchlist tabs at the bottom. Tap a row: a detail screen opens with the ticker as its title, the company name and a price that ticks. Back returns to the list where it was. Switch to Watchlist and back. |
+| M2 | Rows show name, ticker, price and a day-change pill with an arrow, a sign and a percent. Within a few seconds prices change, and a thin ring flashes round the pill in the row's day colour. Scroll to the bottom: the last rows have a price at once and start ticking. Star MSFT, then NVDA: each star fills amber at once. The Watchlist tab lists NVDA first, then MSFT, both ticking. Unstar NVDA there: its row goes at once. Close Expo Go from the app switcher and reopen: MSFT is still starred. Unstar it: the Watchlist tab shows "Your watchlist is empty", and "See all stocks" returns to Markets. |
+| M2, motion and failure | With a stock starred, stop the gateway (`Ctrl+C`), then close and reopen Expo Go. Markets shows skeleton rows that pulse gently for about 7 s while requests retry (three retries, 1 s, 2 s and 4 s apart), then "Couldn't load stocks" with Retry. The Watchlist tab keeps the starred ticker, with the same error and Retry, never a blank screen. Start the gateway again and tap Retry on Markets, then on each Watchlist row: the rows load and tick. Star a stock: the star grows slightly as it fills. |
+| M2, reduced motion | Turn on Reduce Motion (iOS: Settings > Accessibility > Motion; Android: Settings > Accessibility > Remove animations). Then close and reopen Expo Go: the flash ring reads the setting at launch. Prices still change, but no ring flashes round the pill. Star a stock: it fills at once, with no scale. Repeat the gateway stop from the row above: for those 7 s the skeleton rows are a static grey fill, with no pulse. Turn the setting off and reopen Expo Go afterwards. |
+| Graph check (ADR 0033) | On any detail screen, below the price, two green lines render: a short static one and a taller animated one. Press and hold the taller line for about half a second, then drag: a dot follows your finger along the line. A dashed box with error text instead of the lines is a FAIL: copy the text. |
+| M3 | BLOCKED until N02 (detail and chart). |
+| M4 | BLOCKED until N08 (lifecycle). Recipe for then: press home, wait 15 s, return; the socket must have closed and reopened with fresh prices. Under 10 s, it must not reconnect. |
+| M5 | BLOCKED until N08 (connection states). Recipe for then: stop the gateway for stale, and airplane mode for offline. Airplane mode also cuts Metro, but the loaded app keeps running. |
+
+Report the graph check as its own row, `ADR 0033`, so a FAIL there is not mistaken for a list failure. A red error screen that appears only when a detail screen opens also belongs in that row. If it fails, the fallback is `react-native-wagmi-charts` (ADR 0033).
+
+If prices show but never change, the socket is being refused: re-run doctor step 2.
+
+### Stop
+
+Press `Ctrl+C` in both terminals. An agent stops only the sessions it started, as in step 7.
