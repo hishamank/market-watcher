@@ -98,3 +98,17 @@ export function DirectionIcon({ direction }: { direction: keyof typeof direction
     </svg>
   );
 }
+
+export function ChevronStartIcon({ className = "" }: IconProps) {
+  return <StrokeIcon className={`rtl:-scale-x-100 ${className}`} path="M15 5l-7 7 7 7" />;
+}
+
+export function SearchIcon({ className }: IconProps) {
+  return (
+    <StrokeIcon
+      className={className}
+      size="size-[24px]"
+      path="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"
+    />
+  );
+}
