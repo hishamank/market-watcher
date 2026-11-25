@@ -5,3 +5,5 @@ Alpaca's free tier streams at most 30 symbols on one connection. Reference count
 ## Consequences
 
 - The Alpaca ticket must measure the per-call symbol limit and the rate-limit cost of a batch, since neither is documented.
+- The hub reports each symbol's watcher count to the live feed through an optional `watchCount` on `LiveFeed`, because subscribe and unsubscribe arrive only at 0 to 1 and 1 to 0. The simulator ignores it. On a tie the streamed symbol keeps its place, so equally watched symbols do not swap back and forth.
+- Until the first keyed run measures them, a snapshot batch holds at most 100 symbols and is assumed to cost one request. The verify skill lists what that run measures.
