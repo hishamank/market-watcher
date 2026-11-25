@@ -1,7 +1,6 @@
-import type { ConnectionStatus } from "@mini/core";
+import { useT, type ConnectionStatus } from "@mini/core";
 import { Button } from "../components/button.tsx";
 import { OfflineIcon, ReconnectIcon } from "../components/icons.tsx";
-import { useT } from "../i18n/use-t.ts";
 
 export interface ConnectionBannerProps {
   status: ConnectionStatus;

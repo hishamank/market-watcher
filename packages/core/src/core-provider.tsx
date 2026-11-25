@@ -1,4 +1,11 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  attachConnectionAnalytics,
+  createNoopAnalytics,
+  type AnalyticsAdapter,
+  type AnalyticsEvent,
+} from "./analytics/analytics.ts";
+import { createI18n, type I18nService } from "./i18n/create-i18n.ts";
 import type { AppLifecycle } from "./platform/app-lifecycle.ts";
 import type { KeyValueStore } from "./platform/key-value-store.ts";
 import type { NetworkStatus } from "./platform/network-status.ts";
@@ -13,6 +20,8 @@ export interface CoreProviderProps {
   network: NetworkStatus;
   lifecycle: AppLifecycle;
   socketFactory?: SocketFactory | undefined;
+  locale?: string | undefined;
+  analytics?: AnalyticsAdapter | undefined;
   children: ReactNode;
 }
 
@@ -23,6 +32,9 @@ export interface CoreContextValue {
   lifecycle: AppLifecycle;
   quoteStore: QuoteStore;
   socketClient: SocketClient;
+  i18n: I18nService;
+  analytics: AnalyticsAdapter;
+  track: (event: AnalyticsEvent) => void;
 }
 
 export function createCoreServices(
@@ -36,6 +48,8 @@ export function createCoreServices(
     lifecycle: platform.lifecycle,
     socketFactory: platform.socketFactory ?? createDefaultSocket,
   });
+  const i18n = createI18n(platform.locale);
+  const analytics = platform.analytics ?? createNoopAnalytics();
   return {
     gatewayUrl: platform.gatewayUrl,
     storage: platform.storage,
@@ -43,6 +57,9 @@ export function createCoreServices(
     lifecycle: platform.lifecycle,
     quoteStore,
     socketClient,
+    i18n,
+    analytics,
+    track: (event) => analytics.track(event),
   };
 }
 
@@ -52,8 +69,10 @@ export function CoreProvider({ children, ...platform }: CoreProviderProps) {
   const [value] = useState<CoreContextValue>(() => createCoreServices(platform));
 
   useEffect(() => {
+    const unsubscribe = attachConnectionAnalytics(value.socketClient, value.analytics);
     value.socketClient.start();
     return () => {
+      unsubscribe();
       value.socketClient.stop();
     };
   }, [value]);

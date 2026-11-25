@@ -4,7 +4,7 @@ import {
   formatSignedPercent,
   type Direction,
   type FlashDirection,
-} from "../format/quote-format.ts";
+} from "@mini/core";
 import { DirectionIcon } from "./icons.tsx";
 
 export interface ChangePillProps {

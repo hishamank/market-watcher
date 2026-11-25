@@ -1,5 +1,5 @@
 import type { FeedMode, MarketStatus } from "@mini/contracts";
-import { useT } from "../i18n/use-t.ts";
+import { useT } from "@mini/core";
 import { FeedModeBadge } from "./feed-mode-badge.tsx";
 import { MarketClosedLabel } from "./market-closed-label.tsx";
 

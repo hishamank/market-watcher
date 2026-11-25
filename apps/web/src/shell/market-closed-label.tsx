@@ -1,5 +1,5 @@
+import { useT } from "@mini/core";
 import { MoonIcon } from "../components/icons.tsx";
-import { useT } from "../i18n/use-t.ts";
 
 export function MarketClosedLabel() {
   const t = useT();

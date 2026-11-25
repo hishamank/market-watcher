@@ -1,0 +1,16 @@
+export const detailStrings = {
+  "detail.range.1D": "Today",
+  "detail.range.1W": "Past week",
+  "detail.range.1M": "Past month",
+  "detail.range.3M": "Past 3 months",
+  "detail.range.1Y": "Past year",
+  "detail.range.5Y": "Past 5 years",
+  "detail.previousClose": "Previous close",
+  "detail.lastUpdate": "Last update",
+  "detail.chart.error": "Couldn't load this chart",
+  "detail.chart.retry": "Retry",
+  "detail.chart.asOf": "As of {{time}}",
+  "detail.notFound.title": "Stock not found",
+  "detail.notFound.help": "There's no stock with the symbol {{symbol}}.",
+  "detail.notFound.action": "Back to all stocks",
+} as const;

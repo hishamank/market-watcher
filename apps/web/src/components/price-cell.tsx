@@ -1,4 +1,4 @@
-import { directionOf, formatPriceText, type FlashDirection } from "../format/quote-format.ts";
+import { directionOf, formatPrice, type FlashDirection } from "@mini/core";
 
 export interface PriceCellProps {
   price: string;
@@ -26,7 +26,7 @@ export function PriceCell({
       data-flash={flash}
       className={`${size} ${stale ? "text-text-muted" : "text-text"}`}
     >
-      {formatPriceText(price)}
+      {formatPrice(price)}
     </bdi>
   );
 }

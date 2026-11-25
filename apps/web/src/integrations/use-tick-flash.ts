@@ -1,6 +1,6 @@
+import { directionOf, type FlashDirection } from "@mini/core";
 import { duration } from "@mini/tokens";
 import { useEffect, useState } from "react";
-import { directionOf, type FlashDirection } from "../format/quote-format.ts";
 
 export interface TickFlash {
   readonly flash: FlashDirection | undefined;

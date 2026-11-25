@@ -1,4 +1,4 @@
-import { useT } from "../i18n/use-t.ts";
+import { useT } from "@mini/core";
 import { StarIcon } from "./icons.tsx";
 
 export interface StarButtonProps {

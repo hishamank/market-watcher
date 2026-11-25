@@ -25,6 +25,20 @@ test("G1 feed mode badge reads Simulated with no console errors", async ({ page 
   expect(problems).toEqual([]);
 });
 
+test("G2 market status is open against the simulator gateway with no closed label", async ({
+  page,
+}) => {
+  const problems = collectConsoleProblems(page);
+  const html = await (await page.request.get("/")).text();
+  expect(html).toContain('data-market-status="open"');
+  await page.goto("/");
+  const root = page.getByTestId("app-root");
+  await expect(root).toHaveAttribute("data-connection", "connected", { timeout: 2_000 });
+  await expect(root).toHaveAttribute("data-market-status", "open");
+  await expect(page.getByTestId("market-status-label")).toHaveCount(0);
+  expect(problems).toEqual([]);
+});
+
 test("G3 step 1 connecting turns connected within 2 s with no banner", async ({ page }) => {
   const html = await (await page.request.get("/")).text();
   expect(html).toContain('data-connection="connecting"');

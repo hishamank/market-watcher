@@ -8,6 +8,8 @@ export type ConnectionStatus = "connecting" | "connected" | "stale" | "offline";
 
 export type StatusListener = () => void;
 
+export type MarketStatusListener = () => void;
+
 export type ReconnectListener = () => void;
 
 export interface SocketClientOptions {
@@ -31,6 +33,7 @@ export interface SocketClient {
   retryNow(): void;
   send(message: ClientMessage): boolean;
   getMarketStatus(): MarketStatus | null;
+  subscribeMarketStatus(listener: MarketStatusListener): () => void;
   getFeedMode(): FeedMode | null;
   subscribeReconnect(listener: ReconnectListener): () => void;
 }

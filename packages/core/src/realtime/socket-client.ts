@@ -5,6 +5,7 @@ import { createRecoveryGate } from "./recovery-gate.ts";
 import { processRawServerFrame, type WelcomeInfo } from "./socket-message-handler.ts";
 import type {
   ConnectionStatus,
+  MarketStatusListener,
   ReconnectListener,
   SocketClient,
   SocketClientOptions,
@@ -22,8 +23,14 @@ function notifyAll(listeners: ReadonlySet<() => void>): void {
   }
 }
 
+function addListener(listeners: Set<() => void>, listener: () => void): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
 export function createSocketClient(options: SocketClientOptions): SocketClient {
   const statusListeners = new Set<StatusListener>();
+  const marketStatusListeners = new Set<MarketStatusListener>();
   const reconnectListeners = new Set<ReconnectListener>();
   const gate = createRecoveryGate();
 
@@ -38,6 +45,12 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
     if (status === next) return;
     status = next;
     notifyAll(statusListeners);
+  }
+
+  function setMarketStatus(next: MarketStatus): void {
+    if (marketStatus === next) return;
+    marketStatus = next;
+    notifyAll(marketStatusListeners);
   }
 
   function checkConnected(): void {
@@ -131,12 +144,10 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
       gate.welcome();
       hasEverWelcomed = true;
       feedMode = info.feedMode;
-      marketStatus = info.marketStatus;
+      setMarketStatus(info.marketStatus);
       connection.setHeartbeatInterval(info.heartbeatIntervalMs);
     },
-    onMarketStatus: (next: MarketStatus) => {
-      marketStatus = next;
-    },
+    onMarketStatus: setMarketStatus,
     onSnapshotsSettled: checkConnected,
     onWarning: options.onWarning ?? logWarning,
   };
@@ -169,20 +180,11 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
       clearSession();
     },
     getStatus: () => status,
-    subscribeStatus(listener) {
-      statusListeners.add(listener);
-      return () => statusListeners.delete(listener);
-    },
+    subscribeStatus: (listener) => addListener(statusListeners, listener),
     acquireSymbol: subscriptions.acquire,
     retryNow() {
-      if (
-        !started ||
-        platform.isPausedInBackground() ||
-        platform.isOffline() ||
-        status === "connected"
-      ) {
-        return;
-      }
+      if (!started || platform.isPausedInBackground() || platform.isOffline()) return;
+      if (status === "connected") return;
       connection.resetBackoff();
       connection.cancelReconnect();
       subscriptions.resetSession();
@@ -190,10 +192,8 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
     },
     send: (message) => connection.send(message),
     getMarketStatus: () => marketStatus,
+    subscribeMarketStatus: (listener) => addListener(marketStatusListeners, listener),
     getFeedMode: () => feedMode,
-    subscribeReconnect(listener) {
-      reconnectListeners.add(listener);
-      return () => reconnectListeners.delete(listener);
-    },
+    subscribeReconnect: (listener) => addListener(reconnectListeners, listener),
   };
 }

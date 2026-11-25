@@ -1,0 +1,18 @@
+export const chaosStrings = {
+  "chaos.title": "Chaos controls",
+  "chaos.subtitle": "Simulated mode only",
+  "chaos.close": "Close",
+  "chaos.section.connection": "Your connection",
+  "chaos.section.global": "Everyone, reverts after 60 seconds",
+  "chaos.section.health": "Connection health",
+  "chaos.drop": "Drop connection",
+  "chaos.freeze": "Freeze feed",
+  "chaos.offline": "Go offline",
+  "chaos.tickSpike": "Tick spike",
+  "chaos.historyLatency": "History latency",
+  "chaos.historyLatencyHelp": "Adds 2 seconds",
+  "chaos.forceClosed": "Force market closed",
+  "chaos.historyFailures": "History failures",
+  "chaos.secondsLeft_one": "{{count}} s",
+  "chaos.secondsLeft_other": "{{count}} s",
+} as const;

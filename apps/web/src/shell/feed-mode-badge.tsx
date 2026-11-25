@@ -1,5 +1,5 @@
 import type { FeedMode } from "@mini/contracts";
-import { useT } from "../i18n/use-t.ts";
+import { useT } from "@mini/core";
 
 export function FeedModeBadge({ feedMode }: { feedMode: FeedMode }) {
   const t = useT();

@@ -1,0 +1,13 @@
+export const searchStrings = {
+  "search.placeholder": "Search symbol or company",
+  "search.clear": "Clear",
+  "search.idle.title": "Find a stock",
+  "search.idle.help": "Search by symbol or company name.",
+  "search.noResults.title": 'No results for "{{query}}"',
+  "search.noResults.help": "Check the spelling, or search by symbol or company name.",
+  "search.error.title": "Search isn't available",
+  "search.error.help": "Something went wrong. Try again.",
+  "search.error.retry": "Retry",
+  "search.resultsCount_one": "{{count}} result",
+  "search.resultsCount_other": "{{count}} results",
+} as const;
