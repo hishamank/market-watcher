@@ -67,10 +67,59 @@ test("W7 symbols outside the default list load via ?symbols=, tick live, and uns
     )
     .toBe(true);
 
+  const requestsBeforeUnstar = symbolRequests.length;
   await page.getByTestId("star-ABNB").click();
   await expect(page.getByTestId("watchlist-row-ABNB")).toHaveCount(0, { timeout: 200 });
   await expect(page.getByTestId("watchlist-skeleton")).toHaveCount(0);
   expect(await watchlistRowSymbols(page)).toEqual(["SNOW", "MSFT"]);
+  await page.waitForTimeout(300);
+  expect(symbolRequests).toHaveLength(requestsBeforeUnstar);
+  expect(problems).toEqual([]);
+});
+
+test("W7 starring a cached outside-list stock sends no ?symbols= request", async ({ context }) => {
+  const page = await context.newPage();
+  const problems = collectConsoleProblems(page);
+  const thirdSymbol =
+    outsideListSymbols.find((symbol) => symbol !== "ABNB" && symbol !== "SNOW") ?? "A";
+  const symbolRequests: string[][] = [];
+  page.on("request", (req) => {
+    const url = new URL(req.url());
+    const param = url.searchParams.get("symbols");
+    if (url.pathname === "/stocks" && param !== null) {
+      symbolRequests.push(param.split(","));
+    }
+  });
+
+  await page.addInitScript(
+    (symbols) => {
+      window.localStorage.setItem("watchlist:v1", JSON.stringify(symbols));
+    },
+    ["ABNB", "SNOW", thirdSymbol],
+  );
+  await page.goto("/?view=watchlist");
+  await expect(page.getByTestId("watchlist-row-ABNB")).toBeVisible();
+  await expect(page.getByTestId("watchlist-row-SNOW")).toBeVisible();
+  await expect(page.getByTestId(`watchlist-row-${thirdSymbol}`)).toBeVisible();
+
+  await page.getByTestId("star-ABNB").click();
+  await expect(page.getByTestId("watchlist-row-ABNB")).toHaveCount(0, { timeout: 200 });
+  await page.getByTestId(`star-${thirdSymbol}`).click();
+  await expect(page.getByTestId(`watchlist-row-${thirdSymbol}`)).toHaveCount(0, { timeout: 200 });
+  await page.waitForTimeout(300);
+  const requestsBeforeReStar = symbolRequests.length;
+
+  const otherTab = await context.newPage();
+  await otherTab.goto("/");
+  await otherTab.evaluate(() => {
+    window.localStorage.setItem("watchlist:v1", JSON.stringify(["ABNB", "SNOW"]));
+  });
+  await expect(page.getByTestId("watchlist-row-ABNB")).toBeVisible({ timeout: 1_000 });
+  await expect(page.getByTestId("watchlist-skeleton")).toHaveCount(0);
+  expect(await watchlistRowSymbols(page)).toEqual(["ABNB", "SNOW"]);
+  await page.waitForTimeout(300);
+  expect(symbolRequests).toHaveLength(requestsBeforeReStar);
+  expect(symbolRequests).toHaveLength(1);
   expect(problems).toEqual([]);
 });
 
@@ -99,11 +148,20 @@ test("W7 watchlists over 100 outside symbols chunk ?symbols= requests within the
   const lastSymbol = starred.at(-1) ?? "";
   await expect(page.getByTestId(`watchlist-row-${firstSymbol}`)).toBeVisible();
   await expect(page.getByTestId(`stock-row-price-${firstSymbol}`)).toHaveText(/^\$\d/);
-  expect(batches.sort((a, b) => b - a)).toEqual([100, 5]);
+  expect([...batches].sort((a, b) => b - a)).toEqual([100, 5]);
   expect((await watchlistRowSymbols(page)).length).toBeLessThan(starred.length);
 
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   await expect(page.getByTestId(`watchlist-row-${lastSymbol}`)).toBeVisible();
   await expect(page.getByTestId(`stock-row-price-${lastSymbol}`)).toHaveText(/^\$\d/);
+
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await expect(page.getByTestId(`watchlist-row-${firstSymbol}`)).toBeVisible();
+  const batchesBeforeRemove = batches.length;
+  await page.getByTestId(`star-${firstSymbol}`).click();
+  await expect(page.getByTestId(`watchlist-row-${firstSymbol}`)).toHaveCount(0, { timeout: 200 });
+  await expect(page.getByTestId("watchlist-skeleton")).toHaveCount(0);
+  await page.waitForTimeout(300);
+  expect(batches).toHaveLength(batchesBeforeRemove);
   expect(problems).toEqual([]);
 });
