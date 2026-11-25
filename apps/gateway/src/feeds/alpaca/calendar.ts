@@ -8,7 +8,7 @@ import type { TradingDay } from "./quotes.ts";
 import type { MarketMoment } from "./snapshots.ts";
 
 const DAY_MS = 86_400_000;
-const REFRESH_RETRY_MS = 60_000;
+export const REFRESH_RETRY_MS = 60_000;
 
 interface Clock {
   readonly isOpen: boolean;
@@ -85,15 +85,19 @@ export async function loadAlpacaCalendar(
 ): Promise<AlpacaCalendar> {
   let schedule = await loadSchedule(http, now());
   let last = statusAt(schedule.clock, now());
-  let retryAt = Number.POSITIVE_INFINITY;
+  let lastRefresh = now();
+  let failed = false;
   const listeners = new Set<(status: MarketStatus) => void>();
 
   const refresh = (): void => {
-    retryAt = Number.POSITIVE_INFINITY;
+    lastRefresh = now();
     loadSchedule(http, now()).then(
-      (next) => void (schedule = next),
+      (next) => {
+        schedule = next;
+        failed = false;
+      },
       (err: unknown) => {
-        retryAt = now() + REFRESH_RETRY_MS;
+        failed = true;
         warn({ err }, "Alpaca clock or calendar refresh failed, will retry");
       },
     );
@@ -101,11 +105,12 @@ export async function loadAlpacaCalendar(
 
   const check = (): void => {
     const status = statusAt(schedule.clock, now());
+    const outdated = failed || now() >= schedule.clock.nextClose;
     if (status !== last) {
       last = status;
       listeners.forEach((listener) => listener(status));
       refresh();
-    } else if (now() >= retryAt) {
+    } else if (outdated && now() - lastRefresh >= REFRESH_RETRY_MS) {
       refresh();
     }
   };

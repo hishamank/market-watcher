@@ -1,5 +1,6 @@
 import type { MarketStatus } from "@mini/contracts";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
+import { REFRESH_RETRY_MS } from "./calendar.ts";
 import { STATUS_CHECK_INTERVAL_MS } from "./config.ts";
 import { AFTER_HOURS_NOW, type AlpacaRig, fixture, startAlpaca } from "./testing.ts";
 
@@ -68,6 +69,27 @@ test("the close fires onStatusChange and refreshes the catalogue and the clock",
   await vi.advanceTimersByTimeAsync(STATUS_CHECK_INTERVAL_MS);
   expect(changes).toEqual(["closed", "open"]);
   expect(rig.alpaca.calls("/v2/assets")).toHaveLength(3);
+});
+
+test("a clock still saying open after the close is fetched again until it catches up", async () => {
+  let now = SESSION_24.close - 1;
+  rig = await startAlpaca(undefined, { now: () => now });
+  const changes: MarketStatus[] = [];
+  rig.feed.calendar.onStatusChange((status) => changes.push(status));
+
+  now = SESSION_24.close;
+  await vi.advanceTimersByTimeAsync(STATUS_CHECK_INTERVAL_MS);
+  expect(rig.alpaca.calls("/v2/clock")).toHaveLength(2);
+
+  rig.alpaca.clock = "after-hours";
+  now += REFRESH_RETRY_MS;
+  await vi.advanceTimersByTimeAsync(STATUS_CHECK_INTERVAL_MS);
+  expect(rig.alpaca.calls("/v2/clock")).toHaveLength(3);
+
+  now = Date.parse("2025-06-25T13:30:00Z");
+  await vi.advanceTimersByTimeAsync(STATUS_CHECK_INTERVAL_MS);
+  expect(changes).toEqual(["closed", "open"]);
+  expect(rig.feed.calendar.status(now)).toBe("open");
 });
 
 test("the catalogue holds active, tradable US equities and a default list", async () => {
