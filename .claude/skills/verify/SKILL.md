@@ -154,6 +154,7 @@ The docs do not settle these, so the adapter uses a documented default and the r
 - **Stream cap:** subscribe a 31st trade symbol and confirm error 405, "symbol limit exceeded".
 - **Bad keys:** note whether the data API answers 401 or 403. The adapter treats both as rejected keys.
 - **Calendar times:** confirm `/v2/calendar` gives `open` and `close` in New York time, so the session close equals `next_close` from `/v2/clock`.
+- **Hourly bars:** check whether `1Hour` bars start on the hour (09:00, 10:00) or at the open (09:30). The adapter keeps every intraday bar that overlaps the session, so an hourly bar starting at 09:00 also carries pre-market trades from 09:00 to 09:30.
 - **Daily bars:** after hours, confirm the snapshot's `dailyBar.c` equals the 16:00 close and excludes extended-hours trades. Before the open, check whether `dailyBar` is still the previous session.
 
 ## Expo app
