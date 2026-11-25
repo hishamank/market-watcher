@@ -1,5 +1,6 @@
 import { WebSocket } from "ws";
 import type { Feed } from "../types.ts";
+import { withRequestBudget } from "./budget.ts";
 import { type AlpacaCalendar, loadAlpacaCalendar } from "./calendar.ts";
 import { type AlpacaCatalogue, loadAlpacaCatalogue } from "./catalogue.ts";
 import { type AlpacaConfig, AlpacaStartupError, DATA_FEED, readAlpacaConfig } from "./config.ts";
@@ -56,7 +57,10 @@ export async function createAlpacaFeed(
 ): Promise<AlpacaFeed> {
   const now = deps.now ?? (() => Date.now());
   const warn = deps.warn ?? ((detail, message) => console.warn(message, detail));
-  const http = createAlpacaHttp(config, deps.fetch ?? ((url, init) => fetch(url, init)));
+  const http = withRequestBudget(
+    createAlpacaHttp(config, deps.fetch ?? ((url, init) => fetch(url, init))),
+    now,
+  );
   const [calendarResult, catalogueResult, probe] = await Promise.allSettled([
     loadAlpacaCalendar(http, now, warn),
     loadAlpacaCatalogue(http, warn),

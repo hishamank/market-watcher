@@ -6,6 +6,7 @@ import { POLL_INTERVAL_MS, SNAPSHOT_REUSE_MS, STREAM_SYMBOL_LIMIT } from "./conf
 import type { AlpacaHttp } from "./http.ts";
 import { buildQuote } from "./quotes.ts";
 import { pickStreamed, sameSet } from "./ranking.ts";
+import { createSnapshotRequests } from "./requests.ts";
 import type { TradeStream } from "./stream.ts";
 
 export interface AlpacaLiveOptions {
@@ -58,26 +59,11 @@ function createRecorder(now: () => number, isSubscribed: (symbol: string) => boo
   };
 }
 
-function takeDue(
-  symbols: readonly string[],
-  latest: ReadonlyMap<string, Held>,
-  attempted: Map<string, number>,
-  now: number,
-): string[] {
-  const recent = (at: number | undefined) => at !== undefined && at > now - SNAPSHOT_REUSE_MS;
-  const due = symbols.filter(
-    (symbol) => !recent(latest.get(symbol)?.at) && !recent(attempted.get(symbol)),
-  );
-  due.forEach((symbol) => attempted.set(symbol, now));
-  return due;
-}
-
 export function createAlpacaLive(options: AlpacaLiveOptions): AlpacaLive {
   const { http, calendar, now, warn } = options;
   const order = new Map<string, number>();
   const counts = new Map<string, number>();
   const { latest, listeners, record } = createRecorder(now, (symbol) => order.has(symbol));
-  const attempted = new Map<string, number>();
   let streamed = new Set<string>();
   let sequence = 0;
 
@@ -93,10 +79,10 @@ export function createAlpacaLive(options: AlpacaLiveOptions): AlpacaLive {
   };
   const stream = options.openStream(onTrade);
 
-  const fetchQuotes = async (symbols: readonly string[]): Promise<void> => {
+  const requests = createSnapshotRequests(async (symbols) => {
     const quotes = await snapshotQuotes(http, symbols, calendar.moment(now()), calendar.days());
     quotes.forEach((quote) => record(quote));
-  };
+  }, now);
 
   const rebalance = (): void => {
     const next = pickStreamed({ order, counts }, streamed, STREAM_SYMBOL_LIMIT);
@@ -109,7 +95,7 @@ export function createAlpacaLive(options: AlpacaLiveOptions): AlpacaLive {
   const poll = (): void => {
     const polled = [...order.keys()].filter((symbol) => !streamed.has(symbol));
     if (polled.length > 0 && calendar.status(now()) === "open") {
-      fetchQuotes(polled).catch((err: unknown) => warn({ err }, "Alpaca snapshot poll failed"));
+      requests.fetch(polled).catch((err: unknown) => warn({ err }, "Alpaca snapshot poll failed"));
     }
   };
   const timer = setInterval(poll, POLL_INTERVAL_MS);
@@ -129,8 +115,11 @@ export function createAlpacaLive(options: AlpacaLiveOptions): AlpacaLive {
       if (order.has(symbol)) rebalance();
     },
     async snapshot(symbols) {
-      const due = takeDue(symbols, latest, attempted, now());
-      if (due.length > 0) await fetchQuotes(due);
+      const time = now();
+      const reusable = (symbol: string) =>
+        (latest.get(symbol)?.at ?? -Infinity) > time - SNAPSHOT_REUSE_MS;
+      const due = symbols.filter((symbol) => !reusable(symbol) && requests.shouldAsk(symbol, time));
+      if (due.length > 0) await requests.fetch(due);
       return symbols.flatMap((symbol) => latest.get(symbol)?.quote ?? []);
     },
     onQuote(listener) {
@@ -138,7 +127,7 @@ export function createAlpacaLive(options: AlpacaLiveOptions): AlpacaLive {
       return () => void listeners.delete(listener);
     },
     streamed: () => streamed,
-    resync: () => (order.size > 0 ? fetchQuotes([...order.keys()]) : Promise.resolve()),
+    resync: () => (order.size > 0 ? requests.fetch([...order.keys()]) : Promise.resolve()),
     close() {
       clearInterval(timer);
       stream.close();
