@@ -4,19 +4,22 @@ import {
   FeedModeSchema,
   MarketStatusSchema,
   RequestedSymbolSchema,
+  RequestIdSchema,
 } from "../primitives.ts";
 import { QuoteSchema } from "../quote.ts";
 
 export const PROTOCOL_VERSION = 1;
 
-export const SymbolErrorCodeSchema = z.enum(["unknown_symbol", "subscription_limit"]);
-export const PlainErrorCodeSchema = z.enum([
-  "rate_limited",
-  "invalid_message",
-  "unsupported_version",
+export const SymbolErrorCodeSchema = z.enum([
+  "unknown_symbol",
+  "subscription_limit",
+  "unavailable",
 ]);
+export const RateLimitedErrorCodeSchema = z.literal("rate_limited");
+export const PlainErrorCodeSchema = z.enum(["invalid_message", "unsupported_version"]);
 export const ErrorCodeSchema = z.enum([
   ...SymbolErrorCodeSchema.options,
+  RateLimitedErrorCodeSchema.value,
   ...PlainErrorCodeSchema.options,
 ]);
 
@@ -32,6 +35,7 @@ export const WelcomeMessageSchema = z.object({
 
 export const SnapshotMessageSchema = z.object({
   type: z.literal("snapshot"),
+  requestId: RequestIdSchema,
   quotes: z.array(QuoteSchema),
 });
 
@@ -56,7 +60,14 @@ export const ErrorMessageSchema = z.discriminatedUnion("code", [
     type: z.literal("error"),
     code: SymbolErrorCodeSchema,
     message: z.string(),
+    requestId: RequestIdSchema,
     symbols: z.array(RequestedSymbolSchema).min(1),
+  }),
+  z.object({
+    type: z.literal("error"),
+    code: RateLimitedErrorCodeSchema,
+    message: z.string(),
+    requestId: RequestIdSchema.optional(),
   }),
   z.object({ type: z.literal("error"), code: PlainErrorCodeSchema, message: z.string() }),
 ]);
@@ -71,6 +82,7 @@ export const ServerMessageSchema = z.discriminatedUnion("type", [
 ]);
 
 export type ErrorCode = z.infer<typeof ErrorCodeSchema>;
+export type SymbolErrorCode = z.infer<typeof SymbolErrorCodeSchema>;
 export type WelcomeMessage = z.infer<typeof WelcomeMessageSchema>;
 export type SnapshotMessage = z.infer<typeof SnapshotMessageSchema>;
 export type QuotesMessage = z.infer<typeof QuotesMessageSchema>;

@@ -16,4 +16,4 @@ A socket can die without either side noticing, which on a trading app means pric
 
 When the device reports no network, the status is offline and the client does not retry until the network returns, then reconnects at once. The connection statuses are connecting, connected, stale and offline. "Live" is reserved for the feed mode.
 
-Errors carry typed codes (`unknown_symbol`, `subscription_limit`, `rate_limited`, `invalid_message`) and leave the connection open. Only `unsupported_version` (ADR 0005) and a client stuck behind a full buffer (ADR 0008) close it.
+Errors carry typed codes (`unknown_symbol`, `subscription_limit`, `unavailable`, `rate_limited`, `invalid_message`) and leave the connection open. Errors that answer a subscribe carry its `requestId` ([ADR 0038](./0038-subscribe-replies-carry-a-request-id.md)). Only `unsupported_version` (ADR 0005), a client stuck behind a full buffer (ADR 0008) and an internal failure while handling a subscribe (code 1011, ADR 0038) close it.

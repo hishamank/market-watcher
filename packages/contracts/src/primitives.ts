@@ -8,6 +8,7 @@ export const PriceStringSchema = z.string().max(MAX_DECIMAL_LENGTH).regex(UNSIGN
 export const EpochMsSchema = z.int().nonnegative();
 export const SymbolSchema = z.string().min(1).max(16);
 export const RequestedSymbolSchema = z.string().min(1).max(64);
+export const RequestIdSchema = z.int().positive();
 
 export const FeedModeSchema = z.enum(["simulated", "live"]);
 export const MarketStatusSchema = z.enum(["open", "closed"]);
@@ -16,3 +17,4 @@ export type DecimalString = z.infer<typeof DecimalStringSchema>;
 export type EpochMs = z.infer<typeof EpochMsSchema>;
 export type FeedMode = z.infer<typeof FeedModeSchema>;
 export type MarketStatus = z.infer<typeof MarketStatusSchema>;
+export type RequestId = z.infer<typeof RequestIdSchema>;

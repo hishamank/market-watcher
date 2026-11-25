@@ -14,21 +14,35 @@ const serverMessages: ServerMessage[] = [
     maxSubscriptions: 100,
     serverTime: 1_764_000_000_000,
   },
-  { type: "snapshot", quotes: [aaplQuote, pennyQuote] },
-  { type: "snapshot", quotes: [] },
+  { type: "snapshot", requestId: 1, quotes: [aaplQuote, pennyQuote] },
+  { type: "snapshot", requestId: 2, quotes: [] },
   { type: "quotes", quotes: [aaplQuote] },
   { type: "heartbeat", serverTime: 1_764_000_005_000 },
   { type: "heartbeat", serverTime: 1_764_000_005_000, skippedFrames: 3 },
   { type: "market_status", marketStatus: "closed" },
-  { type: "error", code: "unknown_symbol", message: "Unknown symbols", symbols: ["ZZZZ"] },
-  { type: "error", code: "subscription_limit", message: "Limit is 100", symbols: ["MSFT"] },
+  {
+    type: "error",
+    code: "unknown_symbol",
+    message: "Unknown symbols",
+    requestId: 3,
+    symbols: ["ZZZZ"],
+  },
+  {
+    type: "error",
+    code: "subscription_limit",
+    message: "Limit is 100",
+    requestId: 3,
+    symbols: ["MSFT"],
+  },
+  { type: "error", code: "unavailable", message: "No quote yet", requestId: 3, symbols: ["NVDA"] },
+  { type: "error", code: "rate_limited", message: "Too many messages", requestId: 4 },
   { type: "error", code: "rate_limited", message: "Too many messages" },
   { type: "error", code: "invalid_message", message: "Could not parse" },
   { type: "error", code: "unsupported_version", message: "Use v=1" },
 ];
 
 const clientMessages: ClientMessage[] = [
-  { type: "subscribe", symbols: ["AAPL", "MSFT"] },
+  { type: "subscribe", requestId: 1, symbols: ["AAPL", "MSFT"] },
   { type: "unsubscribe", symbols: ["AAPL"] },
   { type: "chaos", action: "drop" },
   { type: "chaos", action: "freeze", enabled: true },
@@ -64,7 +78,7 @@ describe("round trips", () => {
   });
 
   it("keeps unknown but well-formed symbols for the catalogue to judge", () => {
-    const frame = JSON.stringify({ type: "subscribe", symbols: ["aapl", "BRK.B"] });
+    const frame = JSON.stringify({ type: "subscribe", requestId: 1, symbols: ["aapl", "BRK.B"] });
     expect(parseClientFrame(frame).ok).toBe(true);
   });
 });
@@ -94,6 +108,19 @@ describe("invalid frames", () => {
     ["an unknown feed mode", { ...serverMessages[0], feedMode: "mixed" }],
     ["a negative skipped count", { type: "heartbeat", serverTime: 1, skippedFrames: -1 }],
     ["a market status of halted", { type: "market_status", marketStatus: "halted" }],
+    ["a snapshot without a request ID", { type: "snapshot", quotes: [] }],
+    [
+      "an unavailable error without symbols",
+      { type: "error", code: "unavailable", message: "x", requestId: 1 },
+    ],
+    [
+      "a symbol error without a request ID",
+      { type: "error", code: "unknown_symbol", message: "x", symbols: ["ZZZZ"] },
+    ],
+    [
+      "a rate limit with a zero request ID",
+      { type: "error", code: "rate_limited", message: "x", requestId: 0 },
+    ],
     ["an array", []],
   ])("rejects a server frame with %s", (_name, value) => {
     const result = parseServerFrame(JSON.stringify(value));
@@ -102,8 +129,12 @@ describe("invalid frames", () => {
   });
 
   it.each([
-    ["no symbols", { type: "subscribe", symbols: [] }],
-    ["a symbol that is not a string", { type: "subscribe", symbols: [1] }],
+    ["no symbols", { type: "subscribe", requestId: 1, symbols: [] }],
+    ["a symbol that is not a string", { type: "subscribe", requestId: 1, symbols: [1] }],
+    ["a subscribe without a request ID", { type: "subscribe", symbols: ["AAPL"] }],
+    ["a zero request ID", { type: "subscribe", requestId: 0, symbols: ["AAPL"] }],
+    ["a fractional request ID", { type: "subscribe", requestId: 1.5, symbols: ["AAPL"] }],
+    ["a request ID as a string", { type: "subscribe", requestId: "1", symbols: ["AAPL"] }],
     ["an empty symbol", { type: "unsubscribe", symbols: [""] }],
     ["a failure rate of 30", { type: "chaos", action: "history_failure_rate", rate: 30 }],
     ["an offline action", { type: "chaos", action: "offline", enabled: true }],
@@ -113,6 +144,19 @@ describe("invalid frames", () => {
     const result = parseClientFrame(JSON.stringify(value));
     expect(result.ok).toBe(false);
     expect(!result.ok && result.error.kind).toBe("invalid_message");
+  });
+
+  it("strips a request ID from errors that cannot carry one", () => {
+    const frame = JSON.stringify({
+      type: "error",
+      code: "invalid_message",
+      message: "x",
+      requestId: 1,
+    });
+    expect(parseServerFrame(frame)).toEqual({
+      ok: true,
+      message: { type: "error", code: "invalid_message", message: "x" },
+    });
   });
 
   it("names the failing field in the detail", () => {

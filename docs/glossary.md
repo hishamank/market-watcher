@@ -108,6 +108,10 @@ _Avoid_: disconnected, stale
 A client's request to receive the snapshot and ticks for a symbol until it stops watching.
 _Avoid_: watch (which belongs to the watchlist), listener
 
+**Request ID**:
+The positive integer a client puts on each subscribe, unique within one connection. Every reply to that subscribe echoes it, so replies are matched by identity, not arrival order.
+_Avoid_: correlation ID, sequence number
+
 ## Demo
 
 **Chaos controls**:

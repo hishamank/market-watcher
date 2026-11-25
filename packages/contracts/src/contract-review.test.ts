@@ -49,12 +49,21 @@ describe("quote precision", () => {
 
 describe("partial subscriptions", () => {
   it("lets the gateway classify symbols the catalogue does not know", () => {
-    const frame = JSON.stringify({ type: "subscribe", symbols: ["AAPL", "DELISTED-UNKNOWN-X"] });
+    const frame = JSON.stringify({
+      type: "subscribe",
+      requestId: 1,
+      symbols: ["AAPL", "DELISTED-UNKNOWN-X"],
+    });
     expect(parseClientFrame(frame).ok).toBe(true);
   });
 
   it("requires symbols on symbol errors", () => {
-    const frame = JSON.stringify({ type: "error", code: "unknown_symbol", message: "Unknown" });
+    const frame = JSON.stringify({
+      type: "error",
+      code: "unknown_symbol",
+      message: "Unknown",
+      requestId: 1,
+    });
     expect(parseServerFrame(frame).ok).toBe(false);
   });
 
@@ -63,6 +72,7 @@ describe("partial subscriptions", () => {
       type: "error",
       code: "unknown_symbol",
       message: "x",
+      requestId: 1,
       symbols: ["DELISTED-UNKNOWN-X"],
     };
     expect(parseServerFrame(JSON.stringify(error)).ok).toBe(true);
