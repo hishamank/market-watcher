@@ -6,6 +6,7 @@ import { fetchBarPages } from "./pages.ts";
 import type { TradingDay } from "./quotes.ts";
 import {
   baselineBar,
+  batches,
   dailyBar,
   fetchSnapshots,
   type MarketMoment,
@@ -16,13 +17,18 @@ import {
 async function fetchSessionCloses(
   http: AlpacaHttp,
   symbols: readonly string[],
-  date: string,
+  { date, close }: TradingDay,
   signal?: AbortSignal,
 ): Promise<Map<string, string>> {
-  const params = { symbols: symbols.join(","), timeframe: "1Day", start: date, end: date };
-  const bodies = await fetchBarPages(http, { ...params, feed: DATA_FEED }, signal);
+  const pages = await Promise.all(
+    batches(symbols).map((batch) => {
+      const end = new Date(close).toISOString();
+      const params = { symbols: batch.join(","), timeframe: "1Day", start: date, end };
+      return fetchBarPages(http, { ...params, feed: DATA_FEED }, signal);
+    }),
+  );
   const closes = new Map<string, string>();
-  for (const body of bodies) {
+  for (const body of pages.flat()) {
     const bars = isFields(body) ? nested(body, "bars") : undefined;
     for (const symbol of symbols) {
       const bar = list(bars?.[symbol])
@@ -48,7 +54,7 @@ async function completeBaselines(
   if (missing.length === 0 || previous === undefined) {
     return;
   }
-  const closes = await fetchSessionCloses(http, missing, previous.date, signal);
+  const closes = await fetchSessionCloses(http, missing, previous, signal);
   for (const symbol of missing) {
     const close = closes.get(symbol);
     const snapshot = snapshots.get(symbol);

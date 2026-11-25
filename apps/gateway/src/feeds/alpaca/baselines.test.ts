@@ -36,7 +36,7 @@ test("before the open, a missing older baseline is fetched as the preceding sess
   const daily = rig.alpaca.calls("/v2/stocks/bars").at(-1);
   expect(daily?.searchParams.get("timeframe")).toBe("1Day");
   expect(daily?.searchParams.get("start")).toBe("2025-06-23");
-  expect(daily?.searchParams.get("end")).toBe("2025-06-23");
+  expect(daily?.searchParams.get("end")).toBe("2025-06-23T20:00:00.000Z");
   expect(daily?.searchParams.get("feed")).toBe("iex");
 });
 

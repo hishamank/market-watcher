@@ -81,7 +81,7 @@ export function quoteFromSnapshot(
   return buildQuote(symbol, price, baseline, open ? day.open : day.close);
 }
 
-function batches(symbols: readonly string[]): string[][] {
+export function batches(symbols: readonly string[]): string[][] {
   const result: string[][] = [];
   for (let index = 0; index < symbols.length; index += SNAPSHOT_BATCH_SIZE) {
     result.push(symbols.slice(index, index + SNAPSHOT_BATCH_SIZE));
