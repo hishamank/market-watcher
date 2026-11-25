@@ -4,6 +4,7 @@ import { chartArea } from "@mini/tokens";
 import { useRef } from "react";
 import { Stop } from "react-native-svg";
 import { LineChart } from "react-native-wagmi-charts";
+import { plotGeometryOf } from "../detail/plot-points.ts";
 import { useChartPalette, usePalette } from "../theme/palette.ts";
 
 export const PLOT_HEIGHT = 176;
@@ -52,14 +53,14 @@ export function LineChartPlot(props: LineChartPlotProps) {
   const palette = usePalette();
   const chart = useChartPalette();
   const scrub = useScrubIndex(props.onScrub);
-  const points = bars.map((bar) => ({ timestamp: bar.time, value: Number(bar.close) }));
+  const { points, xDomain } = plotGeometryOf(bars, props.xDomain);
   const reference = props.referenceLine === undefined ? undefined : Number(props.referenceLine);
   const live = props.direction === "down" ? chart.lossLine : chart.gainLine;
   const line = muted ? palette.textMuted : live;
   return (
     <LineChart.Provider
       data={points}
-      {...(props.xDomain === undefined ? {} : { xDomain: props.xDomain })}
+      xDomain={xDomain}
       yRange={yRangeOf(
         points.map((point) => point.value),
         reference,
