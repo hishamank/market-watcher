@@ -77,6 +77,10 @@ test("D2 range tabs set the URL, the header change and the chart, with back and 
     await expect(chart).toHaveAttribute("data-state", "ready");
     const direction = await page.getByTestId("detail-change").getAttribute("data-direction");
     await expect(chart).toHaveAttribute("data-direction", direction ?? "");
+    await expect(page.getByTestId("detail-price")).toHaveAttribute(
+      "data-direction",
+      direction ?? "",
+    );
     await expect(page.getByTestId("detail-change")).toHaveText(
       /^([+−][\d,.]+ \([+−][\d.]+%\)|0\.00 \(0\.00%\))$/,
     );

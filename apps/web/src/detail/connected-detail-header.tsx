@@ -23,7 +23,7 @@ export function ConnectedDetailHeader({ stock, range }: ConnectedDetailHeaderPro
       symbol={stock.symbol}
       name={stock.name}
       price={quote.price}
-      dayChange={quote.change}
+      change={rangeChange?.change ?? quote.change}
       rangeChange={rangeChange}
       rangeLabel={t(`detail.range.${range}`)}
       stale={stale}

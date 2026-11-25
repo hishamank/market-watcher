@@ -9,7 +9,7 @@ export interface DetailHeaderProps {
   symbol: string;
   name: string;
   price: string;
-  dayChange: string;
+  change: string;
   rangeChange: Change | undefined;
   rangeLabel: string;
   stale: boolean;
@@ -58,7 +58,7 @@ export function DetailHeader(props: DetailHeaderProps) {
       <div className="mt-8">
         <PriceCell
           price={props.price}
-          change={props.dayChange}
+          change={props.change}
           stale={stale}
           flash={props.flash}
           testId="detail-price"
