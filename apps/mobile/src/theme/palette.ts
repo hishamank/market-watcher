@@ -1,4 +1,4 @@
-import { chart, color, type ChartToken, type ColorToken } from "@mini/tokens";
+import { chart, color, elevation, type ChartToken, type ColorToken } from "@mini/tokens";
 import { useColorScheme } from "react-native";
 
 export type Palette = Readonly<Record<ColorToken, string>>;
@@ -10,4 +10,8 @@ export function usePalette(): Palette {
 
 export function useChartPalette(): ChartPalette {
   return useColorScheme() === "dark" ? chart.dark : chart.light;
+}
+
+export function useElevation(level: 1 | 2): string {
+  return (useColorScheme() === "dark" ? elevation.dark : elevation.light)[level];
 }

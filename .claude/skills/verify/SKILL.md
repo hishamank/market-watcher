@@ -160,7 +160,7 @@ The docs do not settle these, so the adapter uses a documented default and the r
 
 ## Expo app
 
-The mobile app runs in Expo Go on a real phone. No agent tool here can tap a phone, so the owner walks mobile features by hand, following the steps below, and reports in the same table. Every control and value the steps name has a `testID` from [`docs/feature-map.md`](../../../docs/feature-map.md), ready for a device driver such as Maestro if one is ever added (it is not a dependency today).
+The mobile app runs in Expo Go on a real phone. No agent tool here can tap a phone, so the owner walks mobile features by hand, following the steps below, and reports in the same table. An agent with a local Android emulator can walk the same rows itself, as described under **Android emulator**. Every control and value the steps name has a `testID` from [`docs/feature-map.md`](../../../docs/feature-map.md), ready for a device driver such as Maestro if one is ever added (it is not a dependency today).
 
 ### Launch
 
@@ -185,6 +185,17 @@ EXPO_PUBLIC_GATEWAY_URL=http://<LAN IP>:4000 pnpm --filter ./apps/mobile start
 `EXPO_PUBLIC_GATEWAY_URL` is read when Metro bundles, so after changing it, restart with `pnpm --filter ./apps/mobile start --clear`. A value set only on the command line does not survive the restart: repeat it, as in `EXPO_PUBLIC_GATEWAY_URL=http://<LAN IP>:4000 pnpm --filter ./apps/mobile start --clear`. Without it the app uses `http://localhost:4000`, which only works in a simulator on the same machine.
 
 An agent starting these itself (to check the bundle, not to walk) uses the `setsid` pattern from step 2, adds `CI=1` to `expo start`, and uses a spare `--port` if 8081 is taken.
+
+### Android emulator
+
+An agent with the Android SDK can walk the rows on an emulator instead of a phone. The emulator reaches the host at `10.0.2.2`, so use that in place of the LAN IP: start the gateway with `HOST=0.0.0.0 ALLOWED_ORIGINS=http://localhost:3000,http://10.0.2.2:4000`, and Expo with `EXPO_PUBLIC_GATEWAY_URL=http://10.0.2.2:4000 CI=1`.
+
+- **Open the app:** `adb shell am start -W -a android.intent.action.VIEW -p host.exp.exponent -d exp://10.0.2.2:<Metro port>`. `-p` matters when another app on the device also handles `exp://` links. `expo start --android` installs Expo Go the first time; after that, start Metro without `--android`.
+- **Reload:** `CI=1` turns off Metro's file watching, so after a code change restart Metro, then `adb shell am force-stop host.exp.exponent` and open the app again.
+- **Drive it:** `adb shell input tap <x> <y>` for taps. For scrubbing, hold a finger with `adb shell input motionevent DOWN <x> <y>`, move it with `MOVE`, and lift it with `UP`. Screens are in physical pixels.
+- **Screenshots:** `adb exec-out screencap -p > shot.png`, taken once the finger has been still for 2 s. A screenshot taken mid-gesture slows a software-rendered emulator enough to make scrubbing look late.
+- **Reduced motion:** `adb shell settings put global animator_duration_scale 0`, and the same for `transition_animation_scale` and `window_animation_scale`, then reopen Expo Go. Put all three back to `1` afterwards, even if the walk fails.
+- **History chaos:** the mobile app has no chaos panel. Send `{"type":"chaos","action":"history_failure_rate","rate":100}` over a socket to `ws://localhost:4000/ws?v=1` with an allowed `Origin`, or use the web panel at `/?debug=1` against the same gateway. It reverts after 60 s.
 
 ### Doctor
 
@@ -216,12 +227,11 @@ Follow each feature's steps in the feature map and observe the expected result. 
 | M2 | Rows show name, ticker, price and a day-change pill with an arrow, a sign and a percent. Within a few seconds prices change, and a thin ring flashes round the pill in the row's day colour. Scroll to the bottom: the last rows have a price at once and start ticking. Star MSFT, then NVDA: each star fills amber at once. The Watchlist tab lists NVDA first, then MSFT, both ticking. Unstar NVDA there: its row goes at once. Close Expo Go from the app switcher and reopen: MSFT is still starred. Unstar it: the Watchlist tab shows "Your watchlist is empty", and "See all stocks" returns to Markets. |
 | M2, motion and failure | With a stock starred, stop the gateway (`Ctrl+C`), then close and reopen Expo Go. Markets shows skeleton rows that pulse gently for about 7 s while requests retry (three retries, 1 s, 2 s and 4 s apart), then "Couldn't load stocks" with Retry. The Watchlist tab keeps the starred ticker, with the same error and Retry, never a blank screen. Start the gateway again and tap Retry on Markets, then on each Watchlist row: the rows load and tick. Star a stock: the star grows slightly as it fills. |
 | M2, reduced motion | Turn on Reduce Motion (iOS: Settings > Accessibility > Motion; Android: Settings > Accessibility > Remove animations). Then close and reopen Expo Go: the flash ring reads the setting at launch. Prices still change, but no ring flashes round the pill. Star a stock: it fills at once, with no scale. Repeat the gateway stop from the row above: for those 7 s the skeleton rows are a static grey fill, with no pulse. Turn the setting off and reopen Expo Go afterwards. |
-| Graph check (ADR 0033) | On any detail screen, below the price, two green lines render: a short static one and a taller animated one. Press and hold the taller line for about half a second, then drag: a dot follows your finger along the line. A dashed box with error text instead of the lines is a FAIL: copy the text. |
-| M3 | BLOCKED until N02 (detail and chart). |
+| M3 | Tap AAPL. The header shows the ticker chip, the name, a ticking price and a change pill labelled "Today"; below the tabs, Today, Previous close and Last update in ET. The 1D chart spans the whole session with a dashed previous-close line, and its end dot moves with the header price. Tap 1W, 1M, 3M, 1Y and 5Y: each redraws, and the label changes ("Past week" … "Past 5 years"). Press on the chart and drag: a vertical line follows your finger, a readout above the chart shows the time in ET, the price and the change from the start of the range, and the header shows the same point. Lift: the readout goes and the header is live again. Tap the star: it fills and the Markets row agrees. |
+| M3, failure | With the gateway's history failures at 100% (the web chaos panel at `/?debug=1`, or a `history_failure_rate` chaos message on the socket), open a stock not yet viewed: a skeleton, then "Couldn't load this chart" with Retry while the header keeps ticking and shows a dash. Set failures to 0 and tap Retry: the chart draws. For the older copy, view a stock's 1D, wait more than 2 minutes, set failures to 100%, close and reopen Expo Go on that stock: a grey line with no end dot and an "As of" note. |
+| M3, reduced motion | With Remove animations on, reopen Expo Go and repeat the M3 row: the ranges, scrubbing, the live point and the star all work as without it. |
 | M4 | BLOCKED until N08 (lifecycle). Recipe for then: press home, wait 15 s, return; the socket must have closed and reopened with fresh prices. Under 10 s, it must not reconnect. |
 | M5 | BLOCKED until N08 (connection states). Recipe for then: stop the gateway for stale, and airplane mode for offline. Airplane mode also cuts Metro, but the loaded app keeps running. |
-
-Report the graph check as its own row, `ADR 0033`, so a FAIL there is not mistaken for a list failure. A red error screen that appears only when a detail screen opens also belongs in that row. If it fails, the fallback is `react-native-wagmi-charts` (ADR 0033).
 
 If prices show but never change, the socket is being refused: re-run doctor step 2.
 

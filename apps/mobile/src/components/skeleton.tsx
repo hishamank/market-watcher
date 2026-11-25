@@ -13,7 +13,7 @@ const pulse = css.keyframes({
   "100%": { opacity: 1 },
 });
 
-function SkeletonBlock({ style }: { style: ViewStyle }) {
+export function SkeletonBlock({ style }: { style: ViewStyle }) {
   const palette = usePalette();
   const reduceMotion = useReduceMotion();
   return (
