@@ -1,7 +1,8 @@
 import { QueryClient, useQuery } from "@tanstack/react-query";
 import { useContext } from "react";
 import { describe, expect, it, vi } from "vitest";
-import { createCoreServices, stockQueryKeys, useStock } from "../index.ts";
+import { stockQueryKeys, useStock } from "../index.ts";
+import { createCoreServices } from "../core-provider.tsx";
 import { createFakeGateway } from "../testing/fake-gateway.ts";
 import {
   createFakeLifecycle,

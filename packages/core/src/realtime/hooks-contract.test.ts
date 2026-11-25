@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { buildSocketUrl, createCoreServices, createDefaultSocket } from "../index.ts";
+import { buildSocketUrl, createDefaultSocket } from "./transport.ts";
+import { createCoreServices } from "../core-provider.tsx";
 import { createFakeGateway } from "../testing/fake-gateway.ts";
 import {
   createFakeLifecycle,

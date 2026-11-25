@@ -8,8 +8,8 @@ import {
   formatSignedAmount,
   formatSignedChange,
   formatSignedPercent,
-  MINUS_SIGN,
 } from "../index.ts";
+import { MINUS_SIGN } from "./constants.ts";
 
 describe("money formatters", () => {
   it("formats prices with 2 decimals at or above $1 and 4 below per ADR 0037", () => {

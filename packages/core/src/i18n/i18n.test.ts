@@ -1,6 +1,8 @@
 import { useContext } from "react";
 import { describe, expect, it, vi } from "vitest";
-import { createCoreServices, DEFAULT_LOCALE, useLocale, useT } from "../index.ts";
+import { useLocale, useT } from "../index.ts";
+import { createCoreServices } from "../core-provider.tsx";
+import { DEFAULT_LOCALE } from "../format/constants.ts";
 import { createFakeGateway } from "../testing/fake-gateway.ts";
 import {
   createFakeLifecycle,

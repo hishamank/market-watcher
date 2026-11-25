@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState, useSyncExternalStore } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createCoreServices, useChaosControls } from "../index.ts";
+import { useChaosControls } from "../index.ts";
+import { createCoreServices } from "../core-provider.tsx";
 import { createFakeGateway } from "../testing/fake-gateway.ts";
 import {
   createFakeLifecycle,

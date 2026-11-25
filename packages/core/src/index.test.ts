@@ -1,0 +1,41 @@
+import { describe, expect, it } from "vitest";
+import * as core from "./index.ts";
+
+const FROZEN_RUNTIME_EXPORTS = [
+  "CoreProvider",
+  "MARKET_TIME_ZONE_LABEL",
+  "RestClientError",
+  "buildRestBaseUrl",
+  "createRestClient",
+  "directionOf",
+  "formatMarketDate",
+  "formatMarketDateTime",
+  "formatMarketTime",
+  "formatPrice",
+  "formatSignedAmount",
+  "formatSignedChange",
+  "formatSignedPercent",
+  "historyQueryOptions",
+  "stockListQueryOptions",
+  "stockQueryKeys",
+  "stockQueryOptions",
+  "stocksBySymbolsQueryOptions",
+  "useChaosControls",
+  "useConnectionStatus",
+  "useHistory",
+  "useLiveHistory",
+  "useLocale",
+  "useMarketStatus",
+  "useQuote",
+  "useStock",
+  "useStockList",
+  "useStocks",
+  "useT",
+  "useWatchlist",
+];
+
+describe("core public API", () => {
+  it("exports exactly the frozen runtime names", () => {
+    expect(Object.keys(core).sort()).toEqual(FROZEN_RUNTIME_EXPORTS);
+  });
+});

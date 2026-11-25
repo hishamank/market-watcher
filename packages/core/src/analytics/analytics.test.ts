@@ -1,11 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  createCoreServices,
-  createNoopAnalytics,
-  track,
-  type AnalyticsAdapter,
-  type AnalyticsEvent,
-} from "../index.ts";
+import { type AnalyticsAdapter, type AnalyticsEvent } from "../index.ts";
+import { createCoreServices } from "../core-provider.tsx";
+import { createNoopAnalytics, track } from "./analytics.ts";
 import { createFakeGateway } from "../testing/fake-gateway.ts";
 import {
   createFakeLifecycle,

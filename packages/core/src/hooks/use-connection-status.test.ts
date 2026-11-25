@@ -1,6 +1,8 @@
 import { useContext, useSyncExternalStore } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createCoreServices, createSocketClient, useConnectionStatus } from "../index.ts";
+import { useConnectionStatus } from "../index.ts";
+import { createCoreServices } from "../core-provider.tsx";
+import { createSocketClient } from "../realtime/socket-client.ts";
 import { createQuoteStore } from "../realtime/quote-store.ts";
 import { createFakeGateway } from "../testing/fake-gateway.ts";
 import {

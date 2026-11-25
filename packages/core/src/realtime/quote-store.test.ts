@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createQuoteStore } from "../index.ts";
+import { createQuoteStore } from "./quote-store.ts";
 import { makeQuote } from "../testing/fake-platform.ts";
 
 describe("quote store", () => {

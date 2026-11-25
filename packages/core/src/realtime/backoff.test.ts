@@ -4,7 +4,7 @@ import {
   BACKOFF_MAX_MS,
   computeBackoffCeiling,
   computeBackoffDelay,
-} from "../index.ts";
+} from "./backoff.ts";
 
 describe("backoff", () => {
   it("grows exponentially from 0.5 s and caps at 30 s", () => {

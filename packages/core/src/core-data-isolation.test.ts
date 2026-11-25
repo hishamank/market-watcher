@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createCoreServices } from "./index.ts";
+import { createCoreServices } from "./core-provider.tsx";
 import { createFakeGateway } from "./testing/fake-gateway.ts";
 import {
   createFakeLifecycle,

@@ -1,6 +1,7 @@
 import { QueryClient, type QueryCache } from "@tanstack/react-query";
 import { describe, expect, it, vi } from "vitest";
-import { createCoreServices, stockQueryKeys } from "../index.ts";
+import { stockQueryKeys } from "../index.ts";
+import { createCoreServices } from "../core-provider.tsx";
 import { createFakeGateway } from "../testing/fake-gateway.ts";
 import {
   createFakeLifecycle,

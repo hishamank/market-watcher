@@ -1,6 +1,7 @@
 import type { ChaosMessage } from "@mini/contracts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createQuoteStore, createSocketClient } from "../index.ts";
+import { createQuoteStore } from "./quote-store.ts";
+import { createSocketClient } from "./socket-client.ts";
 import { createFakeGateway } from "../testing/fake-gateway.ts";
 import { createFakeNetwork } from "../testing/fake-platform.ts";
 

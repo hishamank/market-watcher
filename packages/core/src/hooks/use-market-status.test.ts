@@ -1,7 +1,8 @@
 import type { MarketStatus } from "@mini/contracts";
 import { useContext, useSyncExternalStore } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createCoreServices, useMarketStatus } from "../index.ts";
+import { useMarketStatus } from "../index.ts";
+import { createCoreServices } from "../core-provider.tsx";
 import { createFakeGateway } from "../testing/fake-gateway.ts";
 import {
   createFakeLifecycle,

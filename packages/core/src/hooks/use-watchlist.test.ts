@@ -1,11 +1,8 @@
 import { useContext, useSyncExternalStore } from "react";
 import { describe, expect, it, vi } from "vitest";
-import {
-  type AnalyticsAdapter,
-  createCoreServices,
-  useWatchlist,
-  WATCHLIST_STORAGE_KEY,
-} from "../index.ts";
+import { type AnalyticsAdapter, useWatchlist } from "../index.ts";
+import { createCoreServices } from "../core-provider.tsx";
+import { WATCHLIST_STORAGE_KEY } from "../watchlist/watchlist-store.ts";
 import { createFakeGateway } from "../testing/fake-gateway.ts";
 import {
   createFakeLifecycle,

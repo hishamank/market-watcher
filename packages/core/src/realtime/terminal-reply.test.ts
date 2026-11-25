@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createQuoteStore, createSocketClient, type ConnectionStatus } from "../index.ts";
+import { type ConnectionStatus } from "../index.ts";
+import { createQuoteStore } from "./quote-store.ts";
+import { createSocketClient } from "./socket-client.ts";
 import { createFakeGateway } from "../testing/fake-gateway.ts";
 import { createFakeNetwork } from "../testing/fake-platform.ts";
 
