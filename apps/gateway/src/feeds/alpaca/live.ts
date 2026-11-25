@@ -1,10 +1,9 @@
-import type { Quote } from "@mini/contracts";
 import type { LiveFeed } from "../types.ts";
 import { snapshotQuotes } from "./baselines.ts";
 import type { AlpacaCalendar } from "./calendar.ts";
 import { POLL_INTERVAL_MS, SNAPSHOT_REUSE_MS, STREAM_SYMBOL_LIMIT } from "./config.ts";
+import { createHeldQuotes, type HeldQuotes, sessionOf } from "./held-quotes.ts";
 import type { AlpacaHttp } from "./http.ts";
-import { buildQuote } from "./quotes.ts";
 import { pickStreamed, sameSet } from "./ranking.ts";
 import { createSnapshotRequests } from "./requests.ts";
 import type { TradeStream } from "./stream.ts";
@@ -23,65 +22,48 @@ export interface AlpacaLive extends LiveFeed {
   close(): void;
 }
 
-interface Held {
-  readonly quote: Quote;
-  readonly at: number;
+function liveSession(calendar: AlpacaCalendar, time: number, now: number): string | undefined {
+  const { day } = calendar.moment(time);
+  const session = sessionOf({ day, open: true });
+  const inDay = time >= day.open && time < day.close;
+  return inDay && session === sessionOf(calendar.moment(now)) ? session : undefined;
 }
 
-interface Recorder {
-  readonly latest: ReadonlyMap<string, Held>;
-  readonly listeners: Set<(quote: Quote) => void>;
-  record(quote: Quote): void;
-}
-
-function sameQuote(a: Quote | undefined, b: Quote): boolean {
-  return (
-    a !== undefined &&
-    a.price === b.price &&
-    a.previousClose === b.previousClose &&
-    a.timestamp === b.timestamp
+function pollDue(
+  symbols: Iterable<string>,
+  streamed: ReadonlySet<string>,
+  held: HeldQuotes,
+  calendar: AlpacaCalendar,
+  now: number,
+): string[] {
+  const session = sessionOf(calendar.moment(now));
+  const open = calendar.status(now) === "open";
+  return [...symbols].filter(
+    (symbol) => (open && !streamed.has(symbol)) || held.stale(symbol, session),
   );
-}
-
-function createRecorder(now: () => number, isSubscribed: (symbol: string) => boolean): Recorder {
-  const latest = new Map<string, Held>();
-  const listeners = new Set<(quote: Quote) => void>();
-  return {
-    latest,
-    listeners,
-    record(quote) {
-      const changed = !sameQuote(latest.get(quote.symbol)?.quote, quote);
-      latest.set(quote.symbol, { quote, at: now() });
-      if (changed && isSubscribed(quote.symbol)) {
-        listeners.forEach((listener) => listener(quote));
-      }
-    },
-  };
 }
 
 export function createAlpacaLive(options: AlpacaLiveOptions): AlpacaLive {
   const { http, calendar, now, warn } = options;
   const order = new Map<string, number>();
   const counts = new Map<string, number>();
-  const { latest, listeners, record } = createRecorder(now, (symbol) => order.has(symbol));
+  const held = createHeldQuotes(now, (symbol) => order.has(symbol));
+  const sessionNow = (): string => sessionOf(calendar.moment(now()));
   let streamed = new Set<string>();
   let sequence = 0;
 
   const onTrade = (symbol: string, price: string, time: number): void => {
-    const baseline = latest.get(symbol)?.quote.previousClose;
-    if (!streamed.has(symbol) || baseline === undefined || calendar.status(now()) !== "open") {
-      return;
-    }
-    const quote = buildQuote(symbol, price, baseline, time);
-    if (quote !== undefined && quote.timestamp >= (latest.get(symbol)?.quote.timestamp ?? 0)) {
-      record(quote);
+    const session = liveSession(calendar, time, now());
+    if (streamed.has(symbol) && session !== undefined) {
+      held.trade(symbol, { price, time, session });
     }
   };
   const stream = options.openStream(onTrade);
 
   const requests = createSnapshotRequests(async (symbols) => {
-    const quotes = await snapshotQuotes(http, symbols, calendar.moment(now()), calendar.days());
-    quotes.forEach((quote) => record(quote));
+    const moment = calendar.moment(now());
+    const quotes = await snapshotQuotes(http, symbols, moment, calendar.days());
+    quotes.forEach((quote) => held.record(quote, sessionOf(moment)));
   }, now);
 
   const rebalance = (): void => {
@@ -93,9 +75,9 @@ export function createAlpacaLive(options: AlpacaLiveOptions): AlpacaLive {
   };
 
   const poll = (): void => {
-    const polled = [...order.keys()].filter((symbol) => !streamed.has(symbol));
-    if (polled.length > 0 && calendar.status(now()) === "open") {
-      requests.fetch(polled).catch((err: unknown) => warn({ err }, "Alpaca snapshot poll failed"));
+    const due = pollDue(order.keys(), streamed, held, calendar, now());
+    if (due.length > 0) {
+      requests.fetch(due).catch((err: unknown) => warn({ err }, "Alpaca snapshot poll failed"));
     }
   };
   const timer = setInterval(poll, POLL_INTERVAL_MS);
@@ -106,7 +88,10 @@ export function createAlpacaLive(options: AlpacaLiveOptions): AlpacaLive {
       rebalance();
     },
     unsubscribe(symbols) {
-      symbols.forEach((symbol) => order.delete(symbol));
+      symbols.forEach((symbol) => {
+        order.delete(symbol);
+        held.forget(symbol);
+      });
       rebalance();
     },
     watchCount(symbol, count) {
@@ -116,15 +101,18 @@ export function createAlpacaLive(options: AlpacaLiveOptions): AlpacaLive {
     },
     async snapshot(symbols) {
       const time = now();
-      const reusable = (symbol: string) =>
-        (latest.get(symbol)?.at ?? -Infinity) > time - SNAPSHOT_REUSE_MS;
-      const due = symbols.filter((symbol) => !reusable(symbol) && requests.shouldAsk(symbol, time));
+      const session = sessionNow();
+      const due = symbols.filter(
+        (symbol) =>
+          !held.fresh(symbol, session, time - SNAPSHOT_REUSE_MS) &&
+          requests.shouldAsk(symbol, time),
+      );
       if (due.length > 0) await requests.fetch(due);
-      return symbols.flatMap((symbol) => latest.get(symbol)?.quote ?? []);
+      return symbols.flatMap((symbol) => held.current(symbol, sessionNow())?.quote ?? []);
     },
     onQuote(listener) {
-      listeners.add(listener);
-      return () => void listeners.delete(listener);
+      held.listeners.add(listener);
+      return () => void held.listeners.delete(listener);
     },
     streamed: () => streamed,
     resync: () => (order.size > 0 ? requests.fetch([...order.keys()]) : Promise.resolve()),
