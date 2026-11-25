@@ -1,8 +1,14 @@
 import type { HistoryFailureRate } from "@mini/contracts";
-import { type ChaosFailureRateView, type ChaosToggleView, useT } from "@mini/core";
+import {
+  type ChaosFailureRateView,
+  type ChaosToggleView,
+  type ConnectionHealth,
+  useT,
+} from "@mini/core";
 import { Button } from "../components/button.tsx";
 import { BoltIcon } from "../components/icons.tsx";
 import { FailureRateControl, SwitchRow } from "./chaos-controls-ui.tsx";
+import { HealthSection } from "./health-tiles.tsx";
 
 export interface ChaosPanelViewProps {
   offline: boolean;
@@ -10,6 +16,7 @@ export interface ChaosPanelViewProps {
   historyLatency: ChaosToggleView;
   historyFailureRate: ChaosFailureRateView;
   forceClosed: ChaosToggleView;
+  health: ConnectionHealth;
   onClose: () => void;
   onDrop: () => void;
   onFreeze: () => void;
@@ -110,6 +117,7 @@ export function ChaosPanelView(props: ChaosPanelViewProps) {
         </header>
         <ConnectionSection {...props} />
         <GlobalSection {...props} />
+        <HealthSection health={props.health} />
       </section>
     </>
   );

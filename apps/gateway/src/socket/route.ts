@@ -2,7 +2,7 @@ import { encodeFrame, type FeedMode, PROTOCOL_VERSION } from "@mini/contracts";
 import type { FastifyInstance } from "fastify";
 import type { WebSocket } from "ws";
 import type { Feed } from "../feeds/types.ts";
-import { createHub, type Hub } from "../hub/hub.ts";
+import type { Hub } from "../hub/hub.ts";
 import type { Warn } from "../hub/quote-book.ts";
 import {
   CLOSE_UNSUPPORTED_VERSION,
@@ -20,6 +20,7 @@ export interface SocketOptions {
   feedMode: FeedMode;
   allowedOrigins: ReadonlySet<string>;
   now: () => number;
+  hub: Hub;
 }
 
 function rejectVersion(socket: WebSocket): void {
@@ -44,7 +45,7 @@ function welcome(socket: WebSocket, hub: Hub, options: SocketOptions): void {
 
 export async function socketRoute(app: FastifyInstance, options: SocketOptions): Promise<void> {
   const warn: Warn = (detail, message) => app.log.warn(detail, message);
-  const hub = createHub({ feed: options.feed, now: options.now, warn });
+  const { hub } = options;
   const chaos =
     options.feedMode === "simulated"
       ? createChaosController({ feed: options.feed, now: options.now, broadcast: hub.broadcast })
@@ -54,7 +55,6 @@ export async function socketRoute(app: FastifyInstance, options: SocketOptions):
   app.addHook("onClose", async () => {
     chaos?.close();
     stopLiveness();
-    await hub.close();
   });
 
   app.get<{ Querystring: { v?: string } }>(

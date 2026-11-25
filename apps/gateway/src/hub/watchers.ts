@@ -5,9 +5,10 @@ export interface Watchers {
   isWatched(symbol: string): boolean;
   add(member: Member, symbols: readonly string[]): void;
   remove(member: Member, symbols: readonly string[]): string[];
+  symbolCount(): number;
 }
 
-export function createWatchers(): Watchers {
+export function createWatchers(onCount: (symbol: string, count: number) => void): Watchers {
   const bySymbol = new Map<string, Set<Member>>();
 
   function add(member: Member, symbols: readonly string[]): void {
@@ -15,13 +16,16 @@ export function createWatchers(): Watchers {
       const members = bySymbol.get(symbol) ?? new Set<Member>();
       members.add(member);
       bySymbol.set(symbol, members);
+      onCount(symbol, members.size);
       member.symbols.add(symbol);
     }
   }
 
   function detach(member: Member, symbol: string): void {
     const members = bySymbol.get(symbol);
-    members?.delete(member);
+    if (members?.delete(member)) {
+      onCount(symbol, members.size);
+    }
     if (members?.size === 0) {
       bySymbol.delete(symbol);
     }
@@ -41,5 +45,6 @@ export function createWatchers(): Watchers {
     isWatched: (symbol) => bySymbol.has(symbol),
     add,
     remove,
+    symbolCount: () => bySymbol.size,
   };
 }

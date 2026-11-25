@@ -1,4 +1,5 @@
 import { expect, test, vi } from "vitest";
+import { buildApp } from "../app.ts";
 import { createFakeFeed } from "../hub/fake-feed.ts";
 import { createHeldFeed } from "./held-feed.ts";
 import { startGateway } from "./testing.ts";
@@ -70,4 +71,41 @@ test("after close resolves, a pending snapshot is never fetched again", async ()
 
   expect(fetches).toBe(fetchesAtClose);
   expect(base.upstream()).toEqual([]);
+});
+
+test("a boot that fails before the socket route loads leaves no hub timers", async () => {
+  const timersBefore = activeTimers();
+  const app = buildApp({
+    feed: createFakeFeed(),
+    feedMode: "simulated",
+    allowedOrigins: new Set(),
+    logger: false,
+  });
+  app.addHook("onRoute", (route) => {
+    if (route.url === "/stocks") throw new Error("route registration failed");
+  });
+
+  await expect(app.ready()).rejects.toThrow("route registration failed");
+  await app.close();
+
+  expect(activeTimers()).toBeLessThanOrEqual(timersBefore);
+});
+
+test("the hub closes before an onClose hook the gateway's owner adds", async () => {
+  const timersBefore = activeTimers();
+  const app = buildApp({
+    feed: createFakeFeed(),
+    feedMode: "simulated",
+    allowedOrigins: new Set(),
+    logger: false,
+  });
+  let timersAtOwnerClose = Number.POSITIVE_INFINITY;
+  app.addHook("onClose", async () => {
+    timersAtOwnerClose = activeTimers();
+  });
+
+  await app.ready();
+  await app.close();
+
+  expect(timersAtOwnerClose).toBeLessThanOrEqual(timersBefore);
 });

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "b0b6dd9d-8b9b-48a9-ba46-b9d54906e415",
+    "class": "us_equity",
+    "exchange": "NASDAQ",
+    "symbol": "AAPL",
+    "name": "Apple Inc. Common Stock",
+    "status": "active",
+    "tradable": true,
+    "marginable": true,
+    "shortable": true,
+    "fractionable": true
+  },
+  {
+    "id": "b6d1aa75-5c9c-4353-a305-9e2caa1925ab",
+    "class": "us_equity",
+    "exchange": "NASDAQ",
+    "symbol": "MSFT",
+    "name": "Microsoft Corporation Common Stock",
+    "status": "active",
+    "tradable": true,
+    "marginable": true,
+    "shortable": true,
+    "fractionable": true
+  },
+  {
+    "id": "b28f4066-5c6d-479b-a2af-85dc1a8f16fb",
+    "class": "us_equity",
+    "exchange": "ARCA",
+    "symbol": "SPY",
+    "name": "SPDR S&P 500 ETF Trust",
+    "status": "active",
+    "tradable": true,
+    "marginable": true,
+    "shortable": true,
+    "fractionable": true
+  },
+  {
+    "id": "0f6a1b58-1c3e-4f4e-9d0b-2b7f1a7e9c11",
+    "class": "us_equity",
+    "exchange": "NYSE",
+    "symbol": "NEWCO",
+    "name": "New Listing Example Inc.",
+    "status": "active",
+    "tradable": true,
+    "marginable": true,
+    "shortable": true,
+    "fractionable": true
+  }
+]

@@ -1,7 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
-import { gatewayUrl } from "./e2e/support/gateway-process.ts";
+import { gatewayUrl, webPort } from "./e2e/support/gateway-process.ts";
 
-const webPort = 3100;
 const chromium = devices["Desktop Chrome"];
 
 export default defineConfig({

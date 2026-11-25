@@ -1,21 +1,38 @@
 import { buildApp, parseRateLimitMax, parseTrustProxy } from "./app.ts";
-import { createSimulatorFeed } from "./feeds/index.ts";
+import {
+  AlpacaStartupError,
+  createSimulatorFeed,
+  type Feed,
+  loadAlpacaFeed,
+} from "./feeds/index.ts";
 import { parseAllowedOrigins } from "./socket/admission.ts";
 
-const feedName = process.env["FEED"] ?? "simulator";
-if (feedName !== "simulator") {
-  console.error(`FEED=${feedName} is not available yet. Only FEED=simulator is wired in.`);
-  process.exit(1);
+async function selectFeed(
+  feedName: string,
+): Promise<{ feed: Feed & { close(): void }; live: boolean }> {
+  if (feedName === "simulator") {
+    const seed = process.env["SIM_SEED"];
+    return { feed: createSimulatorFeed(seed === undefined ? {} : { seed }), live: false };
+  }
+  if (feedName === "alpaca") {
+    return { feed: await loadAlpacaFeed(process.env), live: true };
+  }
+  throw new AlpacaStartupError(
+    `FEED=${feedName} is not a feed mode. Use FEED=simulator or FEED=alpaca.`,
+  );
 }
 
-const seed = process.env["SIM_SEED"];
-const feed = createSimulatorFeed(seed === undefined ? {} : { seed });
+const selected = await selectFeed(process.env["FEED"] ?? "simulator").catch((err: unknown) => {
+  console.error(err instanceof AlpacaStartupError ? err.message : err);
+  process.exit(1);
+});
+const { feed } = selected;
 const port = Number(process.env["PORT"] ?? 4000);
 const host = process.env["HOST"] ?? "localhost";
 const rateLimit = parseRateLimitMax(process.env["REST_RATE_LIMIT_MAX"]);
 const app = buildApp({
   feed,
-  feedMode: "simulated",
+  feedMode: selected.live ? "live" : "simulated",
   allowedOrigins: parseAllowedOrigins(process.env["ALLOWED_ORIGINS"]),
   trustProxy: parseTrustProxy(process.env["TRUST_PROXY"]),
   ...(rateLimit !== undefined ? { rateLimit } : {}),

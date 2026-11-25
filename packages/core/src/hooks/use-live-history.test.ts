@@ -153,9 +153,10 @@ describe("useLiveHistory range change", () => {
 
     expect(result.ageMs).toBe(5 * HOUR_MS);
     expect(result.asOf).toBe(HOUR_MS);
+    expect(result.rangeChange).toEqual({ change: "0.00", changePercent: "0.00" });
   });
 
-  it("keeps a fallback copy's bars as the gateway sent them, even with a newer quote", () => {
+  it("keeps a fallback copy's bars but measures its range change to the live price", () => {
     serveHistory({
       data: { ...weekHistoryBody("PROBE", [{ time: 0, close: "200.00" }]), ageMs: 5 * HOUR_MS },
       dataUpdatedAt: 6 * HOUR_MS,
@@ -165,7 +166,7 @@ describe("useLiveHistory range change", () => {
     const result = useLiveHistory("PROBE", "1W");
 
     expect(result.bars).toEqual([{ time: 0, close: "200.00" }]);
-    expect(result.rangeChange).toEqual({ change: "0.00", changePercent: "0.00" });
+    expect(result.rangeChange).toEqual({ change: "10.00", changePercent: "5.00" });
   });
 
   it("returns the same result when a parent re-renders with unchanged inputs", () => {

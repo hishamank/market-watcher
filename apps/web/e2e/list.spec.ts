@@ -24,7 +24,7 @@ test("L1 server HTML holds the first window of rows with prices and day change",
   for (const [, , arrow, amount, percent] of changes) {
     const text = `${amount ?? ""}${percent ?? ""}`;
     expect(arrow).toContain("<path");
-    expect(text).toMatch(/^([+−]\d[\d,]*\.\d{2} \([+−]\d+\.\d{2}%\)|0\.00 \(0\.00%\))$/);
+    expect(text).toMatch(/^([+−]\d[\d,]*\.\d{2} \(([+−]\d+\.\d{2}|0\.00)%\)|0\.00 \(0\.00%\))$/);
   }
 });
 

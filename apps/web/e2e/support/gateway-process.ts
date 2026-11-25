@@ -3,7 +3,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-export const gatewayPort = 4100;
+export const gatewayPort = Number(process.env["E2E_GATEWAY_PORT"] ?? 4100);
+export const webPort = Number(process.env["E2E_WEB_PORT"] ?? 3100);
 export const gatewayUrl = `http://localhost:${gatewayPort}`;
 export const gatewayPidFile = join(tmpdir(), `mini-e2e-gateway-${gatewayPort}.pid`);
 
@@ -20,6 +21,7 @@ export function startGateway(detached: boolean): ChildProcess {
       PORT: String(gatewayPort),
       FEED: "simulator",
       SIM_SEED: "42",
+      ALLOWED_ORIGINS: `http://localhost:${webPort}`,
       REST_RATE_LIMIT_MAX: e2eRestRateLimitMax,
     },
   });

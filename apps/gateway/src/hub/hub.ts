@@ -38,6 +38,7 @@ export interface Hub {
   unsubscribe(peer: Peer, symbols: readonly string[]): Promise<void>;
   broadcast(message: ServerMessage): void;
   marketStatus(): MarketStatus;
+  stats(): { connections: number; upstreamSymbols: number };
   close(): Promise<void>;
 }
 
@@ -120,7 +121,7 @@ function retryUpstream(parts: Parts): void {
 
 export function createHub({ feed, now, warn }: HubOptions): Hub {
   const members = new Map<Peer, Member>();
-  const watchers = createWatchers();
+  const watchers = createWatchers((symbol, count) => feed.live.watchCount?.(symbol, count));
   const upstream = createUpstream(feed.live, watchers.isWatched, warn);
   const book = createQuoteBook(feed.live, watchers.isWatched, warn);
   const parts: Parts = { members, feed, watchers, upstream, book, warn, leave };
@@ -184,6 +185,7 @@ export function createHub({ feed, now, warn }: HubOptions): Hub {
       inOrder(peer, (member) => release(watchers.remove(member, symbols), parts)),
     broadcast,
     marketStatus: () => feed.calendar.status(now()),
+    stats: () => ({ connections: members.size, upstreamSymbols: watchers.symbolCount() }),
     async close() {
       timers.forEach(clearInterval);
       stopQuotes();

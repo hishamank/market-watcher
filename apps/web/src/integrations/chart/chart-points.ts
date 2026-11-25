@@ -23,6 +23,7 @@ export interface ChartPoint {
   readonly time: UTCTimestamp;
   readonly value: number;
   readonly close: string;
+  readonly at: number;
 }
 
 function slotOf(timeMs: number, barSize: BarSize): number {
@@ -43,6 +44,7 @@ export function toChartPoints(bars: readonly Bar[], range: Range): ChartPoint[] 
       time: toSeconds(slotOf(bar.time, barSize)),
       value: Number(bar.close),
       close: bar.close,
+      at: bar.time,
     };
     const last = points.at(-1);
     if (last !== undefined && point.time <= last.time) points[points.length - 1] = point;

@@ -1,4 +1,5 @@
 import type { Range } from "@mini/contracts";
+import { useTrack } from "@mini/core";
 import { useSearchParams } from "next/navigation";
 import { parseRange } from "./parse-range.ts";
 
@@ -7,11 +8,15 @@ export interface RangeParam {
   readonly selectRange: (range: Range) => void;
 }
 
-export function useRangeParam(): RangeParam {
+export function useRangeParam(symbol: string): RangeParam {
   const searchParams = useSearchParams();
+  const track = useTrack();
+  const current = parseRange(searchParams.get("range"));
   return {
-    range: parseRange(searchParams.get("range")),
+    range: current,
     selectRange: (range) => {
+      if (range === current) return;
+      track({ name: "range_changed", symbol, range });
       const next = new URLSearchParams(searchParams.toString());
       next.set("range", range);
       window.history.pushState(null, "", `?${next.toString()}`);
