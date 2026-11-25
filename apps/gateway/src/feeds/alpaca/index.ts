@@ -1,16 +1,19 @@
 import { WebSocket } from "ws";
 import type { Feed } from "../types.ts";
-import { loadAlpacaCalendar } from "./calendar.ts";
-import { loadAlpacaCatalogue } from "./catalogue.ts";
+import { type AlpacaCalendar, loadAlpacaCalendar } from "./calendar.ts";
+import { type AlpacaCatalogue, loadAlpacaCatalogue } from "./catalogue.ts";
 import { type AlpacaConfig, AlpacaStartupError, DATA_FEED, readAlpacaConfig } from "./config.ts";
 import { type AlpacaHttp, AlpacaHttpError, createAlpacaHttp, type Fetch } from "./http.ts";
 import { createAlpacaHistory } from "./history.ts";
-import { createAlpacaLive } from "./live.ts";
+import { type AlpacaLive, createAlpacaLive } from "./live.ts";
 import { createTradeStream, type OpenSocket } from "./stream.ts";
 
 export { AlpacaStartupError } from "./config.ts";
 
 export interface AlpacaFeed extends Feed {
+  readonly live: AlpacaLive;
+  readonly catalogue: AlpacaCatalogue;
+  readonly calendar: AlpacaCalendar;
   close(): void;
 }
 

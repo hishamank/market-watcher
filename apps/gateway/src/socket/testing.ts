@@ -1,18 +1,19 @@
 import { once } from "node:events";
 import type { AddressInfo } from "node:net";
-import { encodeFrame, parseServerFrame, type ServerMessage } from "@mini/contracts";
+import { encodeFrame, type FeedMode, parseServerFrame, type ServerMessage } from "@mini/contracts";
 import type { FastifyInstance, FastifyServerOptions } from "fastify";
 import { type ClientOptions, WebSocket } from "ws";
 import { buildApp } from "../app.ts";
+import type { Feed } from "../feeds/types.ts";
 import { createFakeFeed, type FakeFeed } from "../hub/fake-feed.ts";
 
 export const ALLOWED_ORIGIN = "http://localhost:3000";
 
 type MessageOf<Type extends ServerMessage["type"]> = Extract<ServerMessage, { type: Type }>;
 
-export interface Gateway {
+export interface Gateway<F extends Feed = FakeFeed> {
   readonly app: FastifyInstance;
-  readonly feed: FakeFeed;
+  readonly feed: F;
   url(query?: string): string;
   connect(options?: { query?: string } & ClientOptions): Promise<TestClient>;
   close(): Promise<void>;
@@ -70,13 +71,14 @@ function wrap(socket: WebSocket): TestClient {
   };
 }
 
-export async function startGateway(
-  feed: FakeFeed = createFakeFeed({ recordCalls: true }),
+export async function startGateway<F extends Feed = FakeFeed>(
+  feed: F = createFakeFeed({ recordCalls: true }) as unknown as F,
   logger: FastifyServerOptions["logger"] = false,
-): Promise<Gateway> {
+  feedMode: FeedMode = "simulated",
+): Promise<Gateway<F>> {
   const app = buildApp({
     feed,
-    feedMode: "simulated",
+    feedMode,
     allowedOrigins: new Set([ALLOWED_ORIGIN]),
     logger,
   });
@@ -97,7 +99,7 @@ export async function startGateway(
   };
 }
 
-export function serverSockets(gateway: Gateway): WebSocket[] {
+export function serverSockets(gateway: Gateway<Feed>): WebSocket[] {
   return [...gateway.app.websocketServer.clients];
 }
 
