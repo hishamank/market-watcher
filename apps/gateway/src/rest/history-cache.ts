@@ -26,8 +26,14 @@ export interface HistoryCacheResult {
   ageMs?: number;
 }
 
+export interface HistoryCacheStats {
+  hits: number;
+  misses: number;
+}
+
 export interface HistoryCache {
   get(symbol: string, range: Range): Promise<HistoryCacheResult>;
+  stats(): HistoryCacheStats;
   close(): void;
 }
 
@@ -128,6 +134,7 @@ export function createHistoryCache(options: HistoryCacheOptions): HistoryCache {
     lastClosedAt: undefined,
   };
 
+  const counts: HistoryCacheStats = { hits: 0, misses: 0 };
   const stopStatus = options.calendar.onStatusChange((status) => {
     syncStatus(state, status, options.now());
   });
@@ -148,6 +155,7 @@ export function createHistoryCache(options: HistoryCacheOptions): HistoryCache {
         state.lastClosedAt,
         options.calendar.session(currentNow).open,
       );
+      if (entryState !== "expired") counts.hits += 1;
       if (entryState === "fresh") {
         touchEntry(state.entries, key, entry);
         return { series: entry.series };
@@ -159,6 +167,7 @@ export function createHistoryCache(options: HistoryCacheOptions): HistoryCache {
       }
     }
 
+    counts.misses += 1;
     try {
       const series = await refreshEntry(state, options, key, symbol, range, currentNow);
       return { series };
@@ -176,6 +185,7 @@ export function createHistoryCache(options: HistoryCacheOptions): HistoryCache {
 
   return {
     get,
+    stats: () => ({ ...counts }),
     close: () => {
       stopStatus();
       state.controllers.forEach((controller) =>

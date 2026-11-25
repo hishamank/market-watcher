@@ -2,6 +2,8 @@
 
 import { useStock, useT } from "@mini/core";
 import Link from "next/link";
+import { useState } from "react";
+import { DetailError } from "../components/detail-error.tsx";
 import { ChevronStartIcon } from "../components/icons.tsx";
 import { RangeTabs } from "../components/range-tabs.tsx";
 import { DetailSkeleton } from "../components/detail-skeleton.tsx";
@@ -9,21 +11,34 @@ import { ConnectedDetailHeader } from "./connected-detail-header.tsx";
 import { ConnectedPriceChart } from "./connected-price-chart.tsx";
 import { ConnectedDetailFacts } from "./connected-detail-facts.tsx";
 import { ListPane } from "./list-pane.tsx";
+import { scrubFor, type ScrubSelection } from "./scrub-selection.ts";
 import { useRangeParam } from "./use-range-param.ts";
 
 function DetailCard({ symbol }: { symbol: string }) {
   const { range, selectRange } = useRangeParam();
-  const stock = useStock(symbol).data?.stock;
+  const query = useStock(symbol);
+  const [selection, setSelection] = useState<ScrubSelection>();
+  const scrub = scrubFor(selection, range);
+  const stock = query.data?.stock;
   if (stock === undefined) {
-    return <DetailSkeleton />;
+    return query.status === "error" ? (
+      <DetailError onRetry={() => void query.refetch()} />
+    ) : (
+      <DetailSkeleton />
+    );
   }
   return (
     <>
       <div className="px-16 pt-16 md:p-0">
-        <ConnectedDetailHeader stock={stock} range={range} />
+        <ConnectedDetailHeader stock={stock} range={range} scrub={scrub} />
       </div>
       <div className="px-16 md:px-0 md:pt-8">
-        <ConnectedPriceChart symbol={symbol} range={range} />
+        <ConnectedPriceChart
+          symbol={symbol}
+          range={range}
+          scrub={scrub}
+          onScrub={(point) => setSelection(point && { range, point })}
+        />
       </div>
       <div className="px-16 pt-8 md:px-0 md:pt-12">
         <RangeTabs range={range} onSelect={selectRange} />

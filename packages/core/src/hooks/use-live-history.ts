@@ -34,10 +34,14 @@ function baselineOf(history: HistoryResponse): string | undefined {
   return history.range === "1D" ? history.previousClose : history.bars[0]?.close;
 }
 
-function rangeChangeOf(baseline: string | undefined, bars: readonly Bar[]): Change | undefined {
-  const last = bars.at(-1);
-  if (baseline === undefined || last === undefined) return undefined;
-  return changeBetween(baseline, last.close);
+function rangeChangeOf(
+  baseline: string | undefined,
+  bars: readonly Bar[],
+  livePrice: string | undefined,
+): Change | undefined {
+  const end = livePrice ?? bars.at(-1)?.close;
+  if (baseline === undefined || end === undefined) return undefined;
+  return changeBetween(baseline, end);
 }
 
 function asOfOf(history: HistoryResponse, updatedAt: number): number | undefined {
@@ -67,14 +71,15 @@ function deriveLiveHistory(input: HistoryInputs, quote: Quote | undefined): Live
       asOf: undefined,
     };
   }
-  const bars = data.ageMs === undefined ? mergeLiveQuote(data, quote) : data.bars;
+  const fallback = data.ageMs !== undefined;
+  const bars = fallback ? data.bars : mergeLiveQuote(data, quote);
   const baseline = baselineOf(data);
   return {
     ...base,
     bars,
     baseline,
     previousClose: data.previousClose,
-    rangeChange: rangeChangeOf(baseline, bars),
+    rangeChange: rangeChangeOf(baseline, bars, fallback ? quote?.price : undefined),
     session: data.range === "1D" ? data.session : undefined,
     ageMs: data.ageMs,
     asOf: asOfOf(data, dataUpdatedAt),

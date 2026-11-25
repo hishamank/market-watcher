@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { aaplQuote } from "./fixtures.ts";
 import { BAR_SIZE_BY_RANGE, RANGES } from "./range.ts";
 import {
+  HealthResponseSchema,
   HistoryQuerySchema,
   type HistoryResponse,
   HistoryResponseSchema,
@@ -155,5 +156,17 @@ describe("REST inputs and errors", () => {
         error: { code: "not_found", message: "Missing envelope" },
       }).success,
     ).toBe(false);
+  });
+});
+
+describe("health response", () => {
+  it("round-trips connections, upstream symbols and the cache hit rate", () => {
+    const health = { connections: 2, upstreamSymbols: 30, historyCacheHitRate: 0.75 };
+    expect(HealthResponseSchema.parse(roundTrip(health))).toEqual(health);
+  });
+
+  it("rejects a hit rate outside zero to one", () => {
+    const health = { connections: 0, upstreamSymbols: 0, historyCacheHitRate: 1.5 };
+    expect(HealthResponseSchema.safeParse(health).success).toBe(false);
   });
 });

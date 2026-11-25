@@ -82,7 +82,7 @@ test("D2 range tabs set the URL, the header change and the chart, with back and 
       direction ?? "",
     );
     await expect(page.getByTestId("detail-change")).toHaveText(
-      /^([+−][\d,.]+ \([+−][\d.]+%\)|0\.00 \(0\.00%\))$/,
+      /^([+−][\d,.]+ \(([+−][\d.]+|0\.00)%\)|0\.00 \(0\.00%\))$/,
     );
   }
   await page.goBack();

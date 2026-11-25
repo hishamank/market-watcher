@@ -21,6 +21,7 @@ const FROZEN_RUNTIME_EXPORTS = [
   "stockQueryOptions",
   "stocksBySymbolsQueryOptions",
   "useChaosControls",
+  "useConnectionHealth",
   "useConnectionStatus",
   "useHistory",
   "useLiveHistory",

@@ -1,8 +1,8 @@
 import type { Change } from "@mini/contracts";
 import type { FlashDirection } from "@mini/core";
 import { ChangePill } from "./change-pill.tsx";
-import { DirectionIcon } from "./icons.tsx";
 import { PriceCell } from "./price-cell.tsx";
+import { Skeleton } from "./skeleton.tsx";
 import { StarButton } from "./star-button.tsx";
 
 export interface DetailHeaderProps {
@@ -11,6 +11,7 @@ export interface DetailHeaderProps {
   price: string;
   change: string;
   rangeChange: Change | undefined;
+  changeLoading: boolean;
   rangeLabel: string;
   stale: boolean;
   flash: FlashDirection | undefined;
@@ -27,7 +28,7 @@ function UnknownChange() {
       data-direction="flat"
       className="inline-flex items-center gap-[5px] rounded-pill bg-fill px-10 py-[3px] text-label leading-[18px] text-flat"
     >
-      <DirectionIcon direction="flat" />—
+      —
     </bdi>
   );
 }
@@ -66,7 +67,9 @@ export function DetailHeader(props: DetailHeaderProps) {
         />
       </div>
       <div className="mt-6 flex flex-wrap items-center gap-8 text-label font-normal text-text-secondary">
-        {rangeChange === undefined ? (
+        {props.changeLoading ? (
+          <Skeleton className="h-[24px] w-[132px]" pill />
+        ) : rangeChange === undefined ? (
           <UnknownChange />
         ) : (
           <ChangePill
@@ -79,7 +82,7 @@ export function DetailHeader(props: DetailHeaderProps) {
             large
           />
         )}
-        <span data-testid="detail-change-label">{props.rangeLabel}</span>
+        <bdi data-testid="detail-change-label">{props.rangeLabel}</bdi>
       </div>
     </header>
   );

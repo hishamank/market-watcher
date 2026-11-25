@@ -122,6 +122,12 @@ export const HistoryQuerySchema = z.object({
   range: RangeSchema.default("1D"),
 });
 
+export const HealthResponseSchema = z.object({
+  connections: z.int().nonnegative(),
+  upstreamSymbols: z.int().nonnegative(),
+  historyCacheHitRate: z.number().min(0).max(1),
+});
+
 export type Stock = z.infer<typeof StockSchema>;
 export type StockListResponse = z.infer<typeof StockListResponseSchema>;
 export type StockDetailResponse = z.infer<typeof StockDetailResponseSchema>;
@@ -133,6 +139,7 @@ export type RestErrorResponse = z.infer<typeof RestErrorResponseSchema>;
 export type StockListQuery = z.infer<typeof StockListQuerySchema>;
 export type StockSymbolParams = z.infer<typeof StockSymbolParamsSchema>;
 export type HistoryQuery = z.infer<typeof HistoryQuerySchema>;
+export type HealthResponse = z.infer<typeof HealthResponseSchema>;
 export type SearchQuery = z.infer<typeof SearchQuerySchema>;
 export type SearchMatch = z.infer<typeof SearchMatchSchema>;
 export type SearchResponse = z.infer<typeof SearchResponseSchema>;

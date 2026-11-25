@@ -1,6 +1,6 @@
 "use client";
 
-import type { Range } from "@mini/contracts";
+import { changeBetween, type Range } from "@mini/contracts";
 import {
   directionOf,
   formatMarketDate,
@@ -9,10 +9,14 @@ import {
   formatPrice,
   useLiveHistory,
   useT,
+  type LiveHistoryResult,
 } from "@mini/core";
+import type { ChartReadoutValue } from "../components/chart-states.tsx";
 import { PriceChart, type ChartState } from "../components/price-chart.tsx";
 import type { ChartFormatters } from "../integrations/chart/chart-options.ts";
+import type { ScrubListener, ScrubPoint } from "../integrations/chart/use-chart-scrub.ts";
 import { usePriceChart } from "../integrations/chart/use-price-chart.ts";
+import { formatScrubTime } from "./scrub-time.ts";
 
 const formatters: ChartFormatters = {
   time: (epochMs) => formatMarketDateTime(epochMs),
@@ -22,13 +26,33 @@ const formatters: ChartFormatters = {
       : formatMarketDate(epochMs, { includeYear: kind === "year" }),
 };
 
-const states: Record<"pending" | "success" | "error", ChartState> = {
-  pending: "loading",
-  success: "ready",
-  error: "error",
-};
+export interface ConnectedPriceChartProps {
+  symbol: string;
+  range: Range;
+  scrub: ScrubPoint | undefined;
+  onScrub: ScrubListener;
+}
 
-export function ConnectedPriceChart({ symbol, range }: { symbol: string; range: Range }) {
+function chartStateOf(history: LiveHistoryResult): ChartState {
+  if (history.previousClose !== undefined) return "ready";
+  return history.status === "error" ? "error" : "loading";
+}
+
+function readoutOf(
+  range: Range,
+  baseline: string | undefined,
+  scrub: ScrubPoint | undefined,
+): ChartReadoutValue | undefined {
+  if (scrub === undefined || baseline === undefined) return undefined;
+  return {
+    time: formatScrubTime(range, scrub.time),
+    price: scrub.close,
+    change: changeBetween(baseline, scrub.close),
+    fraction: scrub.fraction,
+  };
+}
+
+export function ConnectedPriceChart({ symbol, range, scrub, onScrub }: ConnectedPriceChartProps) {
   const t = useT();
   const history = useLiveHistory(symbol, range);
   const direction =
@@ -41,11 +65,13 @@ export function ConnectedPriceChart({ symbol, range }: { symbol: string; range: 
     session: history.session,
     previousClose,
     direction,
+    muted: history.ageMs !== undefined,
     formatters,
+    onScrub,
   });
   return (
     <PriceChart
-      state={states[history.status]}
+      state={chartStateOf(history)}
       direction={direction}
       drawn={chart.drawn}
       label={t("detail.chart.label", { range: t(`detail.range.${range}`) })}
@@ -56,6 +82,15 @@ export function ConnectedPriceChart({ symbol, range }: { symbol: string; range: 
               price: formatPrice(previousClose).replace("$", ""),
             })
       }
+      asOfLabel={
+        history.asOf === undefined
+          ? undefined
+          : t("detail.chart.asOf", { time: formatMarketTime(history.asOf) })
+      }
+      readout={readoutOf(range, history.baseline, scrub)}
+      onRetry={() => void history.refetch()}
+      onKeyDown={chart.scrub.onKeyDown}
+      onBlur={chart.scrub.onBlur}
       containerRef={chart.containerRef}
       livePointRef={chart.overlays.livePoint}
       previousCloseRef={chart.overlays.previousClose}

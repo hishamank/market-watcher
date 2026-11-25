@@ -12,6 +12,10 @@ import { createI18n, type I18nService } from "./i18n/create-i18n.ts";
 import type { AppLifecycle } from "./platform/app-lifecycle.ts";
 import type { KeyValueStore } from "./platform/key-value-store.ts";
 import type { NetworkStatus } from "./platform/network-status.ts";
+import {
+  createConnectionHealth,
+  type ConnectionHealthRecorder,
+} from "./realtime/connection-health.ts";
 import { createQuoteStore, type QuoteStore } from "./realtime/quote-store.ts";
 import { createSocketClient } from "./realtime/socket-client.ts";
 import type { SocketClient } from "./realtime/socket-types.ts";
@@ -42,6 +46,7 @@ export interface CoreContextValue {
   quoteStore: QuoteStore;
   queryCache: QueryCache | undefined;
   socketClient: SocketClient;
+  health: ConnectionHealthRecorder;
   restClient: RestClient;
   searchStocks: SearchFetcher;
   watchlistStore: WatchlistStore;
@@ -55,13 +60,16 @@ export function createCoreServices(
   queryClient?: QueryClient,
 ): CoreContextValue {
   const quoteStore = createQuoteStore();
+  const health = createConnectionHealth();
   const socketClient = createSocketClient({
     url: buildSocketUrl(platform.gatewayUrl),
     quoteStore,
+    health,
     network: platform.network,
     lifecycle: platform.lifecycle,
     socketFactory: platform.socketFactory ?? createDefaultSocket,
   });
+  socketClient.subscribeReconnect(health.reconnect);
   const i18n = createI18n(platform.locale);
   const analytics = platform.analytics ?? createNoopAnalytics();
   return {
@@ -72,6 +80,7 @@ export function createCoreServices(
     quoteStore,
     queryCache: queryClient?.getQueryCache(),
     socketClient,
+    health,
     restClient: createRestClient({ gatewayUrl: platform.gatewayUrl, fetch: platform.fetch }),
     searchStocks: createSearchFetcher({ gatewayUrl: platform.gatewayUrl, fetch: platform.fetch }),
     watchlistStore: createWatchlistStore(platform.storage),

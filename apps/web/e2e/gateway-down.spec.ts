@@ -34,3 +34,28 @@ test("L4 list error offers retry and the list returns without a reload", async (
     stopGatewayGroup(restarted.pid);
   }
 });
+
+test("D1 a stock that never loads shows an error with retry instead of a lasting skeleton", async ({
+  page,
+}) => {
+  test.setTimeout(90_000);
+  if (await gatewayAnswers()) stopGatewayGroup(Number(readFileSync(gatewayPidFile, "utf8")));
+  await expect.poll(gatewayAnswers, { timeout: 10_000 }).toBe(false);
+  const restarted: { pid?: number | undefined } = {};
+  try {
+    await page.goto("/stocks/AAPL");
+    await expect(page.getByTestId("detail-error")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByTestId("detail-header")).toHaveCount(0);
+
+    restarted.pid = startGateway(true).pid;
+    await expect.poll(gatewayAnswers, { timeout: 30_000 }).toBe(true);
+    await page.getByTestId("detail-retry").click();
+    await expect(page.getByTestId("detail-header")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByTestId("detail-error")).toHaveCount(0);
+    await expect(page.getByTestId("price-chart")).toHaveAttribute("data-state", "ready", {
+      timeout: 30_000,
+    });
+  } finally {
+    stopGatewayGroup(restarted.pid);
+  }
+});
