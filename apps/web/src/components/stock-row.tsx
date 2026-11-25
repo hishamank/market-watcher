@@ -5,7 +5,7 @@ import { PriceCell } from "./price-cell.tsx";
 import { StarButton } from "./star-button.tsx";
 
 export const tableColumns =
-  "xl:grid xl:grid-cols-[minmax(0,1fr)_88px_110px_128px_96px_124px_124px_44px] xl:gap-x-16 xl:ps-20 xl:pe-8";
+  "list-table:grid list-table:grid-cols-[minmax(0,1fr)_88px_110px_128px_96px_124px_124px_44px] list-table:gap-x-16 list-table:ps-20 list-table:pe-8";
 
 export interface StockRowProps {
   symbol: string;
@@ -22,7 +22,7 @@ export interface StockRowProps {
   onToggleStar: () => void;
 }
 
-const tableOnly = "hidden text-end text-label font-normal text-text-secondary xl:block";
+const tableOnly = "hidden text-end text-label font-normal text-text-secondary list-table:block";
 
 const percentTones = { up: "text-gain", down: "text-loss", flat: "text-flat" } as const;
 
@@ -31,26 +31,28 @@ export function StockRow(props: StockRowProps) {
   return (
     <div
       data-testid={`stock-row-${symbol}`}
-      className={`flex min-h-[68px] items-center ps-16 pe-6 hover:bg-hover xl:min-h-[56px] ${tableColumns}`}
+      className={`flex min-h-[68px] items-center ps-16 pe-6 hover:bg-hover list-table:min-h-[56px] ${tableColumns}`}
     >
       <Link
         href={`/stocks/${symbol}`}
-        prefetch={false}
-        className="-ms-8 flex min-w-0 flex-1 items-center gap-12 self-stretch rounded-md ps-8 focus-visible:outline-offset-[-2px] xl:col-span-7 xl:-mx-8 xl:grid xl:grid-cols-subgrid xl:px-8"
+        className="-ms-8 flex min-w-0 flex-1 items-center gap-12 self-stretch rounded-md ps-8 focus-visible:outline-offset-[-2px] list-table:col-span-7 list-table:-mx-8 list-table:grid list-table:grid-cols-subgrid list-table:px-8"
       >
-        <span className="flex min-w-0 flex-1 flex-col items-start gap-[3px] xl:contents">
+        <span className="flex min-w-0 flex-1 flex-col items-start gap-[3px] list-table:contents">
           <span
             data-testid={`stock-row-name-${symbol}`}
-            className="max-w-full overflow-x-clip text-ellipsis whitespace-nowrap text-body-strong xl:text-body xl:font-medium"
+            className="max-w-full overflow-x-clip text-ellipsis whitespace-nowrap text-body-strong list-table:text-body list-table:font-medium"
           >
             {name}
           </span>
-          <bdi dir="ltr" className="text-caption text-text-muted xl:text-label xl:font-normal">
+          <bdi
+            dir="ltr"
+            className="text-caption text-text-muted list-table:text-label list-table:font-normal"
+          >
             {symbol}
           </bdi>
         </span>
-        <span className="flex shrink-0 flex-col items-end gap-4 xl:contents">
-          <span className="xl:text-end">
+        <span className="flex shrink-0 flex-col items-end gap-4 list-table:contents">
+          <span className="list-table:text-end">
             <PriceCell
               price={props.price}
               change={props.change}
@@ -59,7 +61,7 @@ export function StockRow(props: StockRowProps) {
               testId={`stock-row-price-${symbol}`}
             />
           </span>
-          <span className="xl:justify-self-end">
+          <span className="list-table:justify-self-end">
             <ChangePill
               change={props.change}
               changePercent={props.changePercent}
@@ -67,13 +69,13 @@ export function StockRow(props: StockRowProps) {
               flash={flash}
               flashKey={props.flashKey}
               testId={`stock-row-change-${symbol}`}
-              percentClassName="xl:hidden"
+              percentClassName="list-table:hidden"
             />
           </span>
           <bdi
             dir="ltr"
             data-testid={`stock-row-percent-${symbol}`}
-            className={`hidden text-end text-numeric-change xl:block ${stale ? "text-text-secondary" : percentTones[directionOf(props.change)]}`}
+            className={`hidden text-end text-numeric-change list-table:block ${stale ? "text-text-secondary" : percentTones[directionOf(props.change)]}`}
           >
             {formatSignedPercent(props.changePercent)}
           </bdi>

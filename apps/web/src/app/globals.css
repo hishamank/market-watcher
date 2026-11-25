@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @import "./theme.css";
 
+@custom-variant list-table {
+  @media (width >= 80rem) {
+    &:not(:where([data-list-pane] *)) {
+      @slot;
+    }
+  }
+}
+
 @theme {
   --animate-flash: flash var(--duration-flash) var(--ease-standard) both;
   --animate-skeleton: skeleton 1.2s ease-in-out infinite;
