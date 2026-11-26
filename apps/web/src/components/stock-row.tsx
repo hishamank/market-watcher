@@ -25,6 +25,7 @@ export interface StockRowProps {
   starred: boolean | undefined;
   onToggleStar: () => void;
   morph?: boolean;
+  href?: string;
 }
 
 const tableOnly = "hidden text-end text-label font-normal text-text-secondary list-table:block";
@@ -39,7 +40,7 @@ export function StockRow(props: StockRowProps) {
       className={`flex min-h-[68px] items-center ps-16 pe-6 transition-colors duration-(--duration-fast) ease-standard hover:bg-hover list-table:min-h-[56px] list-compact:min-h-[56px] ${tableColumns}`}
     >
       <Link
-        href={`/stocks/${symbol}`}
+        href={props.href ?? `/stocks/${symbol}`}
         transitionTypes={[OPEN_STOCK]}
         className="-ms-8 flex min-w-0 flex-1 items-center gap-12 self-stretch rounded-md ps-8 focus-visible:outline-offset-[-2px] list-table:col-span-7 list-table:-mx-8 list-table:grid list-table:grid-cols-subgrid list-table:px-8 list-compact:col-span-4 list-compact:-mx-8 list-compact:grid list-compact:grid-cols-subgrid list-compact:px-8"
       >

@@ -11,6 +11,7 @@ export interface SearchViewProps {
   triggerRef: RefObject<HTMLButtonElement | null>;
   listboxId: string;
   optionId: (symbol: string) => string;
+  stockHref: (symbol: string) => string;
   activeOptionId: string | undefined;
   query: string;
   activeQuery: string;
@@ -133,6 +134,7 @@ export function SearchView(props: SearchViewProps) {
             className="flex-1 overflow-y-auto focus-visible:outline-none md:absolute md:inset-x-0 md:top-full md:z-40 md:mt-8 md:max-h-[480px] md:flex-none md:overflow-y-auto md:rounded-lg md:border md:border-border md:bg-raised md:shadow-2 md:motion-safe:animate-dropdown-in md:motion-reduce:animate-fade-in"
           >
             <SearchResultsView
+              stockHref={props.stockHref}
               listboxId={props.listboxId}
               optionId={props.optionId}
               query={props.activeQuery}

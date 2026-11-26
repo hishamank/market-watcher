@@ -10,7 +10,9 @@ function boxes(page: Page) {
     (ids) =>
       ids.map((id) => {
         const box = document.querySelector(`[data-testid="${id}"]`)?.getBoundingClientRect();
-        return box === undefined ? null : [box.x, box.y, box.width, box.height].map(Math.round);
+        return box === undefined
+          ? null
+          : [box.x + window.scrollX, box.y + window.scrollY, box.width, box.height].map(Math.round);
       }),
     steadyIds,
   );

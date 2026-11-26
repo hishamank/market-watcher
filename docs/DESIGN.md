@@ -175,7 +175,7 @@ In React Native, `elevation.1` and `elevation.2` map to shadow properties, and t
 | Button | Steps up 1 px on hover; sinks 1 px and scales to 98.5% on press, 120 ms | Colour only |
 | Connection banner | Expands and slides in, 200 ms; collapses on exit, 200 ms | Appears and disappears at once |
 | Selected segment (view control, range tabs, chaos failure rate) | Indicator slides to the new option, 200 ms | Jumps |
-| Star | Scales from 85% to 100%, 120 ms; 90% while pressed | Fills at once |
+| Star | On a user star only: pops past 100% and settles, thin amber ring expands and fades with six tiny dots, 400 ms; transform and opacity only | Fills at once, no animation |
 | Chart first draw | Line reveals from left to right, 450 ms | Appears at once |
 | Range change | New line fades in, 200 ms | Swaps at once |
 | Live point | Halo pulses, 2 s loop | Static halo |
@@ -195,7 +195,7 @@ In React Native, `elevation.1` and `elevation.2` map to shadow properties, and t
 | 768 px | One centred column, at most 720 px wide. The list and the detail sit in cards (`radius.xl`, `elevation.1`). From 768 px to 1279 px the list is a compact table with a header row: name, symbol, price, day change (money and percent) and the star (ADR 0049). Search is a 380 px field in the header with a dropdown. |
 | 1440 px | `/` shows the list as a table, at most 1120 px wide, with columns for name, symbol, price, day change, day change %, previous close and last update. `/stocks/[symbol]` keeps the list visible in a 400 px pane at the start, with the detail card beside it. |
 
-The list and the detail stay separate routes at every width. The 1440 px detail layout is a proposal: the list pane is the same list component, with the open symbol marked by `aria-current`. Page padding is `space.16` at 360 px and `space.24` from 768 px.
+The list and the detail stay separate routes at every width. From 768 px a back link stays visible above the detail card, including beside the desktop pane. It returns to `/` or `/?view=watchlist`. Row and search links carry `?view=watchlist` into detail URLs; range changes and pane navigation retain it. Missing or unknown view values default to all. The phone header back button uses the same destination. The 1440 px detail layout is a proposal: the list pane is the same list component, with the open symbol marked by `aria-current`. Page padding is `space.16` at 360 px and `space.24` from 768 px.
 
 ## Right to left
 
@@ -254,7 +254,8 @@ Each component lists its anatomy, states, spacing, motion and test IDs.
 
 - **Anatomy.** A 44 px button with a 20 px star icon, `aria-pressed`, label "Star {name}".
 - **States.** Off: outline in `color.textMuted`. On: filled in `color.accentFill`. Loading, before the watchlist is known: outline in `color.border`, not interactive, same size so nothing shifts when it resolves. Focused: focus outline.
-- **Motion.** On: scales from 85% to 100%.
+- **Hover and focus.** Colour answers hover with no square fill. A plain mouse click has no outline; keyboard focus keeps the standard visible focus ring. Other icon buttons keep their hover fill.
+- **Motion.** Only the button the user stars pops from 85% through 125%, settles through 95% to 100%, and emits a thin expanding ring and six tiny outward dots in `color.accentFill`, over `duration.flash` (400 ms) with `easing.standard`. Effects use only transform and opacity, sit inside the 44 px target and ignore pointer events; nothing shifts. Unstarring has no burst. Already-starred buttons stay still on hydration, mount, virtual-list re-entry and cross-view updates. Reduced motion fills immediately with no pop, ring, dots or press animation.
 - **Test IDs.** `star-{SYMBOL}`, `detail-star`, `search-result-star-{SYMBOL}`.
 
 ### All and Watchlist control

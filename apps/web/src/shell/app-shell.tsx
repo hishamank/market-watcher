@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import type { ShellMeta } from "../gateway/shell-meta.ts";
 import { HeaderSearch } from "../search/header-search.tsx";
+import { useListNavigation } from "../integrations/use-list-navigation.ts";
 import { AppHeader } from "./app-header.tsx";
 import { ChaosPanel } from "./chaos-panel.tsx";
 import { usePresence } from "../integrations/use-presence.ts";
@@ -18,6 +19,7 @@ export interface AppShellProps {
 export function AppShell({ meta, children }: AppShellProps) {
   const { status, retryNow } = useConnectionStatus();
   const marketStatus = useMarketStatus(meta.marketStatus);
+  const { listHref } = useListNavigation();
   const showBack = usePathname().startsWith("/stocks/");
   const banner = usePresence<BannerStatus>(
     status === "stale" || status === "offline" ? status : undefined,
@@ -34,6 +36,7 @@ export function AppShell({ meta, children }: AppShellProps) {
         feedMode={meta.feedMode}
         marketStatus={marketStatus}
         showBack={showBack}
+        backHref={listHref}
         search={<HeaderSearch />}
       />
       <ConnectionBanner status={banner.value} open={banner.open} onRetry={retryNow} />

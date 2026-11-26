@@ -20,7 +20,9 @@
 @theme {
   --animate-flash: flash var(--duration-flash) var(--ease-standard) both;
   --animate-skeleton: skeleton 1.2s ease-in-out infinite;
-  --animate-star-on: star-on var(--duration-fast) var(--ease-standard) both;
+  --animate-star-on: star-on var(--duration-flash) var(--ease-standard) both;
+  --animate-star-ring: star-ring var(--duration-flash) var(--ease-standard) both;
+  --animate-star-dot: star-dot var(--duration-flash) var(--ease-standard) both;
   --animate-sheet-in: sheet-in var(--duration-slow) var(--ease-standard) both;
   --animate-fade-in: fade-in var(--duration-fast) var(--ease-standard) both;
   --animate-digit-roll: digit-roll var(--duration-base) var(--ease-standard) both;
@@ -43,8 +45,39 @@
   }
 
   @keyframes star-on {
-    from {
+    0% {
       transform: scale(0.85);
+    }
+    35% {
+      transform: scale(1.25);
+    }
+    65% {
+      transform: scale(0.95);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes star-ring {
+    from {
+      transform: scale(0.5);
+      opacity: 0.7;
+    }
+    to {
+      transform: scale(1.4);
+      opacity: 0;
+    }
+  }
+
+  @keyframes star-dot {
+    from {
+      transform: translateY(-9px) scale(1);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(-19px) scale(0.4);
+      opacity: 0;
     }
   }
 
