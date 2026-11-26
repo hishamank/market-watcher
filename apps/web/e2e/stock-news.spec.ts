@@ -97,7 +97,9 @@ for (const width of [360, 1440]) {
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true,
       );
-      await page.getByTestId("language-toggle").click();
+      await page
+        .getByTestId(colorScheme === "light" ? "language-option-ar" : "language-option-en")
+        .click();
       await expect(page.getByTestId("stock-news")).toContainText(
         colorScheme === "light" ? "أخبار الشركة" : "Company news",
       );

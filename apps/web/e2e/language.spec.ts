@@ -11,12 +11,16 @@ test("G6 the toggle switches to Arabic in place and the server keeps it", async 
   const html = page.locator("html");
   await expect(html).toHaveAttribute("dir", "ltr");
 
-  await page.getByTestId("language-toggle").click();
+  await page.getByTestId("language-option-ar").click();
 
   await expect(html).toHaveAttribute("lang", "ar");
   await expect(html).toHaveAttribute("dir", "rtl");
   await expect(page.getByRole("heading", { name: "الأسواق" })).toBeVisible();
-  await expect(page.getByTestId("language-toggle")).toHaveText("English");
+  await expect(page.getByTestId("language-toggle")).toHaveAttribute("data-locale", "ar");
+  await expect(page.getByRole("button", { name: "العربية" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
   await expect(root).toHaveAttribute("data-connection", "connected");
 
   const served = await (await page.request.get("/")).text();
@@ -24,7 +28,7 @@ test("G6 the toggle switches to Arabic in place and the server keeps it", async 
   await page.reload();
   await expect(page.getByRole("heading", { name: "الأسواق" })).toBeVisible();
 
-  await page.getByTestId("language-toggle").click();
+  await page.getByTestId("language-option-en").click();
   await expect(html).toHaveAttribute("dir", "ltr");
   await expect(page.getByRole("heading", { name: "Markets" })).toBeVisible();
   expect(problems).toEqual([]);

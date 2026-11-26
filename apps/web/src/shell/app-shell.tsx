@@ -43,8 +43,8 @@ export function AppShell({ meta, children }: AppShellProps) {
         backHref={listHref}
         search={
           <>
-            <LanguageToggle />
             <HeaderSearch />
+            <LanguageToggle />
           </>
         }
         themeSwitch={

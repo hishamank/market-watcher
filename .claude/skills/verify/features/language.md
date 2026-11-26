@@ -8,14 +8,14 @@ The header toggle switches the app between English and Arabic in place. Strings,
 
 ## How to get to it (user POV)
 
-- Open `/` and press the "العربية" button beside search. Press "English" to switch back.
+- Open `/` and press "ع" beside the dark mode switch. Press "EN" to switch back.
 - From a detail page the toggle is in the same place.
 
 ## Driving it with bin/journey
 
 Preconditions: the baseline in the README, and a fresh context with no `locale` cookie.
 
-- **Flip (G6).** Wait for `app-root[data-connection="connected"]`, press `language-toggle`, then wait for `html[dir="rtl"]` and `html[lang="ar"]`. `language-toggle[data-locale="ar"]` reads "English". `app-root` is still `connected` and prices keep changing. Evidence: `G6-list-1440.png`.
+- **Flip (G6).** Wait for `app-root[data-connection="connected"]`, press `language-option-ar`, then wait for `html[dir="rtl"]` and `html[lang="ar"]`. `language-toggle[data-locale="ar"]` still reads "EN" then "ع", left to right, and `language-option-ar` has `aria-pressed="true"`. `app-root` is still `connected` and prices keep changing. Evidence: `G6-list-1440.png`.
 - **Server render (G6).** Fetch `/` with the same context. The HTML has `lang="ar"` and `dir="rtl"` on `<html>`. Reload: the page is Arabic with no hydration warning.
 - **Values (G6).** Open `/stocks/AAPL?range=5Y`. Axis dates read "5 يونيو" with Latin digits. Scrub the chart: the header label reads the date first, with "09:30 ET" kept together. The view control and range tab indicators sit under their selected options before and after a flip.
 - **Widths.** Repeat at 360 × 740 with a `locale=ar` cookie: no horizontal scroll on the list or the detail page.
