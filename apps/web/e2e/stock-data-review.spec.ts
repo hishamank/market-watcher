@@ -88,12 +88,10 @@ test("D12 estimate-only earnings omit the summary and give the chart the full de
   await expect(section.locator("dl")).toHaveCount(0);
   await expect(page.getByTestId("earnings-chart")).toContainText("$1.96");
   const width = await section.evaluate((el) => el.clientWidth);
-  const chart = await page
-    .getByTestId("earnings-chart")
-    .evaluate((el) => ({
-      width: el.clientWidth,
-      border: getComputedStyle(el).borderInlineStartWidth,
-    }));
+  const chart = await page.getByTestId("earnings-chart").evaluate((el) => ({
+    width: el.clientWidth,
+    border: getComputedStyle(el).borderInlineStartWidth,
+  }));
   expect(chart.width).toBeGreaterThanOrEqual(width - 48);
   expect(chart.border).toBe("0px");
 });
