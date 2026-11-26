@@ -7,6 +7,14 @@ test("L5 the view toggle writes ?view=watchlist and back restores the view", asy
   const all = page.getByTestId("view-toggle-all");
   const watchlist = page.getByTestId("view-toggle-watchlist");
   await expect(all).toHaveAttribute("aria-current", "page");
+  const serverRenders: string[] = [];
+  page.on("request", (request) => {
+    const url = new URL(request.url());
+    const headers = request.headers();
+    if (url.pathname === "/" && headers.rsc === "1" && !headers["next-router-prefetch"]) {
+      serverRenders.push(url.href);
+    }
+  });
 
   await watchlist.click();
   await expect(page).toHaveURL(/\/\?view=watchlist$/);
@@ -20,6 +28,7 @@ test("L5 the view toggle writes ?view=watchlist and back restores the view", asy
   await page.goBack();
   await expect(page).toHaveURL(/\/\?view=watchlist$/);
   await expect(watchlist).toHaveAttribute("aria-current", "page");
+  expect(serverRenders).toEqual([]);
   expect(problems).toEqual([]);
 });
 
