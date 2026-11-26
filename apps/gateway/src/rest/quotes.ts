@@ -10,19 +10,22 @@ export async function fetchQuotesMap(
   symbols: readonly string[],
   warn: Warn,
   now: () => number,
+  { allowEmpty = false }: { allowEmpty?: boolean } = {},
 ): Promise<Map<string, Quote>> {
   if (symbols.length === 0) return new Map();
   let quotes: Quote[] = [];
+  let failed = false;
   try {
     quotes = await feed.live.snapshot(symbols);
   } catch (err) {
+    failed = true;
     warn({ err, symbols }, "live snapshot failed for REST request");
     quotes = withLastKnown([], symbols, feed.live, feed.calendar, now());
   }
   const available = quotes.filter(
     (quote) => quote.lastKnown || isCurrentQuote(quote, feed.calendar, now()),
   );
-  if (available.length === 0) {
+  if (available.length === 0 && (failed || !allowEmpty)) {
     throw new RestError(503, "unavailable", "Market quotes are temporarily unavailable");
   }
   return new Map(available.map((quote) => [quote.symbol, quote]));

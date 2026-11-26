@@ -19,6 +19,8 @@ export type { ConnectionStatus } from "./realtime/socket-types.ts";
 export { useMarketStatus } from "./hooks/use-market-status.ts";
 
 export { useHistory, useStock, useStockList, useStocks } from "./hooks/use-stocks.ts";
+export { useStockPages } from "./hooks/use-stock-pages.ts";
+export type { StockPagesResult } from "./hooks/use-stock-pages.ts";
 export { useLiveHistory } from "./hooks/use-live-history.ts";
 export type { LiveHistoryResult } from "./hooks/use-live-history.ts";
 export { useWatchlist } from "./hooks/use-watchlist.ts";
@@ -29,6 +31,7 @@ export type { TableColumn, TableColumnsResult } from "./hooks/use-table-columns.
 export {
   historyQueryOptions,
   stockListQueryOptions,
+  stockPagesQueryOptions,
   stockQueryKeys,
   stockQueryOptions,
   stocksBySymbolsQueryOptions,

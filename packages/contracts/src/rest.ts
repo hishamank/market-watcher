@@ -20,6 +20,10 @@ export const StockSchema = z.object({
 
 export const StockListResponseSchema = z.object({ ...envelope, stocks: z.array(StockSchema) });
 
+export const StockPageResponseSchema = StockListResponseSchema.extend({
+  nextCursor: SymbolSchema.nullable(),
+});
+
 export const StockDetailResponseSchema = z.object({ ...envelope, stock: StockSchema });
 
 export const BarSchema = z.object({ time: EpochMsSchema, close: PriceStringSchema });
@@ -63,6 +67,8 @@ export const HistoryResponseSchema = z.discriminatedUnion("range", [
 ]);
 
 export const MAX_STOCKS_QUERY_SYMBOLS = 100;
+export const STOCK_PAGE_SIZE = 50;
+export const MAX_STOCK_PAGE_SIZE = 100;
 export const MAX_SEARCH_QUERY_LENGTH = 100;
 export const MAX_SEARCH_RESULTS = 10;
 
@@ -101,18 +107,26 @@ export const RestErrorResponseSchema = z.object({
   }),
 });
 
-export const StockListQuerySchema = z.object({
-  symbols: z
-    .string()
-    .transform((value) =>
-      value
-        .split(",")
-        .map((item) => item.trim())
-        .filter((item) => item.length > 0),
-    )
-    .pipe(z.array(RequestedSymbolSchema).max(MAX_STOCKS_QUERY_SYMBOLS))
-    .optional(),
-});
+export const StockListQuerySchema = z
+  .object({
+    symbols: z
+      .string()
+      .transform((value) =>
+        value
+          .split(",")
+          .map((item) => item.trim())
+          .filter((item) => item.length > 0),
+      )
+      .pipe(z.array(RequestedSymbolSchema).max(MAX_STOCKS_QUERY_SYMBOLS))
+      .optional(),
+    cursor: SymbolSchema.optional(),
+    limit: z.coerce.number().int().min(1).max(MAX_STOCK_PAGE_SIZE).optional(),
+  })
+  .refine(
+    (query) =>
+      query.symbols === undefined || (query.cursor === undefined && query.limit === undefined),
+    { message: "symbols cannot be combined with cursor or limit", path: ["symbols"] },
+  );
 
 export const StockSymbolParamsSchema = z.object({
   symbol: RequestedSymbolSchema,
@@ -130,6 +144,7 @@ export const HealthResponseSchema = z.object({
 
 export type Stock = z.infer<typeof StockSchema>;
 export type StockListResponse = z.infer<typeof StockListResponseSchema>;
+export type StockPageResponse = z.infer<typeof StockPageResponseSchema>;
 export type StockDetailResponse = z.infer<typeof StockDetailResponseSchema>;
 export type Bar = z.infer<typeof BarSchema>;
 export type Session = z.infer<typeof SessionSchema>;

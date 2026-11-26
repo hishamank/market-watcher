@@ -73,7 +73,11 @@ await step("L3", "at 360 x 740, count rows, scroll to the bottom", async () => {
   const width = await page.evaluate(() => document.documentElement.scrollWidth);
   expect(width).toBeLessThanOrEqual(360);
   await shot("L3-bottom-360");
-  return `${mounted} rows mounted at the top; ${last} priced at the bottom; AAPL unmounted; no horizontal scroll`;
+  const next = (await (await fetch(`${stack.GATEWAY_URL}/stocks?limit=50&cursor=${last}`)).json()).stocks[0].symbol;
+  await expect(page.getByTestId(`stock-row-${next}`)).toBeAttached({ timeout: 10_000 });
+  await expect(page.getByTestId(`stock-row-price-${next}`)).toHaveText(/^\$\d/);
+  await shot("L3-next-page-360");
+  return `${mounted} rows mounted at the top; ${last} priced at the bottom; next page loaded ${next}; AAPL unmounted; no horizontal scroll`;
 });
 
 await j.finish();

@@ -14,12 +14,14 @@ export interface VirtualStockListProps {
   rowTestId?: (symbol: string) => string;
   morph?: boolean;
   reflowStar?: ((symbol: string) => void) | undefined;
+  onEndReached?: () => void;
 }
 
 export function VirtualStockList(props: VirtualStockListProps) {
-  const { stocks, listTestId, rowTestId, morph = true, reflowStar } = props;
+  const { stocks, listTestId, rowTestId, morph = true, reflowStar, onEndReached } = props;
   const { rows, paddingStart, paddingEnd, listRef, measureRow } = useWindowRows(
     stocks.map((stock) => stock.symbol),
+    onEndReached,
   );
   return (
     <div className={tableScroll}>
