@@ -2,6 +2,10 @@
 
 A small trading app that shows live US stock prices, price history and a personal watchlist on web and mobile, fed by a market data gateway.
 
+**Company overview**:
+A description and identifying facts about a company or fund, separate from its changing market price.
+_Avoid_: quote, fundamentals dashboard
+
 ## Market data
 
 **Gateway**:

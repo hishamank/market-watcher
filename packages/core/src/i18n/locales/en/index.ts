@@ -1,3 +1,4 @@
+import { profileStrings } from "./profile.ts";
 import { chaosStrings } from "./chaos.ts";
 import { detailStrings } from "./detail.ts";
 import { listStrings } from "./list.ts";
@@ -6,6 +7,7 @@ import { shellStrings } from "./shell.ts";
 import { watchlistStrings } from "./watchlist.ts";
 
 export const en = {
+  ...profileStrings,
   ...shellStrings,
   ...listStrings,
   ...watchlistStrings,

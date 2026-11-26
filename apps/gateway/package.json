@@ -15,7 +15,8 @@
     "@fastify/websocket": "11.3.7",
     "@mini/contracts": "workspace:*",
     "fastify": "5.12.8",
-    "ws": "8.23.0"
+    "ws": "8.23.0",
+    "yahoo-finance2": "4.0.6"
   },
   "devDependencies": {
     "@types/ws": "8.18.2",

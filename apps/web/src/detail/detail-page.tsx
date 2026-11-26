@@ -7,6 +7,7 @@ import { DetailError } from "../components/detail-error.tsx";
 import { ChevronStartIcon } from "../components/icons.tsx";
 import { RangeTabs } from "../components/range-tabs.tsx";
 import { DetailSkeleton } from "../components/detail-skeleton.tsx";
+import { ConnectedCompanyProfile } from "./connected-company-profile.tsx";
 import { ConnectedDetailHeader } from "./connected-detail-header.tsx";
 import { ConnectedPriceChart } from "./connected-price-chart.tsx";
 import { ConnectedDetailFacts } from "./connected-detail-facts.tsx";
@@ -60,7 +61,7 @@ export function DetailPage({ symbol }: { symbol: string }) {
     <main className="flex flex-1 flex-col pb-24 md:p-24">
       <div className="mx-auto flex w-full items-start gap-24 md:max-w-[720px] xl:max-w-[1392px]">
         <ListPane />
-        <div className="flex min-w-0 flex-1 flex-col gap-8 xl:sticky xl:top-24">
+        <div className="flex min-w-0 flex-1 flex-col gap-8">
           <Link
             href={listHref}
             data-testid="detail-back"
@@ -72,6 +73,7 @@ export function DetailPage({ symbol }: { symbol: string }) {
           <section className="flex flex-col md:rounded-xl md:border md:border-border md:bg-surface md:p-24 md:shadow-1">
             <DetailCard symbol={symbol} />
           </section>
+          <ConnectedCompanyProfile key={symbol} symbol={symbol} />
         </div>
       </div>
     </main>

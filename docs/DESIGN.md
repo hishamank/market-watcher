@@ -10,7 +10,7 @@ Graphite is a calm, layered interface for reading prices. Surfaces stack in thre
 
 ## Rules that always hold
 
-- **Data.** Only draw what the gateway provides. Per stock: symbol, name, price, day change (money and percent), previous close, day high and low, time of the last update. Charts: one price per bar. Global: feed mode and market status. Search: symbol and name. No volume, market cap, news, logos, holdings or portfolio value.
+- **Data.** Only draw what the gateway provides. Per stock: symbol, name, price, day change (money and percent), previous close, day high and low, time of the last update. Charts: one price per bar. Global: feed mode and market status. Search: symbol and name. Company overview adds description, sector, industry, exchange and website with separate source attribution. No volume, market cap, news, logos, holdings or portfolio value in this increment.
 - **Gain and loss.** Never colour alone. Every change carries a sign (+ or −) and an up or down arrow. Flat shows a dash and no sign.
 - **Contrast.** Every text and background pair below passes WCAG AA (4.5:1) in both themes. Two limits: do not put `color.textMuted`, `color.accent` or `color.loss` text on `color.fill` in light, and do not put `color.textMuted` on `color.raised` in dark.
 - **Focus.** Every control shows a 2 px `color.focus` outline with a 2 px offset on keyboard focus.
@@ -363,3 +363,7 @@ All sample prices are made-up Simulated values.
 - **1D baseline (decided).** On 1D the header change and the scrub readout measure from the previous close, as drawn (ADR 0029). Every other range measures from its first bar.
 - **Range change when history fails (decided).** For a range that never loaded, the header shows a dash in place of the change. The quote stays as it is: sending each range's first bar with it would change the contract for a rare failure.
 - **Arabic copy.** All Arabic strings on the canvas are placeholders for layout. They need a translator.
+
+### Company overview
+
+A separate surface below the price card on desktop, with the same 24 px inset and aligned edges. On narrow screens use a divider and 16 px page inset. Keep the chart first. Use a 17 px heading, a 15 px description with relaxed line height, an understated Read more control, and a two-column facts grid. Show only supplied fields. Website links keep a visible external-link indicator. A muted source line closes the section. Loading, empty and retry states occupy only this section. Long content scrolls with the page; the expanded detail column is not sticky. Both themes use the existing Graphite tokens.

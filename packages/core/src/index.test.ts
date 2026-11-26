@@ -25,6 +25,7 @@ const FROZEN_RUNTIME_EXPORTS = [
   "stocksBySymbolsQueryOptions",
   "useChaosControls",
   "useColorScheme",
+  "useCompanyProfile",
   "useConnectionHealth",
   "useConnectionStatus",
   "useHistory",

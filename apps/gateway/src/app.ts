@@ -8,6 +8,9 @@ import { registerRestPlugins, type RestRateLimitOptions } from "./rest/plugins.t
 import { restRoute } from "./rest/route.ts";
 import { socketRoute } from "./socket/route.ts";
 
+import { profileRoute } from "./profiles/route.ts";
+import type { ProfileSource } from "./profiles/source.ts";
+
 export { parseRateLimitMax, parseTrustProxy } from "./rest/plugins.ts";
 
 export interface AppOptions {
@@ -21,6 +24,8 @@ export interface AppOptions {
   historyCacheMaxEntries?: number;
   historySourceTimeoutMs?: number;
   rateLimit?: RestRateLimitOptions;
+  profileSource?: ProfileSource;
+  profileTimeoutMs?: number;
 }
 
 export function buildApp({
@@ -55,6 +60,15 @@ export function buildApp({
     ...(historyFallbacks !== undefined ? { historyFallbacks } : {}),
     ...(historyCacheMaxEntries !== undefined ? { historyCacheMaxEntries } : {}),
     ...(historySourceTimeoutMs !== undefined ? { historySourceTimeoutMs } : {}),
+  });
+  app.register(profileRoute, {
+    catalogue: options.feed.catalogue,
+    feedMode: options.feedMode,
+    now,
+    ...(options.profileSource ? { profileSource: options.profileSource } : {}),
+    ...(options.profileTimeoutMs !== undefined
+      ? { profileTimeoutMs: options.profileTimeoutMs }
+      : {}),
   });
   app.register(websocket, { options: { maxPayload: MAX_MESSAGE_BYTES } });
   app.register(socketRoute, { ...options, now, hub });
