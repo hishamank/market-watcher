@@ -1,6 +1,13 @@
 import { useContext, useSyncExternalStore } from "react";
 import { describe, expect, it, vi } from "vitest";
-import { formatMarketDate, useLanguage, useLocale, useT, type LocaleSwitch } from "../index.ts";
+import {
+  formatMarketDate,
+  formatMarketDateTime,
+  useLanguage,
+  useLocale,
+  useT,
+  type LocaleSwitch,
+} from "../index.ts";
 import { createCoreServices } from "../core-provider.tsx";
 import { DEFAULT_LOCALE } from "../format/constants.ts";
 import { createFakeGateway } from "../testing/fake-gateway.ts";
@@ -112,6 +119,9 @@ describe("Arabic", () => {
     expect(useT()("list.view.all")).toBe("الكل");
     expect(formatMarketDate(Date.UTC(2026, 10, 26, 15), { locale: useLocale() })).toBe(
       "\u206726 نوفمبر\u2069",
+    );
+    expect(formatMarketDateTime(Date.UTC(2026, 10, 26, 15), { locale: useLocale() })).toBe(
+      "\u206726 نوفمبر، 10:00\u200E ET\u2069",
     );
   });
 

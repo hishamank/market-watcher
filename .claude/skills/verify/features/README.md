@@ -34,5 +34,6 @@ Each file has an H1 and a one-paragraph description, then exactly these H2s in t
 - [Watchlist](./watchlist.md): starring from a row, the detail page and search, plus order, persistence, cross-tab sync, empty and corrupt storage, and symbols outside the list.
 - [Stock list](./stock-list.md): the first paint from the server, live ticks and flash, virtualisation at phone width, and the All and Watchlist toggle.
 - [Stock detail](./stock-detail.md): opening a stock, the live chart point, scrubbing, range switching, deep links, the unknown-symbol 404 and phone back.
+- [Language](./language.md): the English and Arabic toggle, the in-place switch to right to left, and the server render from the `locale` cookie.
 - [Connection and chaos](./connection.md): the feed mode badge, the chaos panel, dropped and offline connections, forcing the market closed, and gateway health.
 - The Expo app (M1 to M5) is walked on a phone or emulator. See [`../mobile.md`](../mobile.md).

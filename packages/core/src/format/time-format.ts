@@ -13,6 +13,7 @@ export interface MarketDateOptions {
 
 const RIGHT_TO_LEFT_ISOLATE = "\u2067";
 const POP_DIRECTIONAL_ISOLATE = "\u2069";
+const LEFT_TO_RIGHT_MARK = "\u200E";
 
 function isolateDate(formatted: string, locale: string): string {
   return parseLocale(locale) === "ar"
@@ -75,8 +76,7 @@ export function formatMarketDateTime(epochMs: number, options: MarketTimeOptions
     hourCycle: "h23",
   });
   const formatted = formatter.format(new Date(epochMs));
-  return isolateDate(
-    options.label === false ? formatted : `${formatted} ${MARKET_TIME_ZONE_LABEL}`,
-    locale,
-  );
+  if (options.label === false) return isolateDate(formatted, locale);
+  const mark = parseLocale(locale) === "ar" ? LEFT_TO_RIGHT_MARK : "";
+  return isolateDate(`${formatted}${mark} ${MARKET_TIME_ZONE_LABEL}`, locale);
 }
