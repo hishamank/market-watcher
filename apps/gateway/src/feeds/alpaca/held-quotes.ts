@@ -1,4 +1,4 @@
-import type { Quote } from "@mini/contracts";
+import { joinRanges, type Quote, widenRange } from "@mini/contracts";
 import { buildQuote } from "./quotes.ts";
 import type { MarketMoment } from "./snapshots.ts";
 
@@ -34,8 +34,21 @@ function sameQuote(a: Quote | undefined, b: Quote): boolean {
     a !== undefined &&
     a.price === b.price &&
     a.previousClose === b.previousClose &&
-    a.timestamp === b.timestamp
+    a.timestamp === b.timestamp &&
+    a.dayRange?.low === b.dayRange?.low &&
+    a.dayRange?.high === b.dayRange?.high
   );
+}
+
+function keepRange(held: Held | undefined, quote: Quote, session: string): Quote {
+  const kept = held?.session === session ? held.quote.dayRange : undefined;
+  if (kept === undefined) {
+    return quote;
+  }
+  const dayRange = quote.dayRange
+    ? joinRanges(kept, quote.dayRange)
+    : widenRange(kept, quote.price);
+  return { ...quote, dayRange };
 }
 
 export function createHeldQuotes(
@@ -46,8 +59,10 @@ export function createHeldQuotes(
   const waiting = new Map<string, StreamTrade>();
   const listeners = new Set<(quote: Quote) => void>();
 
-  const record = (quote: Quote, session: string): void => {
-    const changed = !sameQuote(latest.get(quote.symbol)?.quote, quote);
+  const record = (fresh: Quote, session: string): void => {
+    const held = latest.get(fresh.symbol);
+    const quote = keepRange(held, fresh, session);
+    const changed = !sameQuote(held?.quote, quote);
     latest.set(quote.symbol, { quote, at: now(), session });
     if (changed && isSubscribed(quote.symbol)) {
       listeners.forEach((listener) => listener(quote));
@@ -59,7 +74,8 @@ export function createHeldQuotes(
     if (held === undefined || held.session !== trade.session) {
       return false;
     }
-    const quote = buildQuote(symbol, trade.price, held.quote.previousClose, trade.time);
+    const range = held.quote.dayRange ?? { low: trade.price, high: trade.price };
+    const quote = buildQuote(symbol, trade.price, held.quote.previousClose, trade.time, range);
     if (quote !== undefined && quote.timestamp >= held.quote.timestamp) {
       record(quote, trade.session);
     }

@@ -14,6 +14,8 @@ export function StockListHeader() {
       <span className="text-end">{t("list.column.change")}</span>
       <span className="text-end list-compact:hidden">{t("list.column.changePercent")}</span>
       <span className="text-end list-compact:hidden">{t("list.column.previousClose")}</span>
+      <span className="hidden text-end list-wide:block">{t("list.column.dayHigh")}</span>
+      <span className="hidden text-end list-wide:block">{t("list.column.dayLow")}</span>
       <span className="text-end list-compact:hidden">{t("list.column.lastUpdate")}</span>
       <span />
     </div>

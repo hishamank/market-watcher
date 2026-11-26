@@ -1,4 +1,4 @@
-import type { Quote } from "@mini/contracts";
+import type { PriceRange, Quote } from "@mini/contracts";
 import { DATA_FEED, SNAPSHOT_BATCH_SIZE } from "./config.ts";
 import { epochMs, type Fields, isFields, nested, text } from "./fields.ts";
 import type { AlpacaHttp } from "./http.ts";
@@ -8,6 +8,7 @@ import { buildQuote, type TradingDay } from "./quotes.ts";
 export interface DailyBar {
   readonly date: string;
   readonly close: string;
+  readonly range?: PriceRange;
 }
 
 interface Trade {
@@ -30,7 +31,13 @@ export interface MarketMoment {
 export function dailyBar(fields: Fields | undefined): DailyBar | undefined {
   const time = epochMs(fields && text(fields, "t"));
   const close = fields && text(fields, "c");
-  return time === undefined || close === undefined ? undefined : { date: newYorkDate(time), close };
+  const low = fields && text(fields, "l");
+  const high = fields && text(fields, "h");
+  if (time === undefined || close === undefined) {
+    return undefined;
+  }
+  const range = low !== undefined && high !== undefined ? { range: { low, high } } : {};
+  return { date: newYorkDate(time), close, ...range };
 }
 
 function trade(fields: Fields | undefined): Trade | undefined {
@@ -75,10 +82,11 @@ export function quoteFromSnapshot(
   const inSession =
     open && latest !== undefined && latest.time >= day.open && latest.time < day.close;
   if (inSession) {
-    return buildQuote(symbol, latest.price, baseline, latest.time);
+    const range = sessionBar?.range ?? { low: latest.price, high: latest.price };
+    return buildQuote(symbol, latest.price, baseline, latest.time, range);
   }
   const price = sessionBar?.close ?? baseline;
-  return buildQuote(symbol, price, baseline, open ? day.open : day.close);
+  return buildQuote(symbol, price, baseline, open ? day.open : day.close, sessionBar?.range);
 }
 
 export function batches(symbols: readonly string[]): string[][] {

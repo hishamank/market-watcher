@@ -4,6 +4,7 @@ import type { Stock } from "@mini/contracts";
 import {
   formatMarketDateTime,
   formatMarketTime,
+  formatPrice,
   useConnectionStatus,
   useLocale,
   useQuote,
@@ -40,6 +41,8 @@ export function ConnectedStockRow({ stock, morph = true, reflowStar }: Connected
       change={quote.change}
       changePercent={quote.changePercent}
       previousClose={quote.previousClose}
+      dayHigh={quote.dayRange ? formatPrice(quote.dayRange.high) : t("quote.dayRange.none")}
+      dayLow={quote.dayRange ? formatPrice(quote.dayRange.low) : t("quote.dayRange.none")}
       lastUpdate={
         quote.lastKnown
           ? formatMarketDateTime(quote.timestamp, { locale })

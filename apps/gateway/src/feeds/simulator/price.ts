@@ -1,4 +1,4 @@
-import { changeBetween, fromUnits, roundToDisplay, type Quote } from "@mini/contracts";
+import { fromUnits, roundToDisplay } from "@mini/contracts";
 import {
   combineHash,
   expFixed,
@@ -166,17 +166,4 @@ export function displayPriceAt(
   basePriceUnits?: bigint,
 ): string {
   return roundToDisplay(fromUnits(priceUnitsAt(seed, symbol, timeMs, basePriceUnits)));
-}
-
-export function quoteAt(
-  seed: string,
-  symbol: string,
-  timeMs: number,
-  basePriceUnits?: bigint,
-): Quote {
-  const timestamp = Math.floor(timeMs);
-  const price = displayPriceAt(seed, symbol, timestamp, basePriceUnits);
-  const previousClose = displayPriceAt(seed, symbol, startOfUtcDay(timestamp), basePriceUnits);
-  const { change, changePercent } = changeBetween(previousClose, price);
-  return { symbol, price, change, changePercent, previousClose, timestamp };
 }

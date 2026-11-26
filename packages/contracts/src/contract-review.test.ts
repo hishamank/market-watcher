@@ -47,6 +47,35 @@ describe("quote precision", () => {
   });
 });
 
+describe("day range", () => {
+  const withRange = (low: string, high: string) => ({ ...aaplQuote, dayRange: { low, high } });
+
+  it("accepts a range that holds the price", () => {
+    expect(QuoteSchema.safeParse(withRange("186.10", "191.25")).success).toBe(true);
+  });
+
+  it("accepts a range that ends at the price", () => {
+    expect(QuoteSchema.safeParse(withRange("187.42", "187.42")).success).toBe(true);
+  });
+
+  it("rejects a high below the price", () => {
+    expect(QuoteSchema.safeParse(withRange("186.10", "187.41")).success).toBe(false);
+  });
+
+  it("rejects a low above the price", () => {
+    expect(QuoteSchema.safeParse(withRange("187.43", "191.25")).success).toBe(false);
+  });
+
+  it("rejects a malformed range in a frame instead of throwing", () => {
+    const frame = JSON.stringify({ type: "quotes", quotes: [withRange("bad", "191.25")] });
+    expect(parseServerFrame(frame).ok).toBe(false);
+  });
+
+  it("rejects a high that is not pre-rounded", () => {
+    expect(QuoteSchema.safeParse(withRange("186.10", "191.255")).success).toBe(false);
+  });
+});
+
 describe("partial subscriptions", () => {
   it("lets the gateway classify symbols the catalogue does not know", () => {
     const frame = JSON.stringify({

@@ -10,6 +10,14 @@
   }
 }
 
+@custom-variant list-wide {
+  @media (width >= 90rem) {
+    &:not(:where([data-list-pane] *)) {
+      @slot;
+    }
+  }
+}
+
 @custom-variant list-compact {
   @media (width >= 48rem) and (width < 80rem) {
     &:not(:where([data-list-pane] *)) {

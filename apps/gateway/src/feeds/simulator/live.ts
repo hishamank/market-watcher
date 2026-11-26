@@ -1,6 +1,6 @@
 import type { Quote } from "@mini/contracts";
 import type { LiveFeed } from "../types.ts";
-import { quoteAt } from "./price.ts";
+import { createDayRangeKeeper, quoteAt } from "./quote.ts";
 
 export interface LiveControl {
   getTickRateMultiplier(): number;
@@ -27,6 +27,9 @@ const MIN_INTERVAL_MS = 10;
 export function createSimulatorLiveFeed(deps: SimulatorLiveDependencies): SimulatorLiveHandle {
   const timers = new Map<string, ReturnType<typeof setTimeout> | null>();
   const listeners = new Set<(quote: Quote) => void>();
+  const keepRange = createDayRangeKeeper();
+  const quoteNow = (symbol: string, now: number): Quote =>
+    keepRange(quoteAt(deps.seed, symbol, now, deps.basePriceUnits(symbol)));
 
   const nextDelayMs = (): number => {
     const rate = deps.baseTicksPerSecond * Math.max(deps.control.getTickRateMultiplier(), 0.01);
@@ -50,7 +53,7 @@ export function createSimulatorLiveFeed(deps: SimulatorLiveDependencies): Simula
     }
     const timer = setTimeout(() => {
       if (!timers.has(symbol) || deps.control.isForceClosed()) return;
-      const quote = quoteAt(deps.seed, symbol, deps.clock(), deps.basePriceUnits(symbol));
+      const quote = quoteNow(symbol, deps.clock());
       for (const listener of listeners) {
         listener(quote);
       }
@@ -75,7 +78,7 @@ export function createSimulatorLiveFeed(deps: SimulatorLiveDependencies): Simula
     },
     snapshot: async (symbols) => {
       const now = deps.clock();
-      return symbols.map((symbol) => quoteAt(deps.seed, symbol, now, deps.basePriceUnits(symbol)));
+      return symbols.map((symbol) => quoteNow(symbol, now));
     },
     onQuote: (listener) => {
       listeners.add(listener);

@@ -17,6 +17,8 @@ test("last-known row and detail show a clock, neutral signed change and visible 
     change: "1.00",
     changePercent: "1.00",
     previousClose: "100.00",
+    dayHigh: "102.00",
+    dayLow: "99.50",
     lastUpdate: "Nov 25, 16:00 ET",
     asOf: "Price as of Nov 25, 16:00 ET",
     stale: false,

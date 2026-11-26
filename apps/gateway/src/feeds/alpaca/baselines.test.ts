@@ -30,6 +30,7 @@ test("before the open, a missing older baseline is fetched as the preceding sess
       change: "1.20",
       changePercent: "0.60",
       previousClose: "200.30",
+      dayRange: { low: "200.55", high: "202.10" },
       timestamp: Date.parse("2025-06-24T20:00:00Z"),
     },
   ]);

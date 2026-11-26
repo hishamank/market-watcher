@@ -4,10 +4,12 @@ import { createSimulatorCalendar } from "./calendar.ts";
 import { createSimulatorCatalogue } from "./catalogue.ts";
 import { createSimulatorHistorySource, type SimulatorFailureRate } from "./history.ts";
 import { createSimulatorLiveFeed } from "./live.ts";
-import { displayPriceAt, quoteAt } from "./price.ts";
+import { displayPriceAt } from "./price.ts";
+import { quoteAt } from "./quote.ts";
 
 export type { SimulatorFailureRate } from "./history.ts";
-export { DAY_MS, displayPriceAt, priceUnitsAt, quoteAt, startOfUtcDay } from "./price.ts";
+export { DAY_MS, displayPriceAt, priceUnitsAt, startOfUtcDay } from "./price.ts";
+export { quoteAt } from "./quote.ts";
 
 export const DEFAULT_SIMULATOR_SEED = "demo-v1";
 export const DEFAULT_BASE_TICKS_PER_SECOND = 3;

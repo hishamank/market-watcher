@@ -10,6 +10,7 @@ export function ConnectedDetailFacts({ stock }: { stock: Stock }) {
   return (
     <DetailFacts
       previousClose={quote.previousClose}
+      dayRange={quote.dayRange}
       lastUpdate={
         quote.lastKnown
           ? formatMarketDateTime(quote.timestamp, { locale })

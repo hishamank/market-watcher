@@ -38,6 +38,16 @@ export function ConnectedDetailFacts({ stock }: { stock: Stock }) {
           value: formatPrice(quote.previousClose),
         },
         {
+          label: t("detail.dayHigh"),
+          testID: "detail-day-high",
+          value: quote.dayRange ? formatPrice(quote.dayRange.high) : t("quote.dayRange.none"),
+        },
+        {
+          label: t("detail.dayLow"),
+          testID: "detail-day-low",
+          value: quote.dayRange ? formatPrice(quote.dayRange.low) : t("quote.dayRange.none"),
+        },
+        {
           label: t("detail.lastUpdate"),
           testID: "detail-last-update",
           value: quote.lastKnown

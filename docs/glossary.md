@@ -47,7 +47,7 @@ Every symbol the current feed mode can price. It is the universe for search and 
 _Avoid_: universe, asset list, symbol list
 
 **Quote**:
-What is currently known about one symbol's price: price, change and percent change against the previous close, and the time it was observed. Its timestamp places it in a trading phase. Opening and closing quotes carry the session open and close times respectively.
+What is currently known about one symbol's price: price, change and percent change against the previous close, the day range when known, and the time it was observed. Its timestamp places it in a trading phase. Opening and closing quotes carry the session open and close times respectively.
 _Avoid_: price (as a noun for the whole record), ticker data
 
 **Snapshot**:
@@ -79,6 +79,10 @@ _Avoid_: current bar, latest candle
 **Previous close**:
 The last close of the session before the current one. Today's change is measured against it.
 _Avoid_: yesterday's close, open
+
+**Day range**:
+The lowest and highest price so far in the session a quote prices, as `low` and `high`. It always holds the price. In Live mode a symbol with no trades in that session has none.
+_Avoid_: day's range, high-low, daily range
 
 **Day change**:
 A quote's change, in money and percent, against the previous close.
