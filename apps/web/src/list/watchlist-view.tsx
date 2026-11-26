@@ -26,6 +26,7 @@ export function WatchlistView() {
       <>
         <EmptyState
           testId="watchlist-empty"
+          starMotion
           icon={<StarIcon />}
           title={t("watchlist.empty.title")}
           help={t("watchlist.empty.help")}
@@ -44,6 +45,7 @@ export function WatchlistView() {
       stocks={state.stocks}
       listTestId="watchlist"
       rowTestId={(symbol) => `watchlist-row-${symbol}`}
+      reflowOnStar={state.stocks.length === 1}
     />
   );
 }

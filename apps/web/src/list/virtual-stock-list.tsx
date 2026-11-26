@@ -1,7 +1,9 @@
 "use client";
 
 import type { Stock } from "@mini/contracts";
+import type { CSSProperties } from "react";
 import { StockListHeader } from "../components/stock-list-header.tsx";
+import { starRowName } from "../integrations/star-motion.ts";
 import { useWindowRows } from "../integrations/use-window-rows.ts";
 import { ConnectedStockRow } from "./connected-stock-row.tsx";
 
@@ -10,10 +12,11 @@ export interface VirtualStockListProps {
   listTestId: string;
   rowTestId?: (symbol: string) => string;
   morph?: boolean;
+  reflowOnStar?: boolean;
 }
 
 export function VirtualStockList(props: VirtualStockListProps) {
-  const { stocks, listTestId, rowTestId, morph = true } = props;
+  const { stocks, listTestId, rowTestId, morph = true, reflowOnStar } = props;
   const { rows, paddingStart, paddingEnd, listRef, measureRow } = useWindowRows(
     stocks.map((stock) => stock.symbol),
   );
@@ -33,9 +36,11 @@ export function VirtualStockList(props: VirtualStockListProps) {
               data-index={row.index}
               data-testid={rowTestId?.(stock.symbol)}
               ref={measureRow}
+              data-star-row
+              style={{ "--star-row": starRowName(stock.symbol) } as CSSProperties}
               className="border-b border-border last:border-b-0"
             >
-              <ConnectedStockRow stock={stock} morph={morph} />
+              <ConnectedStockRow stock={stock} morph={morph} reflowOnStar={reflowOnStar} />
             </li>
           );
         })}

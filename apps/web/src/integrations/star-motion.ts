@@ -1,0 +1,88 @@
+import { duration, easing } from "@mini/tokens";
+import { flushSync } from "react-dom";
+
+const ease = `cubic-bezier(${easing.standard.join(", ")})`;
+const FLIGHT_STEPS = 12;
+const FLIGHT_END_SCALE = 0.6;
+const TARGET_BUMP_SCALE = 1.06;
+
+let current: ViewTransition | undefined;
+
+function reducedMotion(): boolean {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+export function starRowName(symbol: string): string {
+  return `star-row-${symbol.replace(/[^A-Za-z0-9]/g, "-")}`;
+}
+
+export function startStarTransition(starring: boolean, update: () => void): void {
+  if (reducedMotion() || typeof document.startViewTransition !== "function") {
+    update();
+    return;
+  }
+  const root = document.documentElement;
+  root.dataset.starMotion = starring ? "star" : "unstar";
+  const transition = document.startViewTransition(() => flushSync(update));
+  current = transition;
+  void transition.finished.finally(() => {
+    if (current === transition) delete root.dataset.starMotion;
+  });
+}
+
+function flightKeyframes(dx: number, dy: number): Keyframe[] {
+  return Array.from({ length: FLIGHT_STEPS + 1 }, (_, step) => {
+    const t = step / FLIGHT_STEPS;
+    const x = dx * t * t;
+    const y = dy * (1 - (1 - t) * (1 - t));
+    const scale = 1 + (FLIGHT_END_SCALE - 1) * t;
+    return {
+      transform: `translate(${x}px, ${y}px) scale(${scale})`,
+      opacity: t < 0.8 ? 1 : (1 - t) * 5,
+    };
+  });
+}
+
+function visibleTarget(): HTMLElement | undefined {
+  const target = document.querySelector<HTMLElement>("[data-star-target]");
+  if (target === null || target.getAttribute("aria-current") === "page") return undefined;
+  const rect = target.getBoundingClientRect();
+  const onScreen = rect.width > 0 && rect.bottom > 0 && rect.top < window.innerHeight;
+  return onScreen ? target : undefined;
+}
+
+export function flyStarToWatchlist(source: HTMLElement): void {
+  const icon = source.querySelector("svg");
+  const target = visibleTarget();
+  if (icon === null || target === undefined || reducedMotion()) return;
+  const from = icon.getBoundingClientRect();
+  const to = target.getBoundingClientRect();
+  const star = icon.cloneNode(true) as SVGElement;
+  Object.assign(star.style, {
+    position: "fixed",
+    left: `${from.left}px`,
+    top: `${from.top}px`,
+    width: `${from.width}px`,
+    height: `${from.height}px`,
+    fill: "currentColor",
+    color: "var(--color-accent-fill)",
+    pointerEvents: "none",
+    zIndex: "60",
+  });
+  document.body.append(star);
+  const dx = to.left + to.width / 2 - (from.left + from.width / 2);
+  const dy = to.top + to.height / 2 - (from.top + from.height / 2);
+  const flight = star.animate(flightKeyframes(dx, dy), { duration: duration.flash, easing: ease });
+  flight.oncancel = () => star.remove();
+  flight.onfinish = () => {
+    star.remove();
+    target.animate(
+      [
+        { transform: "scale(1)" },
+        { transform: `scale(${TARGET_BUMP_SCALE})` },
+        { transform: "scale(1)" },
+      ],
+      { duration: duration.slow, easing: ease },
+    );
+  };
+}

@@ -1,6 +1,8 @@
 "use client";
 
 import { useStockList, useT } from "@mini/core";
+import type { CSSProperties } from "react";
+import { starRowName } from "../integrations/star-motion.ts";
 import { ConnectedStockRow } from "./connected-stock-row.tsx";
 
 const SUGGESTION_COUNT = 3;
@@ -16,8 +18,13 @@ export function WatchlistSuggestions() {
       </h3>
       <ul>
         {stocks.map((stock) => (
-          <li key={stock.symbol} className="border-t border-border">
-            <ConnectedStockRow stock={stock} />
+          <li
+            key={stock.symbol}
+            data-star-row
+            style={{ "--star-row": starRowName(stock.symbol) } as CSSProperties}
+            className="border-t border-border"
+          >
+            <ConnectedStockRow stock={stock} reflowOnStar />
           </li>
         ))}
       </ul>
