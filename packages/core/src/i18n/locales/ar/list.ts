@@ -19,6 +19,8 @@ export const arListStrings = {
   "list.column.price": "السعر",
   "list.column.change": "تغيّر اليوم",
   "list.column.changePercent": "تغيّر اليوم %",
+  "list.column.dayHigh": "أعلى سعر اليوم",
+  "list.column.dayLow": "أدنى سعر اليوم",
   "list.column.previousClose": "الإغلاق السابق",
   "list.column.lastUpdate": "آخر تحديث",
   "list.lastUpdate": "⁦{{time}} ET⁩",
