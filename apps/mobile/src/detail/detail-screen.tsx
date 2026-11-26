@@ -8,6 +8,7 @@ import { EmptyState } from "../components/empty-state.tsx";
 import { RangeTabs } from "../components/range-tabs.tsx";
 import { SkeletonBlock } from "../components/skeleton.tsx";
 import { useTrackStockOpened } from "../integrations/use-track-stock-opened.ts";
+import { selectionHaptic } from "../platform/haptics.ts";
 import { ConnectedDetailFacts } from "./connected-detail-facts.tsx";
 import { ConnectedDetailHeader } from "./connected-detail-header.tsx";
 import { ConnectedPriceChart } from "./connected-price-chart.tsx";
@@ -19,6 +20,7 @@ function DetailContent({ stock }: { stock: Stock }) {
   const track = useTrack();
   const selectRange = (next: Range) => {
     if (next === range) return;
+    selectionHaptic();
     track({ name: "range_changed", symbol: stock.symbol, range: next });
     setRange(next);
   };

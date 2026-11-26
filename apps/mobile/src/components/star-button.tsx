@@ -1,14 +1,13 @@
 import { useT } from "@mini/core";
-import { duration, easing, radius } from "@mini/tokens";
-import { Pressable, StyleSheet, Text } from "react-native";
-import Animated, { css, cubicBezier } from "react-native-reanimated";
+import { radius } from "@mini/tokens";
+import { useState } from "react";
+import { Pressable, StyleSheet } from "react-native";
+import Animated from "react-native-reanimated";
 import { useReduceMotion } from "../integrations/use-reduce-motion.ts";
+import { tapHaptic } from "../platform/haptics.ts";
 import { usePalette, type Palette } from "../theme/palette.ts";
-
-const starOn = css.keyframes({
-  from: { transform: [{ scale: 0.85 }] },
-  to: { transform: [{ scale: 1 }] },
-});
+import { Icon } from "./icon.tsx";
+import { StarBurst, starOn, starTiming } from "./star-burst.tsx";
 
 export interface StarButtonProps {
   name: string;
@@ -26,6 +25,8 @@ export function StarButton({ name, starred, onToggle, testID }: StarButtonProps)
   const t = useT();
   const palette = usePalette();
   const reduceMotion = useReduceMotion();
+  const [celebrate, setCelebrate] = useState(false);
+  const playing = celebrate && starred === true && !reduceMotion;
   return (
     <Pressable
       testID={testID}
@@ -33,26 +34,23 @@ export function StarButton({ name, starred, onToggle, testID }: StarButtonProps)
       accessibilityLabel={t("star.label", { name })}
       accessibilityState={{ checked: starred === true, disabled: starred === undefined }}
       disabled={starred === undefined}
-      onPress={onToggle}
+      onPress={() => {
+        setCelebrate(starred === false && !reduceMotion);
+        tapHaptic();
+        onToggle();
+      }}
       style={styles.button}
     >
-      <Animated.View style={starred === true && !reduceMotion && motion.starOn}>
-        <Text style={[styles.icon, { color: starTone(starred, palette) }]}>
-          {starred === true ? "★" : "☆"}
-        </Text>
+      {playing ? <StarBurst color={palette.accentFill} /> : null}
+      <Animated.View
+        onCSSAnimationEnd={() => setCelebrate(false)}
+        style={playing ? { animationName: starOn, ...starTiming } : undefined}
+      >
+        <Icon name="star" color={starTone(starred, palette)} filled={starred === true} />
       </Animated.View>
     </Pressable>
   );
 }
-
-const motion = css.create({
-  starOn: {
-    animationName: starOn,
-    animationDuration: duration.fast,
-    animationTimingFunction: cubicBezier(...easing.standard),
-    animationFillMode: "both",
-  },
-});
 
 const styles = StyleSheet.create({
   button: {
@@ -62,5 +60,4 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: radius.md,
   },
-  icon: { fontSize: 20, lineHeight: 24 },
 });

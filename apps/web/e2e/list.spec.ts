@@ -46,24 +46,62 @@ async function readFlash(page: Page) {
   return page.evaluate(() => {
     const node = document.querySelector('[data-testid^="stock-row-price-"][data-flash]');
     if (node === null) return null;
-    const symbol = node.getAttribute("data-testid")?.replace("stock-row-price-", "") ?? "";
-    const ring = document.querySelector(
-      `[data-testid="stock-row-change-${symbol}"] > span[aria-hidden="true"]`,
-    );
+    const tint = node.querySelector(':scope > span[aria-hidden="true"]');
     return {
       flash: node.getAttribute("data-flash"),
-      direction: node.getAttribute("data-direction"),
-      ringDisplay: ring === null ? null : getComputedStyle(ring).display,
+      tintDisplay: tint === null ? null : getComputedStyle(tint).display,
     };
   });
 }
 
-test("L2 visible prices tick and flash in the row's day direction", async ({ page }) => {
+interface SeenFlash {
+  readonly flash: string;
+  readonly delta: number;
+}
+
+async function recordFlashes(page: Page) {
+  await page.evaluate(() => {
+    const priceSelector = '[data-testid^="stock-row-price-"]';
+    const history = new Map<Element, number[]>();
+    const seen: Array<{ flash: string; delta: number }> = [];
+    const valueOf = (node: Element) => Number((node.textContent ?? "").replace(/[^0-9.]/g, ""));
+    const priceOf = (target: Node) =>
+      (target instanceof Element ? target : target.parentElement)?.closest(priceSelector) ?? null;
+    for (const node of document.querySelectorAll(priceSelector)) history.set(node, [valueOf(node)]);
+    new MutationObserver((records) => {
+      for (const record of records) {
+        const node = priceOf(record.target);
+        if (node === null) continue;
+        const values = history.get(node) ?? [];
+        const value = valueOf(node);
+        if (values.at(-1) !== value) values.push(value);
+        history.set(node, values);
+        const flash = node.getAttribute("data-flash");
+        if (record.type === "attributes" && record.oldValue === null && flash !== null) {
+          const [before, after] = values.slice(-2);
+          if (before !== undefined && after !== undefined)
+            seen.push({ flash, delta: after - before });
+        }
+      }
+    }).observe(document.body, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+      attributes: true,
+      attributeOldValue: true,
+      attributeFilter: ["data-flash"],
+    });
+    Object.assign(window, { seenFlashes: seen });
+  });
+}
+
+test("L2 visible prices tick and flash in the tick's direction", async ({ page }) => {
   const problems = collectConsoleProblems(page);
   await page.goto("/");
   await expect(page.getByTestId("app-root")).toHaveAttribute("data-connection", "connected");
   const prices = page.locator('[data-testid^="stock-row-price-"]');
   const before = await prices.allTextContents();
+  await recordFlashes(page);
   await expect
     .poll(async () => (await prices.allTextContents()).join() !== before.join(), {
       timeout: 10_000,
@@ -79,17 +117,22 @@ test("L2 visible prices tick and flash in the row's day direction", async ({ pag
       { timeout: 10_000, intervals: [50] },
     )
     .not.toBeNull();
-  expect(box.seen?.flash).toBe(box.seen?.direction);
-  expect(box.seen?.ringDisplay).toBe("block");
+  expect(box.seen?.tintDisplay).toBe("block");
+  await page.waitForTimeout(3_000);
+  const seen = await page.evaluate(
+    () => (window as unknown as { seenFlashes: SeenFlash[] }).seenFlashes,
+  );
+  expect(seen.length).toBeGreaterThan(0);
+  for (const flash of seen) expect(flash.flash).toBe(flash.delta > 0 ? "up" : "down");
   expect(problems).toEqual([]);
 });
 
-test("L2 with reduced motion data-flash is set but no ring animates", async ({ page }) => {
+test("L2 with reduced motion data-flash is set but no tint animates", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await expect(page.getByTestId("app-root")).toHaveAttribute("data-connection", "connected");
   await expect
-    .poll(async () => (await readFlash(page))?.ringDisplay ?? null, {
+    .poll(async () => (await readFlash(page))?.tintDisplay ?? null, {
       timeout: 10_000,
       intervals: [50],
     })

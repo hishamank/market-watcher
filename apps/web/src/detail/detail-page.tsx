@@ -10,6 +10,7 @@ import { DetailSkeleton } from "../components/detail-skeleton.tsx";
 import { ConnectedDetailHeader } from "./connected-detail-header.tsx";
 import { ConnectedPriceChart } from "./connected-price-chart.tsx";
 import { ConnectedDetailFacts } from "./connected-detail-facts.tsx";
+import { useListNavigation } from "../integrations/use-list-navigation.ts";
 import { ListPane } from "./list-pane.tsx";
 import { scrubFor, type ScrubSelection } from "./scrub-selection.ts";
 import { useTrackStockOpened } from "../integrations/use-track-stock-opened.ts";
@@ -33,7 +34,7 @@ function DetailCard({ symbol }: { symbol: string }) {
       <div className="px-16 pt-16 md:p-0">
         <ConnectedDetailHeader stock={stock} range={range} scrub={scrub} />
       </div>
-      <div className="px-16 md:px-0 md:pt-8">
+      <div className="px-16 md:px-0">
         <ConnectedPriceChart
           symbol={symbol}
           range={range}
@@ -54,18 +55,19 @@ function DetailCard({ symbol }: { symbol: string }) {
 export function DetailPage({ symbol }: { symbol: string }) {
   const t = useT();
   useTrackStockOpened(symbol);
+  const { listHref } = useListNavigation();
   return (
     <main className="flex flex-1 flex-col pb-24 md:p-24">
       <div className="mx-auto flex w-full items-start gap-24 md:max-w-[720px] xl:max-w-[1392px]">
         <ListPane />
         <div className="flex min-w-0 flex-1 flex-col gap-8 xl:sticky xl:top-24">
           <Link
-            href="/"
+            href={listHref}
             data-testid="detail-back"
-            className="hidden min-h-[44px] items-center gap-4 self-start rounded-md pe-12 text-label text-text-secondary md:inline-flex xl:hidden"
+            className="hidden min-h-[44px] items-center gap-4 self-start rounded-md pe-12 text-label text-text-secondary transition-colors duration-(--duration-fast) hover:text-text md:inline-flex"
           >
             <ChevronStartIcon />
-            {t("detail.back")}
+            {t(listHref === "/" ? "detail.back" : "list.view.watchlist")}
           </Link>
           <section className="flex flex-col md:rounded-xl md:border md:border-border md:bg-surface md:p-24 md:shadow-1">
             <DetailCard symbol={symbol} />

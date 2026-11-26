@@ -9,13 +9,25 @@
   }
 }
 
+@custom-variant list-compact {
+  @media (width >= 48rem) and (width < 80rem) {
+    &:not(:where([data-list-pane] *)) {
+      @slot;
+    }
+  }
+}
+
 @theme {
   --animate-flash: flash var(--duration-flash) var(--ease-standard) both;
   --animate-skeleton: skeleton 1.2s ease-in-out infinite;
-  --animate-banner-in: banner-in var(--duration-base) var(--ease-standard) both;
-  --animate-star-on: star-on var(--duration-fast) var(--ease-standard) both;
+  --animate-star-on: star-on var(--duration-flash) var(--ease-standard) both;
+  --animate-star-ring: star-ring var(--duration-flash) var(--ease-standard) both;
+  --animate-star-dot: star-dot var(--duration-flash) var(--ease-standard) both;
   --animate-sheet-in: sheet-in var(--duration-slow) var(--ease-standard) both;
   --animate-fade-in: fade-in var(--duration-fast) var(--ease-standard) both;
+  --animate-digit-roll: digit-roll var(--duration-base) var(--ease-standard) both;
+  --animate-halo: halo 2s ease-out infinite;
+  --animate-dropdown-in: dropdown-in var(--duration-base) var(--ease-standard) both;
 
   @keyframes flash {
     from {
@@ -32,16 +44,40 @@
     }
   }
 
-  @keyframes banner-in {
-    from {
-      opacity: 0;
-      transform: translateY(-100%);
+  @keyframes star-on {
+    0% {
+      transform: scale(0.85);
+    }
+    35% {
+      transform: scale(1.25);
+    }
+    65% {
+      transform: scale(0.95);
+    }
+    100% {
+      transform: scale(1);
     }
   }
 
-  @keyframes star-on {
+  @keyframes star-ring {
     from {
-      transform: scale(0.85);
+      transform: scale(0.5);
+      opacity: 0.7;
+    }
+    to {
+      transform: scale(1.4);
+      opacity: 0;
+    }
+  }
+
+  @keyframes star-dot {
+    from {
+      transform: translateY(-9px) scale(1);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(-19px) scale(0.4);
+      opacity: 0;
     }
   }
 
@@ -56,6 +92,43 @@
     from {
       opacity: 0;
     }
+  }
+
+  @keyframes digit-roll {
+    from {
+      translate: 0 30%;
+    }
+  }
+
+  @keyframes halo {
+    from {
+      opacity: 0.35;
+      scale: 1;
+    }
+    to {
+      opacity: 0;
+      scale: 2.6;
+    }
+  }
+
+  @keyframes dropdown-in {
+    from {
+      opacity: 0;
+      translate: 0 -6px;
+    }
+  }
+}
+
+::view-transition-group(.morph) {
+  animation-duration: var(--duration-slow);
+  animation-timing-function: var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none;
   }
 }
 

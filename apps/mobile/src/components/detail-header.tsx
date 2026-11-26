@@ -61,7 +61,14 @@ export function DetailHeader(props: DetailHeaderProps) {
           testID="detail-star"
         />
       </View>
-      <PriceText price={props.price} stale={stale} testID="detail-price" display />
+      <PriceText
+        price={props.price}
+        stale={stale}
+        flash={props.asOf ? undefined : props.flash}
+        flashKey={props.flashKey}
+        testID="detail-price"
+        display
+      />
       <View style={styles.changeRow}>
         {rangeChange === undefined ? (
           <UnknownChange />
@@ -70,8 +77,6 @@ export function DetailHeader(props: DetailHeaderProps) {
             change={rangeChange.change}
             changePercent={rangeChange.changePercent}
             stale={stale || !!props.asOf}
-            flash={props.asOf ? undefined : props.flash}
-            flashKey={props.flashKey}
             testID="detail-change"
           />
         )}

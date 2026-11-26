@@ -8,6 +8,7 @@ import { StarIcon } from "../components/icons.tsx";
 import { ListError } from "../components/list-error.tsx";
 import { ListSkeleton } from "../components/list-skeleton.tsx";
 import { VirtualStockList } from "./virtual-stock-list.tsx";
+import { WatchlistSuggestions } from "./watchlist-suggestions.tsx";
 import { useWatchlistStocks } from "./watchlist-stocks.ts";
 
 export function WatchlistView() {
@@ -22,17 +23,20 @@ export function WatchlistView() {
   }
   if (state.status === "empty") {
     return (
-      <EmptyState
-        testId="watchlist-empty"
-        icon={<StarIcon />}
-        title={t("watchlist.empty.title")}
-        help={t("watchlist.empty.help")}
-        action={
-          <Link href="/" className={buttonClassName()}>
-            {t("watchlist.empty.action")}
-          </Link>
-        }
-      />
+      <>
+        <EmptyState
+          testId="watchlist-empty"
+          icon={<StarIcon />}
+          title={t("watchlist.empty.title")}
+          help={t("watchlist.empty.help")}
+          action={
+            <Link href="/" className={buttonClassName()}>
+              {t("watchlist.empty.action")}
+            </Link>
+          }
+        />
+        <WatchlistSuggestions />
+      </>
     );
   }
   return (

@@ -22,7 +22,7 @@ vi.mock("../theme/palette.ts", () => ({
   }),
 }));
 vi.mock("./star-button.tsx", () => ({ StarButton: () => null }));
-vi.mock("./flash-ring.tsx", () => ({ FlashRing: () => null }));
+vi.mock("./flash-tint.tsx", () => ({ FlashTint: () => null }));
 
 function elements(node: ReactNode): React.ReactElement<Record<string, unknown>>[] {
   return Children.toArray(node).flatMap((child) =>

@@ -24,6 +24,7 @@ export interface PriceChartProps {
   containerRef: RefObject<HTMLDivElement | null>;
   livePointRef: RefObject<HTMLSpanElement | null>;
   previousCloseRef: RefObject<HTMLSpanElement | null>;
+  plotRef: RefObject<HTMLDivElement | null>;
 }
 
 const pointTones: Record<Direction, string> = {
@@ -54,6 +55,15 @@ export function PriceChart(props: PriceChartProps) {
         className="relative h-[200px] rounded-lg md:h-[344px]"
       >
         <div
+          ref={props.plotRef}
+          aria-hidden="true"
+          className={`group pointer-events-none absolute start-0 end-0 top-0 overflow-hidden ${showChart ? "" : "invisible"}`}
+        >
+          <span className="absolute inset-x-0 top-1/3 border-t border-chart-grid" />
+          <span className="absolute inset-x-0 top-2/3 border-t border-chart-grid" />
+          <span className="absolute inset-y-0 start-0 hidden w-full translate-x-(--future-x) bg-fill/35 group-data-[future=true]:block" />
+        </div>
+        <div
           ref={props.containerRef}
           className={`absolute inset-0 ${showChart ? "" : "invisible"}`}
         />
@@ -64,6 +74,7 @@ export function PriceChart(props: PriceChartProps) {
           className={`pointer-events-none invisible absolute start-0 top-0 ${pointTones[direction]} ${showChart ? "" : "hidden"}`}
         >
           <span className="absolute size-[20px] -translate-1/2 rounded-full bg-current opacity-[0.22]" />
+          <span className="absolute size-[20px] -translate-1/2 rounded-full bg-current opacity-0 motion-safe:animate-halo" />
           <span className="absolute size-[8px] -translate-1/2 rounded-full bg-current" />
         </span>
         {props.previousCloseLabel === undefined || !showChart ? null : (

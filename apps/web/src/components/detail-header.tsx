@@ -1,6 +1,8 @@
 import type { Change } from "@mini/contracts";
 import type { FlashDirection } from "@mini/core";
+import type { FlashRoll } from "../integrations/use-tick-flash.ts";
 import { ChangePill } from "./change-pill.tsx";
+import { Morph } from "./morph.tsx";
 import { PriceCell } from "./price-cell.tsx";
 import { QuoteAsOf } from "./quote-as-of.tsx";
 import { Skeleton } from "./skeleton.tsx";
@@ -19,6 +21,7 @@ export interface DetailHeaderProps {
   stale: boolean;
   flash: FlashDirection | undefined;
   flashKey: number | undefined;
+  flashRoll?: FlashRoll | undefined;
   starred: boolean | undefined;
   onToggleStar: () => void;
 }
@@ -48,9 +51,11 @@ export function DetailHeader(props: DetailHeaderProps) {
           >
             {symbol}
           </bdi>
-          <h2 data-testid="detail-name" className="text-body text-text-secondary">
-            {name}
-          </h2>
+          <Morph name={`stock-name-${symbol}`}>
+            <h2 data-testid="detail-name" className="text-body text-text-secondary">
+              {name}
+            </h2>
+          </Morph>
         </div>
         <StarButton
           name={name}
@@ -60,14 +65,18 @@ export function DetailHeader(props: DetailHeaderProps) {
         />
       </div>
       <div className="mt-8">
-        <PriceCell
-          price={props.price}
-          change={props.change}
-          stale={stale}
-          flash={props.asOf ? undefined : props.flash}
-          testId="detail-price"
-          display
-        />
+        <Morph name={`stock-price-${symbol}`}>
+          <PriceCell
+            price={props.price}
+            change={props.change}
+            stale={stale}
+            flash={props.asOf ? undefined : props.flash}
+            flashKey={props.flashKey}
+            flashRoll={props.flashRoll}
+            testId="detail-price"
+            display
+          />
+        </Morph>
       </div>
       <div className="mt-6 flex flex-wrap items-center gap-8 text-label font-normal text-text-secondary">
         {props.changeLoading ? (
@@ -79,8 +88,6 @@ export function DetailHeader(props: DetailHeaderProps) {
             change={rangeChange.change}
             changePercent={rangeChange.changePercent}
             stale={stale || !!props.asOf}
-            flash={props.asOf ? undefined : props.flash}
-            flashKey={props.flashKey}
             testId="detail-change"
             large
           />

@@ -10,6 +10,7 @@ import { splitHighlight } from "./highlight-match.ts";
 export interface SearchResultsViewProps {
   listboxId: string;
   optionId: (symbol: string) => string;
+  stockHref: (symbol: string) => string;
   query: string;
   status: SearchResult["status"];
   results: readonly SearchMatch[];
@@ -20,9 +21,7 @@ export interface SearchResultsViewProps {
   onToggleStar: (symbol: string) => void;
   onRetry: () => void;
 }
-
 const SKELETON_ROWS = [0, 1, 2, 3] as const;
-
 function HighlightedText({
   text,
   query,
@@ -98,6 +97,7 @@ function SearchResultRow({
   starred,
   onSelect,
   onToggleStar,
+  href,
 }: {
   item: SearchMatch;
   id: string;
@@ -106,6 +106,7 @@ function SearchResultRow({
   starred: boolean | undefined;
   onSelect: () => void;
   onToggleStar: () => void;
+  href: string;
 }) {
   return (
     <div
@@ -113,10 +114,10 @@ function SearchResultRow({
       role="option"
       aria-selected={highlighted}
       data-testid={`search-result-${item.symbol}`}
-      className={`flex min-h-[56px] items-center pe-6 ${highlighted ? "bg-fill" : "hover:bg-hover"}`}
+      className={`flex min-h-[56px] items-center pe-6 transition-colors duration-(--duration-fast) ease-standard ${highlighted ? "bg-fill" : "hover:bg-hover"}`}
     >
       <Link
-        href={`/stocks/${item.symbol}`}
+        href={href}
         onClick={onSelect}
         className="flex min-w-0 flex-1 items-center gap-12 self-stretch ps-16 pe-8 focus-visible:outline-offset-[-2px]"
       >
@@ -140,7 +141,6 @@ function SearchResultRow({
 export function SearchResultsView(props: SearchResultsViewProps) {
   const t = useT();
   const { status, results, query, activeIndex, listboxId, optionId } = props;
-
   if (status === "idle") {
     return (
       <SearchMessageState
@@ -170,7 +170,6 @@ export function SearchResultsView(props: SearchResultsViewProps) {
       />
     );
   }
-
   return (
     <>
       <div
@@ -181,6 +180,7 @@ export function SearchResultsView(props: SearchResultsViewProps) {
       >
         {results.map((item, index) => (
           <SearchResultRow
+            href={props.stockHref(item.symbol)}
             key={item.symbol}
             item={item}
             id={optionId(item.symbol)}

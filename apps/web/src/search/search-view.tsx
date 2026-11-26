@@ -3,6 +3,7 @@ import { type SearchResult, useT } from "@mini/core";
 import type { FocusEvent, KeyboardEvent, RefObject } from "react";
 import { ChevronStartIcon, CloseIcon, SearchIcon, SpinnerIcon } from "../components/icons.tsx";
 import { SearchResultsView } from "./search-results-view.tsx";
+import { iconPressMotion } from "../components/button.tsx";
 
 export interface SearchViewProps {
   containerRef: RefObject<HTMLDivElement | null>;
@@ -10,6 +11,7 @@ export interface SearchViewProps {
   triggerRef: RefObject<HTMLButtonElement | null>;
   listboxId: string;
   optionId: (symbol: string) => string;
+  stockHref: (symbol: string) => string;
   activeOptionId: string | undefined;
   query: string;
   activeQuery: string;
@@ -71,7 +73,7 @@ function SearchField(props: SearchViewProps) {
           type="button"
           aria-label={t("search.clear")}
           onClick={props.onClear}
-          className="grid size-[44px] shrink-0 place-items-center rounded-md text-text-secondary"
+          className={`grid size-[44px] shrink-0 place-items-center rounded-md text-text-secondary ${iconPressMotion}`}
         >
           <CloseIcon />
         </button>
@@ -94,7 +96,7 @@ export function SearchView(props: SearchViewProps) {
         type="button"
         aria-label={t("search.open")}
         onClick={props.onOpenSheet}
-        className="grid size-[44px] shrink-0 place-items-center rounded-md text-text-secondary md:hidden"
+        className={`grid size-[44px] shrink-0 place-items-center rounded-md text-text-secondary md:hidden ${iconPressMotion}`}
       >
         <SearchIcon />
       </button>
@@ -119,7 +121,7 @@ export function SearchView(props: SearchViewProps) {
               type="button"
               aria-label={t("detail.back")}
               onClick={props.onCloseSheet}
-              className="grid size-[44px] shrink-0 place-items-center rounded-md text-text-secondary md:hidden"
+              className={`grid size-[44px] shrink-0 place-items-center rounded-md text-text-secondary md:hidden ${iconPressMotion}`}
             >
               <ChevronStartIcon />
             </button>
@@ -129,9 +131,10 @@ export function SearchView(props: SearchViewProps) {
         {panelOpen || sheetOpen ? (
           <div
             tabIndex={-1}
-            className="flex-1 overflow-y-auto focus-visible:outline-none md:absolute md:inset-x-0 md:top-full md:z-40 md:mt-8 md:max-h-[480px] md:flex-none md:overflow-y-auto md:rounded-lg md:border md:border-border md:bg-raised md:shadow-2"
+            className="flex-1 overflow-y-auto focus-visible:outline-none md:absolute md:inset-x-0 md:top-full md:z-40 md:mt-8 md:max-h-[480px] md:flex-none md:overflow-y-auto md:rounded-lg md:border md:border-border md:bg-raised md:shadow-2 md:motion-safe:animate-dropdown-in md:motion-reduce:animate-fade-in"
           >
             <SearchResultsView
+              stockHref={props.stockHref}
               listboxId={props.listboxId}
               optionId={props.optionId}
               query={props.activeQuery}

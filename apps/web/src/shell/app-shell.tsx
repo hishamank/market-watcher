@@ -5,9 +5,11 @@ import { usePathname } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import type { ShellMeta } from "../gateway/shell-meta.ts";
 import { HeaderSearch } from "../search/header-search.tsx";
+import { useListNavigation } from "../integrations/use-list-navigation.ts";
 import { AppHeader } from "./app-header.tsx";
 import { ChaosPanel } from "./chaos-panel.tsx";
-import { ConnectionBanner } from "./connection-banner.tsx";
+import { usePresence } from "../integrations/use-presence.ts";
+import { ConnectionBanner, type BannerStatus } from "./connection-banner.tsx";
 
 export interface AppShellProps {
   meta: ShellMeta;
@@ -17,7 +19,11 @@ export interface AppShellProps {
 export function AppShell({ meta, children }: AppShellProps) {
   const { status, retryNow } = useConnectionStatus();
   const marketStatus = useMarketStatus(meta.marketStatus);
+  const { listHref } = useListNavigation();
   const showBack = usePathname().startsWith("/stocks/");
+  const banner = usePresence<BannerStatus>(
+    status === "stale" || status === "offline" ? status : undefined,
+  );
   return (
     <div
       data-testid="app-root"
@@ -30,9 +36,10 @@ export function AppShell({ meta, children }: AppShellProps) {
         feedMode={meta.feedMode}
         marketStatus={marketStatus}
         showBack={showBack}
+        backHref={listHref}
         search={<HeaderSearch />}
       />
-      <ConnectionBanner status={status} onRetry={retryNow} />
+      <ConnectionBanner status={banner.value} open={banner.open} onRetry={retryNow} />
       <div className="flex flex-1 flex-col">{children}</div>
       {meta.feedMode === "simulated" ? (
         <Suspense fallback={null}>

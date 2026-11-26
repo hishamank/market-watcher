@@ -8,7 +8,7 @@ A user stars stocks from the list, the detail page or search results. The watchl
 - `W2` watchlist view: rows newest first and ticking, and unstarring removes the row at once.
 - `W3` persistence: stars and their order survive a reload, and are stored in `localStorage["watchlist:v1"]`.
 - `W4` cross-tab sync: a star made in one tab shows in another within 1 s, with no reload.
-- `W5` empty state: `watchlist-empty` shows when nothing is starred.
+- `W5` empty state: `watchlist-empty` shows when nothing is starred, with three live rows in `watchlist-suggestions` to star.
 - `W6` corrupt storage: `watchlist:v1 = "not json"` loads as empty, and starring works again.
 - `W7` symbols outside the 50-symbol list (ABNB, SHOP) appear with name and live price.
 - `D8` star from the detail header agrees with the list.

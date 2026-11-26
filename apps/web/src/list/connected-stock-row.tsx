@@ -9,18 +9,21 @@ import {
   useT,
   useWatchlist,
 } from "@mini/core";
+import { useListNavigation } from "../integrations/use-list-navigation.ts";
 import { StockRow } from "../components/stock-row.tsx";
 import { useTickFlash } from "../integrations/use-tick-flash.ts";
 
-export function ConnectedStockRow({ stock }: { stock: Stock }) {
+export function ConnectedStockRow({ stock, morph = true }: { stock: Stock; morph?: boolean }) {
   const t = useT();
+  const { stockHref } = useListNavigation();
   const quote = useQuote(stock.symbol) ?? stock.quote;
   const { status } = useConnectionStatus();
   const stale = status === "stale" || status === "offline";
-  const { flash, flashKey } = useTickFlash(quote.timestamp, quote.change, stale);
+  const { flash, flashKey, roll } = useTickFlash(quote.price, stale);
   const watchlist = useWatchlist();
   return (
     <StockRow
+      href={stockHref(stock.symbol)}
       symbol={stock.symbol}
       name={stock.name}
       price={quote.price}
@@ -42,8 +45,10 @@ export function ConnectedStockRow({ stock }: { stock: Stock }) {
       stale={stale}
       flash={flash}
       flashKey={flashKey}
+      flashRoll={roll}
       starred={watchlist.isLoaded ? watchlist.isStarred(stock.symbol) : undefined}
       onToggleStar={() => watchlist.toggle(stock.symbol)}
+      morph={morph}
     />
   );
 }

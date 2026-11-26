@@ -4,6 +4,7 @@ import type { SearchMatch } from "@mini/contracts";
 import { useSearch, useWatchlist } from "@mini/core";
 import { useRouter } from "next/navigation";
 import { type FocusEvent, type KeyboardEvent, useId, useRef, useState } from "react";
+import { useListNavigation } from "../integrations/use-list-navigation.ts";
 import { useMediaQuery } from "../integrations/use-media-query.ts";
 import { useModalDialog } from "../integrations/use-modal-dialog.ts";
 import { useScrollActiveOption } from "../integrations/use-scroll-active-option.ts";
@@ -122,6 +123,7 @@ export function HeaderSearch() {
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const { stockHref } = useListNavigation();
   const isDesktop = useMediaQuery("(width >= 48rem)");
   const panel = useSearchPanelState();
   const search = useSearch(panel.query);
@@ -145,6 +147,7 @@ export function HeaderSearch() {
 
   return (
     <SearchView
+      stockHref={stockHref}
       containerRef={containerRef}
       inputRef={inputRef}
       triggerRef={triggerRef}
@@ -176,7 +179,7 @@ export function HeaderSearch() {
           onMove: (delta) => panel.moveActive(delta, search.results.length),
           onChoose: (symbol) => {
             panel.selectResult();
-            router.push(`/stocks/${symbol}`);
+            router.push(stockHref(symbol));
           },
         })
       }

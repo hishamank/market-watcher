@@ -1,23 +1,14 @@
-import {
-  directionOf,
-  formatSignedAmount,
-  formatSignedPercent,
-  type Direction,
-  type FlashDirection,
-} from "@mini/core";
+import { directionOf, formatSignedAmount, formatSignedPercent, type Direction } from "@mini/core";
 import { radius, space } from "@mini/tokens";
 import { StyleSheet, Text, View } from "react-native";
 import { usePalette, type Palette } from "../theme/palette.ts";
 import { textStyles } from "../theme/text-styles.ts";
-import { FlashRing } from "./flash-ring.tsx";
 import { ltr } from "./ltr.ts";
 
 export interface ChangePillProps {
   change: string;
   changePercent: string;
   stale: boolean;
-  flash: FlashDirection | undefined;
-  flashKey: number | undefined;
   testID: string;
 }
 
@@ -31,7 +22,7 @@ function pillTone(direction: Direction, stale: boolean, palette: Palette) {
 }
 
 export function ChangePill(props: ChangePillProps) {
-  const { change, changePercent, stale, flash, flashKey, testID } = props;
+  const { change, changePercent, stale, testID } = props;
   const palette = usePalette();
   const direction = directionOf(change);
   const tone = pillTone(direction, stale, palette);
@@ -39,7 +30,6 @@ export function ChangePill(props: ChangePillProps) {
   return (
     <View testID={testID} style={[styles.pill, { backgroundColor: tone.background }]}>
       <Text style={[textStyles.change, { color: tone.text }]}>{ltr(label)}</Text>
-      {flash === undefined ? null : <FlashRing key={flashKey} color={tone.text} />}
     </View>
   );
 }
