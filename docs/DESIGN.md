@@ -10,7 +10,7 @@ Graphite is a calm, layered interface for reading prices. Surfaces stack in thre
 
 ## Rules that always hold
 
-- **Data.** Only draw what the gateway provides. Per stock: symbol, name, price, day change (money and percent), previous close, day high and low, time of the last update. Charts: one price per bar. Global: feed mode and market status. Search: symbol and name. Company overview adds description, sector, industry, exchange and website with separate source attribution. Key statistics adds market cap, trailing P/E and EPS, dividend yield, average volume and the 52-week range. No news, logos, holdings or portfolio value in this increment.
+- **Data.** Only draw what the gateway provides. Per stock: symbol, name, price, day change (money and percent), previous close, day high and low, time of the last update. Charts: one price per bar. Global: feed mode and market status. Search: symbol and name. Company overview adds description, sector, industry, exchange and website with separate source attribution. Key statistics adds market cap, trailing P/E and EPS, dividend yield, average volume and the 52-week range. News adds feed headlines, sources, dates and optional thumbnails. No logos, holdings or portfolio value in this increment.
 - **Gain and loss.** Never colour alone. Every change carries a sign (+ or −) and an up or down arrow. Flat shows a dash and no sign.
 - **Contrast.** Every text and background pair below passes WCAG AA (4.5:1) in both themes. Two limits: do not put `color.textMuted`, `color.accent` or `color.loss` text on `color.fill` in light, and do not put `color.textMuted` on `color.raised` in dark.
 - **Focus.** Every control shows a 2 px `color.focus` outline with a 2 px offset on keyboard focus.
@@ -371,3 +371,7 @@ A separate surface below the price card on desktop, with the same 24 px inset an
 ### Key statistics
 
 Place the section between the chart and company overview. Match the overview surface on desktop and its simple divider on phones. Use a two-column grid below 768 px and three columns above, with light row dividers, quiet labels and tabular values. Labels are plain text, with no information icons, click targets or expanding explanations. Keep the 52-week range neutral, with both endpoints and a Last price label; it expresses position, not gain/loss. Numbers and range geometry remain left to right in both languages. Missing values use — without collapsing the grid. Loading reserves six metric spaces. Source and retrieval time use the same treatment as the overview.
+
+### Company news
+
+Use the same section surface as statistics and overview. Three text-led rows, separated by quiet dividers, keep the initial section compact. Put publisher/site and publication time above each headline. Use a thumbnail at the end only if supplied, with no empty placeholder; a failed image yields a text-only row. Live rows are whole-row links with a small external arrow and a keyboard focus ring. Sample rows have no hover affordance or links. Show more/Show less sits beneath the list; source attribution follows in muted text. Headlines can wrap naturally at phone widths. No inline article summaries, carousels or popovers.

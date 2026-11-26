@@ -14,6 +14,9 @@ import type { ProfileSource } from "./profiles/source.ts";
 import { statisticsRoute } from "./statistics/route.ts";
 import type { StatisticsSource } from "./statistics/source.ts";
 
+import { newsRoute } from "./news/route.ts";
+import type { NewsSource } from "./news/source.ts";
+
 export { parseRateLimitMax, parseTrustProxy } from "./rest/plugins.ts";
 
 export interface AppOptions {
@@ -27,6 +30,8 @@ export interface AppOptions {
   historyCacheMaxEntries?: number;
   historySourceTimeoutMs?: number;
   rateLimit?: RestRateLimitOptions;
+  newsSource?: NewsSource;
+  newsTimeoutMs?: number;
   statisticsSource?: StatisticsSource;
   statisticsTimeoutMs?: number;
   profileSource?: ProfileSource;
@@ -83,6 +88,13 @@ export function buildApp({
     ...(options.statisticsTimeoutMs !== undefined
       ? { statisticsTimeoutMs: options.statisticsTimeoutMs }
       : {}),
+  });
+  app.register(newsRoute, {
+    catalogue: options.feed.catalogue,
+    feedMode: options.feedMode,
+    now,
+    ...(options.newsSource ? { newsSource: options.newsSource } : {}),
+    ...(options.newsTimeoutMs !== undefined ? { newsTimeoutMs: options.newsTimeoutMs } : {}),
   });
   app.register(websocket, { options: { maxPayload: MAX_MESSAGE_BYTES } });
   app.register(socketRoute, { ...options, now, hub });

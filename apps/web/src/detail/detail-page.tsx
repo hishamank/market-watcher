@@ -8,6 +8,7 @@ import { ChevronStartIcon } from "../components/icons.tsx";
 import { RangeTabs } from "../components/range-tabs.tsx";
 import { DetailSkeleton } from "../components/detail-skeleton.tsx";
 import { ConnectedStockStatistics } from "./connected-stock-statistics.tsx";
+import { ConnectedStockNews } from "./connected-stock-news.tsx";
 import { ConnectedCompanyProfile } from "./connected-company-profile.tsx";
 import { ConnectedDetailHeader } from "./connected-detail-header.tsx";
 import { ConnectedPriceChart } from "./connected-price-chart.tsx";
@@ -76,6 +77,7 @@ export function DetailPage({ symbol }: { symbol: string }) {
           </section>
           <ConnectedStockStatistics key={`statistics-${symbol}`} symbol={symbol} />
           <ConnectedCompanyProfile key={symbol} symbol={symbol} />
+          <ConnectedStockNews key={`news-${symbol}`} symbol={symbol} />
         </div>
       </div>
     </main>

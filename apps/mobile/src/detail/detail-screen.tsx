@@ -10,6 +10,7 @@ import { SkeletonBlock } from "../components/skeleton.tsx";
 import { useTrackStockOpened } from "../integrations/use-track-stock-opened.ts";
 import { selectionHaptic } from "../platform/haptics.ts";
 import { ConnectedStockStatistics } from "./connected-stock-statistics.tsx";
+import { ConnectedStockNews } from "./connected-stock-news.tsx";
 import { ConnectedCompanyProfile } from "./connected-company-profile.tsx";
 import { ConnectedDetailFacts } from "./connected-detail-facts.tsx";
 import { ConnectedDetailHeader } from "./connected-detail-header.tsx";
@@ -39,6 +40,7 @@ function DetailContent({ stock }: { stock: Stock }) {
       <ConnectedDetailFacts stock={stock} />
       <ConnectedStockStatistics key={`statistics-${stock.symbol}`} symbol={stock.symbol} />
       <ConnectedCompanyProfile key={stock.symbol} symbol={stock.symbol} />
+      <ConnectedStockNews key={`news-${stock.symbol}`} symbol={stock.symbol} />
     </ScrollView>
   );
 }

@@ -77,3 +77,5 @@ export { useCompanyProfile } from "./hooks/use-company-profile.ts";
 export type { CompanyProfileView } from "./hooks/use-company-profile.ts";
 
 export { useStockStatistics, type StockStatisticsView } from "./hooks/use-stock-statistics.ts";
+
+export { useStockNews, type StockNewsView } from "./hooks/use-stock-news.ts";

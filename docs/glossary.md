@@ -157,3 +157,5 @@ _Avoid_: language setting, lang, i18n mode
 **TTM (trailing twelve months)**: The preceding twelve months of reported earnings used by trailing EPS and P/E.
 
 **Indicated dividend yield**: Yahoo's indicated annual dividend relative to the share price, delivered as a decimal ratio and displayed as a percentage. An absent value does not mean zero.
+
+**Company news**: A ticker-focused batch of headlines and article links obtained by the gateway, independently of prices. A destination site identifies the linked host when the feed does not supply the original publisher.
