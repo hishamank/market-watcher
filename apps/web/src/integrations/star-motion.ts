@@ -47,8 +47,8 @@ function visibleTarget(): HTMLElement | undefined {
   const target = document.querySelector<HTMLElement>("[data-star-target]");
   if (target === null || target.getAttribute("aria-current") === "page") return undefined;
   const rect = target.getBoundingClientRect();
-  const onScreen = rect.width > 0 && rect.bottom > 0 && rect.top < window.innerHeight;
-  return onScreen ? target : undefined;
+  const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+  return hit !== null && target.contains(hit) ? target : undefined;
 }
 
 export function flyStarToWatchlist(source: HTMLElement): void {

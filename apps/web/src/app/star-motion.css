@@ -27,6 +27,10 @@
 
 :root[data-star-motion]::view-transition-group(.star-row) {
   z-index: 1;
+}
+
+:root[data-star-motion]::view-transition-old(.star-row),
+:root[data-star-motion]::view-transition-new(.star-row) {
   background-color: var(--color-surface);
 }
 
