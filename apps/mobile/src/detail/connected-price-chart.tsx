@@ -4,6 +4,7 @@ import {
   formatMarketTime,
   formatPrice,
   useLiveHistory,
+  useLocale,
   useT,
   type LiveHistoryResult,
 } from "@mini/core";
@@ -30,10 +31,11 @@ function readoutOf(
   range: Range,
   baseline: string | undefined,
   scrub: ScrubPoint | undefined,
+  locale: string,
 ): ChartReadoutValue | undefined {
   if (scrub === undefined || baseline === undefined) return undefined;
   return {
-    time: formatScrubTime(range, scrub.time),
+    time: formatScrubTime(range, scrub.time, locale),
     price: scrub.close,
     change: changeBetween(baseline, scrub.close),
     fraction: scrub.fraction,
@@ -48,6 +50,7 @@ function usePlotWidth() {
 export function ConnectedPriceChart(props: ConnectedPriceChartProps) {
   const { symbol, range } = props;
   const t = useT();
+  const locale = useLocale();
   const history = useLiveHistory(symbol, range);
   const { width, onWidth } = usePlotWidth();
   const { bars, session } = history;
@@ -72,7 +75,7 @@ export function ConnectedPriceChart(props: ConnectedPriceChartProps) {
           />
         )
       }
-      axisLabels={axisLabels(range, bars, session)}
+      axisLabels={axisLabels(range, bars, session, locale)}
       previousCloseLabel={
         previousClose === undefined
           ? undefined
@@ -83,9 +86,14 @@ export function ConnectedPriceChart(props: ConnectedPriceChartProps) {
       asOfLabel={
         history.asOf === undefined
           ? undefined
-          : t("detail.chart.asOf", { time: formatMarketTime(history.asOf) })
+          : t("detail.chart.asOf", { time: formatMarketTime(history.asOf, { locale }) })
       }
-      readout={readoutOf(range, history.baseline, scrubPointOf(props.selection, range, history))}
+      readout={readoutOf(
+        range,
+        history.baseline,
+        scrubPointOf(props.selection, range, history),
+        locale,
+      )}
       onRetry={() => void history.refetch()}
       onWidth={onWidth}
     />

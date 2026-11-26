@@ -5,6 +5,7 @@ import {
   formatMarketDateTime,
   formatMarketTime,
   useConnectionStatus,
+  useLocale,
   useQuote,
   useT,
   useWatchlist,
@@ -21,6 +22,7 @@ export interface ConnectedStockRowProps {
 
 export function ConnectedStockRow({ stock, morph = true, reflowStar }: ConnectedStockRowProps) {
   const t = useT();
+  const locale = useLocale();
   const { stockHref } = useListNavigation();
   const quote = useQuote(stock.symbol) ?? stock.quote;
   const { status } = useConnectionStatus();
@@ -40,14 +42,14 @@ export function ConnectedStockRow({ stock, morph = true, reflowStar }: Connected
       previousClose={quote.previousClose}
       lastUpdate={
         quote.lastKnown
-          ? formatMarketDateTime(quote.timestamp)
+          ? formatMarketDateTime(quote.timestamp, { locale })
           : t("list.lastUpdate", {
-              time: formatMarketTime(quote.timestamp, { label: false }),
+              time: formatMarketTime(quote.timestamp, { locale, label: false }),
             })
       }
       asOf={
         quote.lastKnown
-          ? t("quote.lastKnown.label", { time: formatMarketDateTime(quote.timestamp) })
+          ? t("quote.lastKnown.label", { time: formatMarketDateTime(quote.timestamp, { locale }) })
           : undefined
       }
       stale={stale}

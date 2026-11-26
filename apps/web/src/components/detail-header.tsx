@@ -52,7 +52,7 @@ export function DetailHeader(props: DetailHeaderProps) {
             {symbol}
           </bdi>
           <Morph name={`stock-name-${symbol}`}>
-            <h2 data-testid="detail-name" className="text-body text-text-secondary">
+            <h2 data-testid="detail-name" dir="auto" className="text-body text-text-secondary">
               {name}
             </h2>
           </Morph>

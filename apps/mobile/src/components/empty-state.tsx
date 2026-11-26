@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import Animated, { Keyframe } from "react-native-reanimated";
 import { useReduceMotion } from "../integrations/use-reduce-motion.ts";
 import { usePalette } from "../theme/palette.ts";
-import { textStyles } from "../theme/text-styles.ts";
+import { useTextStyles } from "../theme/text-styles.ts";
 import { Button } from "./button.tsx";
 
 export interface EmptyStateProps {
@@ -25,6 +25,7 @@ const iconPop = new Keyframe({
 }).duration(duration.flash);
 
 export function EmptyState(props: EmptyStateProps) {
+  const textStyles = useTextStyles();
   const palette = usePalette();
   const reduceMotion = useReduceMotion();
   const pop = props.popIcon === true && !reduceMotion;

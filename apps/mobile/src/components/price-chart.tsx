@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { StyleSheet, Text, View, type LayoutChangeEvent } from "react-native";
 import { LINE_CHART_HEIGHT } from "../integrations/line-chart.tsx";
 import { usePalette } from "../theme/palette.ts";
-import { textStyles } from "../theme/text-styles.ts";
+import { useTextStyles } from "../theme/text-styles.ts";
 import {
   ChartAsOf,
   ChartError,
@@ -31,6 +31,7 @@ export interface PriceChartProps {
 }
 
 function ChartStrip(props: PriceChartProps) {
+  const textStyles = useTextStyles();
   const palette = usePalette();
   return (
     <View style={styles.strip}>
@@ -46,6 +47,7 @@ function ChartStrip(props: PriceChartProps) {
 }
 
 function ChartAxis({ labels }: { labels: readonly string[] }) {
+  const textStyles = useTextStyles();
   const palette = usePalette();
   return (
     <View style={styles.axis}>

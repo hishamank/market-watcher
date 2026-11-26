@@ -1,0 +1,25 @@
+import type { listStrings } from "../en/list.ts";
+import type { Translation } from "../en/index.ts";
+
+export const arListStrings = {
+  "list.view.label": "العرض",
+  "list.view.all": "الكل",
+  "list.view.watchlist": "قائمة المتابعة",
+  "list.error.title": "تعذّر تحميل الأسهم",
+  "list.error.help": "تحقّق من اتصالك وحاول مرة أخرى.",
+  "list.error.retry": "إعادة المحاولة",
+  "list.count_zero": "لا توجد أسهم",
+  "list.count_one": "سهم واحد",
+  "list.count_two": "سهمان",
+  "list.count_few": "{{count}} أسهم",
+  "list.count_many": "{{count}} سهمًا",
+  "list.count_other": "{{count}} سهم",
+  "list.column.name": "الاسم",
+  "list.column.symbol": "الرمز",
+  "list.column.price": "السعر",
+  "list.column.change": "تغيّر اليوم",
+  "list.column.changePercent": "تغيّر اليوم %",
+  "list.column.previousClose": "الإغلاق السابق",
+  "list.column.lastUpdate": "آخر تحديث",
+  "list.lastUpdate": "⁦{{time}} ET⁩",
+} satisfies Translation<typeof listStrings>;

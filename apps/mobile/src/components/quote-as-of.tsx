@@ -1,10 +1,11 @@
 import { radius, space } from "@mini/tokens";
 import { Text, View } from "react-native";
 import { usePalette } from "../theme/palette.ts";
-import { textStyles } from "../theme/text-styles.ts";
+import { useTextStyles } from "../theme/text-styles.ts";
 import { ltr } from "./ltr.ts";
 
 export function QuoteAsOf({ label, help }: { label: string; help: string }) {
+  const textStyles = useTextStyles();
   const palette = usePalette();
   return (
     <View testID="detail-price-as-of">

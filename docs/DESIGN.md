@@ -204,6 +204,7 @@ The list and the detail stay separate routes at every width. From 768 px a back 
 
 - The root sets `dir="rtl"` and `lang="ar"`. Layout uses logical properties only, so it mirrors by itself.
 - Prices, symbols, percentages, times and charts stay left to right. On web, wrap each value in `<bdi dir="ltr">`. In React Native, put U+2066 before the value and U+2069 after it, and set `writingDirection: 'ltr'`.
+- Company names are Latin: on web they take `dir="auto"` and align to the end in Arabic, so the full stop stays at the end of "Apple Inc." and truncation clips the end. Arabic dates are wrapped in a right-to-left isolate by the core formatters, so "26 نوفمبر" reads correctly inside left-to-right containers such as the chart axis.
 - Charts never mirror: time runs left to right and the TradingView mark stays in the bottom left corner of the plot.
 - Range tabs and the view control mirror, because they are controls, not values.
 
@@ -224,7 +225,8 @@ Each component lists its anatomy, states, spacing, motion and test IDs.
 - **Spacing.** Minimum height 64 px at 360 px and 72 px from 768 px. Inline padding `space.16` start, `space.6` end (the icon button supplies the rest).
 - **Feed mode badge.** A pill with a 7 px dot and the word "Simulated" or "Live", `type.caption` at weight 500, `color.textSecondary`. Simulated has a dashed `color.borderStrong` border and a hollow dot. Live has a solid border and a filled dot. It never changes while the page is open and is present in the server render.
 - **Market closed label.** A 16 px moon icon and "Market closed", `type.caption` at weight 500, `color.textSecondary`. Absent while the market is open.
-- **Test IDs.** `feed-mode-badge`, `market-status-label`, `app-root[data-feed-mode]`, `app-root[data-market-status]`.
+- **Language toggle.** A text button before search that names the other language in that language: "العربية" in English, "English" in Arabic, with its `lang` set to match. `type.label` at weight 500, `color.textSecondary`, 44 px tall, with the icon button's hover fill and press scale. Pressing it switches language and direction in place, with a cross-fade where view transitions exist (ADR 0051). On mobile it sits at the end of the tab header.
+- **Test IDs.** `feed-mode-badge`, `market-status-label`, `language-toggle[data-locale]`, `app-root[data-feed-mode]`, `app-root[data-market-status]`.
 
 ### Connection banner
 

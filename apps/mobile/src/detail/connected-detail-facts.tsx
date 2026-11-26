@@ -4,6 +4,7 @@ import {
   formatMarketTime,
   formatPrice,
   useConnectionStatus,
+  useLocale,
   useQuote,
   useT,
 } from "@mini/core";
@@ -12,6 +13,7 @@ import { DetailFacts } from "../components/detail-facts.tsx";
 
 export function ConnectedDetailFacts({ stock }: { stock: Stock }) {
   const t = useT();
+  const locale = useLocale();
   const quote = useQuote(stock.symbol) ?? stock.quote;
   const { status } = useConnectionStatus();
   const stale = status === "stale" || status === "offline";
@@ -39,8 +41,8 @@ export function ConnectedDetailFacts({ stock }: { stock: Stock }) {
           label: t("detail.lastUpdate"),
           testID: "detail-last-update",
           value: quote.lastKnown
-            ? formatMarketDateTime(quote.timestamp)
-            : formatMarketTime(quote.timestamp),
+            ? formatMarketDateTime(quote.timestamp, { locale })
+            : formatMarketTime(quote.timestamp, { locale }),
         },
       ]}
     />

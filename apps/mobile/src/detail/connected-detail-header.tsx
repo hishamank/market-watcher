@@ -3,6 +3,7 @@ import {
   formatMarketDateTime,
   useConnectionStatus,
   useLiveHistory,
+  useLocale,
   useQuote,
   useT,
   useWatchlist,
@@ -20,6 +21,7 @@ export interface ConnectedDetailHeaderProps {
 
 export function ConnectedDetailHeader({ stock, range, selection }: ConnectedDetailHeaderProps) {
   const t = useT();
+  const locale = useLocale();
   const quote = useQuote(stock.symbol) ?? stock.quote;
   const history = useLiveHistory(stock.symbol, range);
   const { status } = useConnectionStatus();
@@ -36,10 +38,12 @@ export function ConnectedDetailHeader({ stock, range, selection }: ConnectedDeta
       name={stock.name}
       price={scrubbed ? scrub.close : quote.price}
       rangeChange={rangeChange}
-      rangeLabel={scrubbed ? formatScrubTime(range, scrub.time) : t(`detail.range.${range}`)}
+      rangeLabel={
+        scrubbed ? formatScrubTime(range, scrub.time, locale) : t(`detail.range.${range}`)
+      }
       asOf={
         quote.lastKnown
-          ? t("quote.lastKnown.label", { time: formatMarketDateTime(quote.timestamp) })
+          ? t("quote.lastKnown.label", { time: formatMarketDateTime(quote.timestamp, { locale }) })
           : undefined
       }
       asOfHelp={t("quote.lastKnown.help")}

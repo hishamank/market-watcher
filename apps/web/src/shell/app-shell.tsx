@@ -8,6 +8,7 @@ import { HeaderSearch } from "../search/header-search.tsx";
 import { useListNavigation } from "../integrations/use-list-navigation.ts";
 import { AppHeader } from "./app-header.tsx";
 import { ChaosPanel } from "./chaos-panel.tsx";
+import { LanguageToggle } from "./language-toggle.tsx";
 import { usePresence } from "../integrations/use-presence.ts";
 import { ConnectionBanner, type BannerStatus } from "./connection-banner.tsx";
 
@@ -37,7 +38,12 @@ export function AppShell({ meta, children }: AppShellProps) {
         marketStatus={marketStatus}
         showBack={showBack}
         backHref={listHref}
-        search={<HeaderSearch />}
+        search={
+          <>
+            <LanguageToggle />
+            <HeaderSearch />
+          </>
+        }
       />
       <ConnectionBanner status={banner.value} open={banner.open} onRetry={retryNow} />
       <div className="flex flex-1 flex-col">{children}</div>

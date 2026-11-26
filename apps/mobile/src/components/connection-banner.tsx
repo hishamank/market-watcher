@@ -2,7 +2,7 @@ import { duration, space } from "@mini/tokens";
 import { StyleSheet, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import type { Palette } from "../theme/palette.ts";
-import { textStyles } from "../theme/text-styles.ts";
+import { useTextStyles } from "../theme/text-styles.ts";
 import { Button } from "./button.tsx";
 
 interface ConnectionBannerProps {
@@ -16,6 +16,7 @@ interface ConnectionBannerProps {
 }
 
 export function ConnectionBanner(props: ConnectionBannerProps) {
+  const textStyles = useTextStyles();
   return (
     <Animated.View
       {...(props.reduceMotion ? {} : { entering: FadeInDown.duration(duration.base) })}
