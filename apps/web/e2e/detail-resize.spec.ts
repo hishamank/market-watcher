@@ -5,6 +5,7 @@ interface Placement {
   readonly dotY: number;
   readonly lineEndX: number;
   readonly lineEndYs: readonly number[];
+  readonly canvasHeight: number;
 }
 
 function measure(page: Page): Promise<Placement> {
@@ -37,6 +38,7 @@ function measure(page: Page): Promise<Placement> {
       dotY: dotY ?? Number.NaN,
       lineEndX: lineEndX / scale,
       lineEndYs,
+      canvasHeight: canvas.clientHeight,
     };
   });
 }
@@ -67,10 +69,12 @@ test("D3 chart overlays follow the canvas after a width and a height-only resize
         return Math.abs(placement.dotX - placement.lineEndX);
       })
       .toBeLessThanOrEqual(2);
+    const { canvasHeight } = await measure(page);
     await page.evaluate(() => {
       const root = document.querySelector<HTMLElement>('[data-testid="price-chart"]');
       if (root) root.style.height = "500px";
     });
+    await expect.poll(async () => (await measure(page)).canvasHeight).toBeGreaterThan(canvasHeight);
     await expect
       .poll(async () => {
         const placement = await measure(page);
