@@ -19,6 +19,7 @@ export interface DetailHeaderProps {
   stale: boolean;
   flash: FlashDirection | undefined;
   flashKey: number | undefined;
+  flashFrom?: string | undefined;
   starred: boolean | undefined;
   onToggleStar: () => void;
 }
@@ -65,6 +66,8 @@ export function DetailHeader(props: DetailHeaderProps) {
           change={props.change}
           stale={stale}
           flash={props.asOf ? undefined : props.flash}
+          flashKey={props.flashKey}
+          flashFrom={props.flashFrom}
           testId="detail-price"
           display
         />
@@ -79,8 +82,6 @@ export function DetailHeader(props: DetailHeaderProps) {
             change={rangeChange.change}
             changePercent={rangeChange.changePercent}
             stale={stale || !!props.asOf}
-            flash={props.asOf ? undefined : props.flash}
-            flashKey={props.flashKey}
             testId="detail-change"
             large
           />

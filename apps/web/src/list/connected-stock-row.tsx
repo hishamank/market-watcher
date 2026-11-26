@@ -17,7 +17,7 @@ export function ConnectedStockRow({ stock }: { stock: Stock }) {
   const quote = useQuote(stock.symbol) ?? stock.quote;
   const { status } = useConnectionStatus();
   const stale = status === "stale" || status === "offline";
-  const { flash, flashKey } = useTickFlash(quote.timestamp, quote.change, stale);
+  const { flash, flashKey, from } = useTickFlash(quote.price, stale);
   const watchlist = useWatchlist();
   return (
     <StockRow
@@ -42,6 +42,7 @@ export function ConnectedStockRow({ stock }: { stock: Stock }) {
       stale={stale}
       flash={flash}
       flashKey={flashKey}
+      flashFrom={from}
       starred={watchlist.isLoaded ? watchlist.isStarred(stock.symbol) : undefined}
       onToggleStar={() => watchlist.toggle(stock.symbol)}
     />

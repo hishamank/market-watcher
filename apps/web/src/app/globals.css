@@ -12,10 +12,12 @@
 @theme {
   --animate-flash: flash var(--duration-flash) var(--ease-standard) both;
   --animate-skeleton: skeleton 1.2s ease-in-out infinite;
-  --animate-banner-in: banner-in var(--duration-base) var(--ease-standard) both;
   --animate-star-on: star-on var(--duration-fast) var(--ease-standard) both;
   --animate-sheet-in: sheet-in var(--duration-slow) var(--ease-standard) both;
   --animate-fade-in: fade-in var(--duration-fast) var(--ease-standard) both;
+  --animate-digit-roll: digit-roll var(--duration-base) var(--ease-standard) both;
+  --animate-halo: halo 2s ease-out infinite;
+  --animate-dropdown-in: dropdown-in var(--duration-base) var(--ease-standard) both;
 
   @keyframes flash {
     from {
@@ -29,13 +31,6 @@
   @keyframes skeleton {
     50% {
       opacity: 0.55;
-    }
-  }
-
-  @keyframes banner-in {
-    from {
-      opacity: 0;
-      transform: translateY(-100%);
     }
   }
 
@@ -55,6 +50,31 @@
   @keyframes fade-in {
     from {
       opacity: 0;
+    }
+  }
+
+  @keyframes digit-roll {
+    from {
+      opacity: 0.2;
+      translate: 0 40%;
+    }
+  }
+
+  @keyframes halo {
+    from {
+      opacity: 0.35;
+      scale: 1;
+    }
+    to {
+      opacity: 0;
+      scale: 2.6;
+    }
+  }
+
+  @keyframes dropdown-in {
+    from {
+      opacity: 0;
+      translate: 0 -6px;
     }
   }
 }

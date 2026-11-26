@@ -7,28 +7,50 @@ export interface PriceCellProps {
   change: string;
   stale: boolean;
   flash: FlashDirection | undefined;
+  flashKey?: number | undefined;
+  flashFrom?: string | undefined;
   testId: string;
   display?: boolean;
 }
 
-export function PriceCell({
-  asOf,
-  price,
-  change,
-  stale,
-  flash,
-  testId,
-  display = false,
-}: PriceCellProps) {
+const tints: Record<FlashDirection, string> = {
+  up: "bg-gain-tint",
+  down: "bg-loss-tint",
+};
+
+function RollingDigits({ text, from, rollKey }: { text: string; from: string; rollKey: number }) {
+  const offset = text.length - from.length;
+  return Array.from(text, (char, index) =>
+    char === from[index - offset] ? (
+      <span key={index}>{char}</span>
+    ) : (
+      <span key={`${rollKey}-${index}`} className="inline-block motion-safe:animate-digit-roll">
+        {char}
+      </span>
+    ),
+  );
+}
+
+export function PriceCell(props: PriceCellProps) {
+  const { asOf, price, stale, flash, flashKey, flashFrom, testId, display = false } = props;
   const size = display ? "text-numeric-display" : "text-numeric-price";
+  const text = formatPrice(price);
+  const rolling = flash !== undefined && flashKey !== undefined && flashFrom !== undefined;
   return (
     <bdi
       dir="ltr"
       data-testid={testId}
-      data-direction={directionOf(change)}
+      data-direction={directionOf(props.change)}
       data-flash={flash}
-      className={`${size} ${stale ? "text-text-muted" : "text-text"}`}
+      className={`relative isolate inline-block ${size} ${stale ? "text-text-muted" : "text-text"}`}
     >
+      {flash === undefined ? null : (
+        <span
+          key={flashKey}
+          aria-hidden="true"
+          className={`pointer-events-none absolute -inset-x-4 inset-y-0 -z-10 animate-flash rounded-xs motion-reduce:hidden ${tints[flash]}`}
+        />
+      )}
       {asOf ? (
         <span
           title={asOf}
@@ -39,7 +61,11 @@ export function PriceCell({
           <span className="sr-only">{asOf}, </span>
         </span>
       ) : null}
-      {formatPrice(price)}
+      {rolling ? (
+        <RollingDigits text={text} from={formatPrice(flashFrom)} rollKey={flashKey} />
+      ) : (
+        text
+      )}
     </bdi>
   );
 }

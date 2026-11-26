@@ -19,6 +19,7 @@ export interface StockRowProps {
   stale: boolean;
   flash: FlashDirection | undefined;
   flashKey: number | undefined;
+  flashFrom?: string | undefined;
   starred: boolean | undefined;
   onToggleStar: () => void;
 }
@@ -32,7 +33,7 @@ export function StockRow(props: StockRowProps) {
   return (
     <div
       data-testid={`stock-row-${symbol}`}
-      className={`flex min-h-[68px] items-center ps-16 pe-6 hover:bg-hover list-table:min-h-[56px] ${tableColumns}`}
+      className={`flex min-h-[68px] items-center ps-16 pe-6 transition-colors duration-(--duration-fast) ease-standard hover:bg-hover list-table:min-h-[56px] ${tableColumns}`}
     >
       <Link
         href={`/stocks/${symbol}`}
@@ -60,6 +61,8 @@ export function StockRow(props: StockRowProps) {
               stale={stale}
               asOf={props.asOf}
               flash={props.asOf ? undefined : flash}
+              flashKey={props.flashKey}
+              flashFrom={props.flashFrom}
               testId={`stock-row-price-${symbol}`}
             />
           </span>
@@ -68,8 +71,6 @@ export function StockRow(props: StockRowProps) {
               change={props.change}
               changePercent={props.changePercent}
               stale={stale || !!props.asOf}
-              flash={props.asOf ? undefined : flash}
-              flashKey={props.flashKey}
               testId={`stock-row-change-${symbol}`}
               percentClassName="list-table:hidden"
             />

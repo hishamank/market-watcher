@@ -33,7 +33,7 @@ export function ConnectedDetailHeader({ stock, range, scrub }: ConnectedDetailHe
     scrubbed && history.baseline !== undefined
       ? changeBetween(history.baseline, shownPrice)
       : history.rangeChange;
-  const { flash, flashKey } = useTickFlash(quote.timestamp, rangeChange?.change, stale);
+  const { flash, flashKey, from } = useTickFlash(quote.price, stale);
   return (
     <DetailHeader
       symbol={stock.symbol}
@@ -52,6 +52,7 @@ export function ConnectedDetailHeader({ stock, range, scrub }: ConnectedDetailHe
       stale={stale}
       flash={scrubbed ? undefined : flash}
       flashKey={flashKey}
+      flashFrom={scrubbed ? undefined : from}
       starred={watchlist.isLoaded ? watchlist.isStarred(stock.symbol) : undefined}
       onToggleStar={() => watchlist.toggle(stock.symbol)}
     />
