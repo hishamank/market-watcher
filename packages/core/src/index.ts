@@ -73,3 +73,11 @@ export type { SearchResult } from "./hooks/use-search.ts";
 
 export { useColorScheme } from "./hooks/use-color-scheme.ts";
 export type { ColorScheme, ColorSchemeStore } from "./platform/color-scheme.ts";
+export { useCompanyProfile } from "./hooks/use-company-profile.ts";
+export type { CompanyProfileView } from "./hooks/use-company-profile.ts";
+
+export { useStockStatistics, type StockStatisticsView } from "./hooks/use-stock-statistics.ts";
+
+export { useStockNews, type StockNewsView } from "./hooks/use-stock-news.ts";
+
+export { useStockEarnings, type StockEarningsView } from "./hooks/use-stock-earnings.ts";

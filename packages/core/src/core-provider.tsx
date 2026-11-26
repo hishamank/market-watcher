@@ -25,6 +25,10 @@ import { buildSocketUrl, createDefaultSocket, type SocketFactory } from "./realt
 import { refetchHistoryOnReconnect } from "./rest/history-refetch.ts";
 import { syncQuotesFromQueryCache } from "./rest/quote-cache-sync.ts";
 import { createRestClient, type HttpFetch, type RestClient } from "./rest/rest-client.ts";
+import { createEarningsFetcher, type EarningsFetcher } from "./rest/earnings-query.ts";
+import { createNewsFetcher, type NewsFetcher } from "./rest/news-query.ts";
+import { createStatisticsFetcher, type StatisticsFetcher } from "./rest/statistics-query.ts";
+import { createProfileFetcher, type ProfileFetcher } from "./rest/profile-query.ts";
 import { createSearchFetcher, type SearchFetcher } from "./rest/search-query.ts";
 import { createWatchlistStore, type WatchlistStore } from "./watchlist/watchlist-store.ts";
 import { createTableColumnsStore, type TableColumnsStore } from "./columns/table-columns-store.ts";
@@ -54,6 +58,10 @@ export interface CoreContextValue {
   health: ConnectionHealthRecorder;
   restClient: RestClient;
   searchStocks: SearchFetcher;
+  fetchProfile: ProfileFetcher;
+  fetchStatistics: StatisticsFetcher;
+  fetchNews: NewsFetcher;
+  fetchEarnings: EarningsFetcher;
   watchlistStore: WatchlistStore;
   tableColumnsStore: TableColumnsStore;
   i18n: I18nService;
@@ -90,6 +98,16 @@ export function createCoreServices(
     socketClient,
     health,
     restClient: createRestClient({ gatewayUrl: platform.gatewayUrl, fetch: platform.fetch }),
+    fetchEarnings: createEarningsFetcher({
+      gatewayUrl: platform.gatewayUrl,
+      fetch: platform.fetch,
+    }),
+    fetchNews: createNewsFetcher({ gatewayUrl: platform.gatewayUrl, fetch: platform.fetch }),
+    fetchStatistics: createStatisticsFetcher({
+      gatewayUrl: platform.gatewayUrl,
+      fetch: platform.fetch,
+    }),
+    fetchProfile: createProfileFetcher({ gatewayUrl: platform.gatewayUrl, fetch: platform.fetch }),
     searchStocks: createSearchFetcher({ gatewayUrl: platform.gatewayUrl, fetch: platform.fetch }),
     watchlistStore: createWatchlistStore(platform.storage),
     tableColumnsStore: createTableColumnsStore(platform.storage),

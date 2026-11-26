@@ -2,6 +2,10 @@
 
 A small trading app that shows live US stock prices, price history and a personal watchlist on web and mobile, fed by a market data gateway.
 
+**Company overview**:
+A description and identifying facts about a company or fund, separate from its changing market price.
+_Avoid_: quote, fundamentals dashboard
+
 ## Market data
 
 **Gateway**:
@@ -147,3 +151,13 @@ A held quote from an earlier trading phase, served with `lastKnown: true` after 
 **Locale**:
 The language the apps are shown in: English (`en-US`) or Arabic (`ar`). It sets the strings, the month names and the text direction, never the digits, which stay Latin. On web it lives in the `locale` cookie, and on mobile in device storage.
 _Avoid_: language setting, lang, i18n mode
+
+**Key statistics**: Supplemental valuation, dividend, trading-volume and 52-week-range data for a security, loaded independently of its quote and company overview.
+
+**TTM (trailing twelve months)**: The preceding twelve months of reported earnings used by trailing EPS and P/E.
+
+**Indicated dividend yield**: Yahoo's indicated annual dividend relative to the share price, delivered as a decimal ratio and displayed as a percentage. An absent value does not mean zero.
+
+**Company news**: A ticker-focused batch of headlines and article links obtained by the gateway, independently of prices. A destination site identifies the linked host when the feed does not supply the original publisher.
+
+**Earnings**: Fiscal-quarter earnings per share (EPS), their analyst estimates and upcoming reporting dates. GAAP and non-GAAP identify the accounting basis supplied by the provider; fiscal quarter labels may differ from calendar quarters.
