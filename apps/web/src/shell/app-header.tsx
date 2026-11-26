@@ -13,9 +13,17 @@ export interface AppHeaderProps {
   showBack: boolean;
   backHref: string;
   search?: ReactNode;
+  themeSwitch?: ReactNode;
 }
 
-export function AppHeader({ feedMode, marketStatus, showBack, backHref, search }: AppHeaderProps) {
+export function AppHeader({
+  feedMode,
+  marketStatus,
+  showBack,
+  backHref,
+  search,
+  themeSwitch,
+}: AppHeaderProps) {
   const t = useT();
   return (
     <header className="flex min-h-[64px] items-center gap-8 ps-16 pe-6 md:min-h-[72px] md:gap-12 md:border-b md:border-border md:px-24">
@@ -40,6 +48,7 @@ export function AppHeader({ feedMode, marketStatus, showBack, backHref, search }
         </div>
       </div>
       {search}
+      {themeSwitch}
     </header>
   );
 }

@@ -1,0 +1,111 @@
+.theme-switch {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  inline-size: 44px;
+  block-size: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-accent);
+  transition: transform var(--duration-base) var(--ease-standard);
+}
+
+.theme-switch-sky {
+  inline-size: 30px;
+  block-size: 30px;
+  overflow: visible;
+  transition: transform var(--duration-slow) var(--ease-standard);
+}
+
+.theme-switch-rays,
+.theme-switch-body,
+.theme-switch-shadow,
+.theme-switch-star,
+.theme-switch-orbit {
+  transform-origin: center;
+  transition:
+    transform var(--duration-slow) var(--ease-standard),
+    opacity var(--duration-slow) var(--ease-standard);
+}
+
+.theme-switch-shadow {
+  transform: translate(0, 0);
+}
+
+.theme-switch-star {
+  opacity: 0;
+  transform: scale(0.3);
+  transform-origin: 25px 8px;
+}
+
+.theme-switch-orbit {
+  position: absolute;
+  inset: 3px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  opacity: 0;
+  transform: rotate(-80deg) scale(0.8);
+}
+
+.theme-switch-orbit::after {
+  content: "";
+  position: absolute;
+  inset-block-start: -2px;
+  inset-inline-start: 50%;
+  inline-size: 4px;
+  block-size: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+:root[data-theme="dark"] .theme-switch-rays {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.4);
+}
+
+:root[data-theme="dark"] .theme-switch-body {
+  transform: scale(1.25);
+}
+
+:root[data-theme="dark"] .theme-switch-shadow {
+  transform: translate(-10px, 10px);
+}
+
+:root[data-theme="dark"] .theme-switch-star {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .theme-switch:hover {
+    transform: translateY(-1px);
+  }
+
+  .theme-switch:hover .theme-switch-sky {
+    transform: rotate(-12deg) scale(0.88);
+  }
+
+  .theme-switch:hover .theme-switch-orbit {
+    opacity: 0.55;
+    transform: rotate(30deg) scale(1);
+  }
+}
+
+.theme-switch:active {
+  transform: scale(0.92);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-switch,
+  .theme-switch * {
+    transition: none;
+  }
+
+  .theme-switch:hover,
+  .theme-switch:active,
+  .theme-switch:hover .theme-switch-sky {
+    transform: none;
+  }
+}

@@ -8,6 +8,7 @@ import { gatewayUrl, readShellMeta } from "../gateway/shell-meta.ts";
 import { LOCALE_COOKIE } from "../platform/locale-cookie.ts";
 import { Providers } from "../providers/providers.tsx";
 import { AppShell } from "../shell/app-shell.tsx";
+import { ThemeScript } from "../integrations/theme-script.tsx";
 import "./globals.css";
 
 const alexandria = Alexandria({
@@ -23,7 +24,15 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const meta = await readShellMeta();
   const locale = parseLocale((await cookies()).get(LOCALE_COOKIE)?.value);
   return (
-    <html lang={locale} dir={localeDirection(locale)} className={alexandria.variable}>
+    <html
+      lang={locale}
+      dir={localeDirection(locale)}
+      className={alexandria.variable}
+      suppressHydrationWarning
+    >
+      <head>
+        <ThemeScript />
+      </head>
       <body>
         <Providers gatewayUrl={gatewayUrl} locale={locale}>
           <AppShell meta={meta}>{children}</AppShell>

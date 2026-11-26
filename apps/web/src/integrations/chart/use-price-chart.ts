@@ -1,9 +1,8 @@
 import type { Bar, Range, Session } from "@mini/contracts";
-import type { Direction } from "@mini/core";
+import { useColorScheme, type Direction } from "@mini/core";
 import { chart, type Theme } from "@mini/tokens";
 import type { AutoscaleInfoProvider } from "lightweight-charts";
 import { useEffect, useRef, useState, type RefObject } from "react";
-import { useMediaQuery } from "../use-media-query.ts";
 import { animateDraw } from "./chart-motion.ts";
 import { chartOptions, seriesOptions, type ChartFormatters } from "./chart-options.ts";
 import {
@@ -176,7 +175,7 @@ export function usePriceChart(input: PriceChartInput): PriceChartHandles {
     future: false,
   });
   const [overlays] = useState<OverlayRefs>(() => ({ livePoint, previousClose, plot }));
-  const theme: Theme = useMediaQuery("(prefers-color-scheme: dark)") ? "dark" : "light";
+  const { scheme: theme } = useColorScheme();
   const parts = useChartParts(containerRef);
   useChartStyle(parts, containerRef, theme, input);
   usePreviousCloseLine(parts, theme, input.previousClose);

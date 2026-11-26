@@ -65,3 +65,6 @@ export type { ConnectionHealth } from "./hooks/use-connection-health.ts";
 export { useSearch } from "./hooks/use-search.ts";
 export { useTrack } from "./hooks/use-track.ts";
 export type { SearchResult } from "./hooks/use-search.ts";
+
+export { useColorScheme } from "./hooks/use-color-scheme.ts";
+export type { ColorScheme, ColorSchemeStore } from "./platform/color-scheme.ts";
