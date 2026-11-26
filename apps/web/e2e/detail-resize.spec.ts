@@ -1,53 +1,46 @@
-import { chart } from "@mini/tokens";
 import { expect, test, type Page } from "@playwright/test";
 
 interface Placement {
   readonly dotX: number;
-  readonly labelY: number;
+  readonly dotY: number;
   readonly lineEndX: number;
-  readonly previousCloseY: number;
-}
-
-function rgbOf(hex: string): number[] {
-  return [1, 3, 5].map((start) => Number.parseInt(hex.slice(start, start + 2), 16));
+  readonly lineEndYs: readonly number[];
+  readonly canvasHeight: number;
 }
 
 function measure(page: Page): Promise<Placement> {
-  return page.evaluate((previousCloseRgb) => {
+  return page.evaluate(() => {
     const root = document.querySelector('[data-testid="price-chart"]');
     const dot = root?.querySelector<HTMLElement>('[data-testid="chart-last-price"]');
-    const label = [...(root?.querySelectorAll<HTMLElement>("span") ?? [])].find((node) =>
-      node.textContent?.startsWith("Previous close"),
-    );
     const canvas = root?.querySelector("canvas");
     const context = canvas?.getContext("2d");
-    if (!dot || !label || !canvas || !context) throw new Error("chart not drawn");
+    if (!dot || !canvas || !context) throw new Error("chart not drawn");
     const scale = canvas.width / canvas.clientWidth;
     const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
     const lineRgb = (getComputedStyle(dot).color.match(/\d+/g) ?? []).map(Number);
-    const matches = (index: number, rgb: number[], tolerance: number) =>
+    const matches = (index: number) =>
       (pixels[index + 3] ?? 0) > 200 &&
-      rgb.every((value, channel) => Math.abs((pixels[index + channel] ?? 0) - value) < tolerance);
+      lineRgb.every((value, channel) => Math.abs((pixels[index + channel] ?? 0) - value) < 5);
     let lineEndX = -1;
-    let previousCloseY = -1;
+    let lineEndYs: number[] = [];
     for (let y = 0; y < canvas.height; y += 1) {
-      let dashed = 0;
       for (let x = 0; x < canvas.width; x += 1) {
-        const index = (y * canvas.width + x) * 4;
-        if (matches(index, lineRgb, 5)) lineEndX = Math.max(lineEndX, x);
-        if (matches(index, previousCloseRgb, 3)) dashed += 1;
+        if (!matches((y * canvas.width + x) * 4) || x < lineEndX) continue;
+        lineEndYs = x > lineEndX ? [y / scale] : [...lineEndYs, y / scale];
+        lineEndX = x;
       }
-      if (previousCloseY < 0 && dashed > 100) previousCloseY = y;
     }
-    const dotX = Number(/translate\(([-\d.]+)px/.exec(dot.style.transform)?.[1] ?? "NaN");
-    const labelY = Number(/translateY\(([-\d.]+)px/.exec(label.style.transform)?.[1] ?? "NaN");
+    const [dotX, dotY] = (/translate\(([-\d.]+)px, ([-\d.]+)px/.exec(dot.style.transform) ?? [])
+      .slice(1)
+      .map(Number);
     return {
-      dotX,
-      labelY,
+      dotX: dotX ?? Number.NaN,
+      dotY: dotY ?? Number.NaN,
       lineEndX: lineEndX / scale,
-      previousCloseY: previousCloseY / scale,
+      lineEndYs,
+      canvasHeight: canvas.clientHeight,
     };
-  }, rgbOf(chart.dark.previousClose));
+  });
 }
 
 async function setForceClosed(page: Page, on: boolean) {
@@ -76,14 +69,16 @@ test("D3 chart overlays follow the canvas after a width and a height-only resize
         return Math.abs(placement.dotX - placement.lineEndX);
       })
       .toBeLessThanOrEqual(2);
+    const { canvasHeight } = await measure(page);
     await page.evaluate(() => {
       const root = document.querySelector<HTMLElement>('[data-testid="price-chart"]');
       if (root) root.style.height = "500px";
     });
+    await expect.poll(async () => (await measure(page)).canvasHeight).toBeGreaterThan(canvasHeight);
     await expect
       .poll(async () => {
         const placement = await measure(page);
-        return Math.abs(placement.labelY - placement.previousCloseY);
+        return Math.min(...placement.lineEndYs.map((y) => Math.abs(placement.dotY - y)));
       })
       .toBeLessThanOrEqual(2);
   } finally {
