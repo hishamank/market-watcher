@@ -6,7 +6,7 @@ export function MarketClosedLabel() {
   return (
     <span
       data-testid="market-status-label"
-      className="inline-flex items-center gap-[5px] text-caption font-medium text-text-secondary"
+      className="inline-flex items-center gap-[5px] text-caption font-medium whitespace-nowrap text-text-secondary"
     >
       <MoonIcon />
       {t("marketStatus.closed")}

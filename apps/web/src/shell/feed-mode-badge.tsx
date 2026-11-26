@@ -7,7 +7,7 @@ export function FeedModeBadge({ feedMode }: { feedMode: FeedMode }) {
   return (
     <span
       data-testid="feed-mode-badge"
-      className={`inline-flex items-center gap-6 rounded-pill border border-border-strong px-10 py-2 text-caption font-medium text-text-secondary ${live ? "border-solid" : "border-dashed"}`}
+      className={`inline-flex items-center gap-6 text-caption font-medium whitespace-nowrap text-text-secondary xl:rounded-pill xl:border xl:border-border-strong xl:px-10 xl:py-2 ${live ? "xl:border-solid" : "xl:border-dashed"}`}
     >
       <span
         aria-hidden="true"
