@@ -2,12 +2,13 @@ import { useT } from "@mini/core";
 import { space } from "@mini/tokens";
 import { StyleSheet, Text, View } from "react-native";
 import { usePalette } from "../theme/palette.ts";
-import { textStyles } from "../theme/text-styles.ts";
+import { useTextStyles } from "../theme/text-styles.ts";
 import { Button } from "./button.tsx";
 
 export function ListMoreError({ onRetry }: { onRetry: () => void }) {
   const t = useT();
   const palette = usePalette();
+  const textStyles = useTextStyles();
   return (
     <View testID="list-more-error" accessibilityRole="alert" style={styles.footer}>
       <Text style={[textStyles.label, styles.message, { color: palette.textSecondary }]}>
