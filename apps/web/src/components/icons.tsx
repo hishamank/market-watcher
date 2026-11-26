@@ -123,3 +123,16 @@ export function CloseIcon({ className }: IconProps) {
 export function SpinnerIcon({ className }: IconProps) {
   return <StrokeIcon className={className} path="M12 3a9 9 0 1 0 9 9" />;
 }
+
+export function BrandMark({ className = "" }: IconProps) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`grid size-[28px] shrink-0 place-items-center rounded-sm bg-text text-bg ${className}`}
+    >
+      <svg viewBox="0 0 24 24" className={`${strokeIcon} size-[18px] fill-none stroke-[2.4]`}>
+        <path d="M4 16.5l4.5-4.5 3.5 3 7.5-8M15 7h4.5v4.5" />
+      </svg>
+    </span>
+  );
+}

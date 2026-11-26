@@ -134,6 +134,23 @@ test("W5 empty watchlist shows a friendly hint and links back to all stocks", as
   expect(problems).toEqual([]);
 });
 
+test("W5 a suggestion's star fills the empty watchlist", async ({ page }) => {
+  const problems = collectConsoleProblems(page);
+  await page.goto("/");
+  await page.evaluate(() => window.localStorage.clear());
+  await page.goto("/?view=watchlist");
+
+  const suggestions = page.getByTestId("watchlist-suggestions");
+  await expect(suggestions.getByRole("listitem")).toHaveCount(3);
+  const star = suggestions.getByTestId("star-AAPL");
+  await expect(star).toBeEnabled();
+  await star.click();
+
+  await expect(page.getByTestId("watchlist-row-AAPL")).toBeVisible();
+  await expect(page.getByTestId("watchlist-empty")).toHaveCount(0);
+  expect(problems).toEqual([]);
+});
+
 test("W6 corrupt storage starts empty with no error and allows starring afterwards", async ({
   page,
 }) => {

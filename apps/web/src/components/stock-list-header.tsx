@@ -12,9 +12,9 @@ export function StockListHeader() {
       <span>{t("list.column.symbol")}</span>
       <span className="text-end">{t("list.column.price")}</span>
       <span className="text-end">{t("list.column.change")}</span>
-      <span className="text-end">{t("list.column.changePercent")}</span>
-      <span className="text-end">{t("list.column.previousClose")}</span>
-      <span className="text-end">{t("list.column.lastUpdate")}</span>
+      <span className="text-end list-compact:hidden">{t("list.column.changePercent")}</span>
+      <span className="text-end list-compact:hidden">{t("list.column.previousClose")}</span>
+      <span className="text-end list-compact:hidden">{t("list.column.lastUpdate")}</span>
       <span />
     </div>
   );
