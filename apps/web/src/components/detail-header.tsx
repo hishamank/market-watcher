@@ -1,5 +1,6 @@
 import type { Change } from "@mini/contracts";
 import type { FlashDirection } from "@mini/core";
+import type { FlashRoll } from "../integrations/use-tick-flash.ts";
 import { ChangePill } from "./change-pill.tsx";
 import { Morph } from "./morph.tsx";
 import { PriceCell } from "./price-cell.tsx";
@@ -20,7 +21,7 @@ export interface DetailHeaderProps {
   stale: boolean;
   flash: FlashDirection | undefined;
   flashKey: number | undefined;
-  flashFrom?: string | undefined;
+  flashRoll?: FlashRoll | undefined;
   starred: boolean | undefined;
   onToggleStar: () => void;
 }
@@ -71,7 +72,7 @@ export function DetailHeader(props: DetailHeaderProps) {
             stale={stale}
             flash={props.asOf ? undefined : props.flash}
             flashKey={props.flashKey}
-            flashFrom={props.flashFrom}
+            flashRoll={props.flashRoll}
             testId="detail-price"
             display
           />

@@ -39,7 +39,10 @@ export function StarButton({ name, starred, onToggle, testID }: StarButtonProps)
         tapHaptic();
         onToggle();
       }}
-      style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        styles.button,
+        pressed && (reduceMotion ? styles.pressedStill : styles.pressed),
+      ]}
     >
       <Animated.View style={starred === true && !reduceMotion && motion.starOn}>
         <Icon name="star" color={starTone(starred, palette)} filled={starred === true} />
@@ -66,4 +69,5 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
   pressed: { transform: [{ scale: 0.9 }] },
+  pressedStill: { opacity: 0.7 },
 });

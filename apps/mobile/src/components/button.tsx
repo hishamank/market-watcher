@@ -1,5 +1,6 @@
 import { radius, space } from "@mini/tokens";
 import { Pressable, StyleSheet, Text } from "react-native";
+import { useReduceMotion } from "../integrations/use-reduce-motion.ts";
 import { usePalette } from "../theme/palette.ts";
 import { textStyles } from "../theme/text-styles.ts";
 
@@ -11,6 +12,7 @@ export interface ButtonProps {
 
 export function Button({ label, onPress, testID }: ButtonProps) {
   const palette = usePalette();
+  const reduceMotion = useReduceMotion();
   return (
     <Pressable
       testID={testID}
@@ -19,7 +21,7 @@ export function Button({ label, onPress, testID }: ButtonProps) {
       style={({ pressed }) => [
         styles.button,
         { backgroundColor: palette.text },
-        pressed && styles.pressed,
+        pressed && (reduceMotion ? styles.pressedStill : styles.pressed),
       ]}
     >
       <Text style={[textStyles.label, { color: palette.surface }]}>{label}</Text>
@@ -37,4 +39,5 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
   pressed: { opacity: 0.85, transform: [{ scale: 0.985 }] },
+  pressedStill: { opacity: 0.85 },
 });

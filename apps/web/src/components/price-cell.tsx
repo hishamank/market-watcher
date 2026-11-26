@@ -1,4 +1,5 @@
 import { directionOf, formatPrice, type FlashDirection } from "@mini/core";
+import type { FlashRoll } from "../integrations/use-tick-flash.ts";
 import { ClockIcon } from "./icons.tsx";
 
 export interface PriceCellProps {
@@ -8,7 +9,7 @@ export interface PriceCellProps {
   stale: boolean;
   flash: FlashDirection | undefined;
   flashKey?: number | undefined;
-  flashFrom?: string | undefined;
+  flashRoll?: FlashRoll | undefined;
   testId: string;
   display?: boolean;
 }
@@ -18,10 +19,30 @@ const tints: Record<FlashDirection, string> = {
   down: "bg-loss-tint",
 };
 
-function RollingDigits({ text, from, rollKey }: { text: string; from: string; rollKey: number }) {
-  const offset = text.length - from.length;
+function changedPositions(text: string, roll: FlashRoll): Set<number> {
+  const from = formatPrice(roll.from);
+  const to = formatPrice(roll.to);
+  const changed = new Set<number>();
+  for (let index = 0; index < to.length; index += 1) {
+    if (to[index] !== from[index - (to.length - from.length)]) {
+      changed.add(index + text.length - to.length);
+    }
+  }
+  return changed;
+}
+
+function RollingDigits({
+  text,
+  roll,
+  rollKey,
+}: {
+  text: string;
+  roll: FlashRoll;
+  rollKey: number;
+}) {
+  const changed = changedPositions(text, roll);
   return Array.from(text, (char, index) =>
-    char === from[index - offset] ? (
+    !changed.has(index) ? (
       <span key={index}>{char}</span>
     ) : (
       <span key={`${rollKey}-${index}`} className="inline-block motion-safe:animate-digit-roll">
@@ -32,10 +53,10 @@ function RollingDigits({ text, from, rollKey }: { text: string; from: string; ro
 }
 
 export function PriceCell(props: PriceCellProps) {
-  const { asOf, price, stale, flash, flashKey, flashFrom, testId, display = false } = props;
+  const { asOf, price, stale, flash, flashKey, flashRoll, testId, display = false } = props;
   const size = display ? "text-numeric-display" : "text-numeric-price";
   const text = formatPrice(price);
-  const rolling = flash !== undefined && flashKey !== undefined && flashFrom !== undefined;
+  const rolling = flash !== undefined && flashKey !== undefined && flashRoll !== undefined;
   return (
     <bdi
       dir="ltr"
@@ -61,11 +82,7 @@ export function PriceCell(props: PriceCellProps) {
           <span className="sr-only">{asOf}, </span>
         </span>
       ) : null}
-      {rolling ? (
-        <RollingDigits text={text} from={formatPrice(flashFrom)} rollKey={flashKey} />
-      ) : (
-        text
-      )}
+      {rolling ? <RollingDigits text={text} roll={flashRoll} rollKey={flashKey} /> : text}
     </bdi>
   );
 }

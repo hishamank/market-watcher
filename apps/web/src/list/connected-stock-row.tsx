@@ -17,7 +17,7 @@ export function ConnectedStockRow({ stock, morph = true }: { stock: Stock; morph
   const quote = useQuote(stock.symbol) ?? stock.quote;
   const { status } = useConnectionStatus();
   const stale = status === "stale" || status === "offline";
-  const { flash, flashKey, from } = useTickFlash(quote.price, stale);
+  const { flash, flashKey, roll } = useTickFlash(quote.price, stale);
   const watchlist = useWatchlist();
   return (
     <StockRow
@@ -42,7 +42,7 @@ export function ConnectedStockRow({ stock, morph = true }: { stock: Stock; morph
       stale={stale}
       flash={flash}
       flashKey={flashKey}
-      flashFrom={from}
+      flashRoll={roll}
       starred={watchlist.isLoaded ? watchlist.isStarred(stock.symbol) : undefined}
       onToggleStar={() => watchlist.toggle(stock.symbol)}
       morph={morph}

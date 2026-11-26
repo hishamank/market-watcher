@@ -1,5 +1,6 @@
 import { directionOf, formatPrice, formatSignedPercent, type FlashDirection } from "@mini/core";
 import Link from "next/link";
+import type { FlashRoll } from "../integrations/use-tick-flash.ts";
 import { ChangePill } from "./change-pill.tsx";
 import { Morph, OPEN_STOCK } from "./morph.tsx";
 import { PriceCell } from "./price-cell.tsx";
@@ -20,7 +21,7 @@ export interface StockRowProps {
   stale: boolean;
   flash: FlashDirection | undefined;
   flashKey: number | undefined;
-  flashFrom?: string | undefined;
+  flashRoll?: FlashRoll | undefined;
   starred: boolean | undefined;
   onToggleStar: () => void;
   morph?: boolean;
@@ -68,7 +69,7 @@ export function StockRow(props: StockRowProps) {
                 asOf={props.asOf}
                 flash={props.asOf ? undefined : flash}
                 flashKey={props.flashKey}
-                flashFrom={props.flashFrom}
+                flashRoll={props.flashRoll}
                 testId={`stock-row-price-${symbol}`}
               />
             </Morph>

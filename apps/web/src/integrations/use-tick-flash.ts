@@ -5,19 +5,24 @@ import { useEffect, useRef, useState } from "react";
 
 const MIN_FLASH_GAP_MS = 1000;
 
+export interface FlashRoll {
+  readonly from: string;
+  readonly to: string;
+}
+
 export interface TickFlash {
   readonly flash: FlashDirection | undefined;
   readonly flashKey: number | undefined;
-  readonly from: string | undefined;
+  readonly roll: FlashRoll | undefined;
 }
 
 interface ActiveFlash {
   readonly direction: FlashDirection;
   readonly key: number;
-  readonly from: string;
+  readonly roll: FlashRoll;
 }
 
-const NO_FLASH: TickFlash = { flash: undefined, flashKey: undefined, from: undefined };
+const NO_FLASH: TickFlash = { flash: undefined, flashKey: undefined, roll: undefined };
 
 export function useTickFlash(price: string | undefined, stale: boolean): TickFlash {
   const [active, setActive] = useState<ActiveFlash>();
@@ -33,7 +38,7 @@ export function useTickFlash(price: string | undefined, stale: boolean): TickFla
     const direction = directionOf(subtract(price, before));
     if (direction === "flat") return;
     lastFlashAt.current = now;
-    setActive({ direction, key: now, from: before });
+    setActive({ direction, key: now, roll: { from: before, to: price } });
   }, [price]);
 
   useEffect(() => {
@@ -43,5 +48,5 @@ export function useTickFlash(price: string | undefined, stale: boolean): TickFla
   }, [active]);
 
   if (active === undefined || stale) return NO_FLASH;
-  return { flash: active.direction, flashKey: active.key, from: active.from };
+  return { flash: active.direction, flashKey: active.key, roll: active.roll };
 }
