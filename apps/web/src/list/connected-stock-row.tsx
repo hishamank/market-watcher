@@ -13,7 +13,13 @@ import { useListNavigation } from "../integrations/use-list-navigation.ts";
 import { StockRow } from "../components/stock-row.tsx";
 import { useTickFlash } from "../integrations/use-tick-flash.ts";
 
-export function ConnectedStockRow({ stock, morph = true }: { stock: Stock; morph?: boolean }) {
+export interface ConnectedStockRowProps {
+  stock: Stock;
+  morph?: boolean;
+  reflowStar?: ((symbol: string) => void) | undefined;
+}
+
+export function ConnectedStockRow({ stock, morph = true, reflowStar }: ConnectedStockRowProps) {
   const t = useT();
   const { stockHref } = useListNavigation();
   const quote = useQuote(stock.symbol) ?? stock.quote;
@@ -21,6 +27,8 @@ export function ConnectedStockRow({ stock, morph = true }: { stock: Stock; morph
   const stale = status === "stale" || status === "offline";
   const { flash, flashKey, roll } = useTickFlash(quote.price, stale);
   const watchlist = useWatchlist();
+  const starred = watchlist.isLoaded ? watchlist.isStarred(stock.symbol) : undefined;
+  const toggle = () => watchlist.toggle(stock.symbol);
   return (
     <StockRow
       href={stockHref(stock.symbol)}
@@ -46,8 +54,8 @@ export function ConnectedStockRow({ stock, morph = true }: { stock: Stock; morph
       flash={flash}
       flashKey={flashKey}
       flashRoll={roll}
-      starred={watchlist.isLoaded ? watchlist.isStarred(stock.symbol) : undefined}
-      onToggleStar={() => watchlist.toggle(stock.symbol)}
+      starred={starred}
+      onToggleStar={reflowStar ? () => reflowStar(stock.symbol) : toggle}
       morph={morph}
     />
   );

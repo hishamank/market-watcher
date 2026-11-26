@@ -6,6 +6,7 @@ import type { MouseEvent } from "react";
 import { buttonClassName } from "../components/button.tsx";
 import { EmptyState } from "../components/empty-state.tsx";
 import { StarIcon } from "../components/icons.tsx";
+import { useStarTransition } from "../integrations/star-motion.ts";
 import { ListError } from "../components/list-error.tsx";
 import { ListSkeleton } from "../components/list-skeleton.tsx";
 import type { ListView } from "../components/view-toggle.tsx";
@@ -19,7 +20,8 @@ export interface WatchlistViewProps {
 
 export function WatchlistView({ onShowAll }: WatchlistViewProps) {
   const t = useT();
-  const { isLoaded, symbols } = useWatchlist();
+  const { isLoaded, symbols, toggle } = useWatchlist();
+  const reflowStar = useStarTransition(symbols, toggle);
   const state = useWatchlistStocks(symbols, isLoaded);
   if (state.status === "loading") {
     return <ListSkeleton testId="watchlist-skeleton" />;
@@ -32,6 +34,7 @@ export function WatchlistView({ onShowAll }: WatchlistViewProps) {
       <>
         <EmptyState
           testId="watchlist-empty"
+          starMotion
           icon={<StarIcon />}
           title={t("watchlist.empty.title")}
           help={t("watchlist.empty.help")}
@@ -45,7 +48,7 @@ export function WatchlistView({ onShowAll }: WatchlistViewProps) {
             </Link>
           }
         />
-        <WatchlistSuggestions />
+        <WatchlistSuggestions onStar={reflowStar} />
       </>
     );
   }
@@ -54,6 +57,7 @@ export function WatchlistView({ onShowAll }: WatchlistViewProps) {
       stocks={state.stocks}
       listTestId="watchlist"
       rowTestId={(symbol) => `watchlist-row-${symbol}`}
+      reflowStar={state.stocks.length === 1 ? reflowStar : undefined}
     />
   );
 }

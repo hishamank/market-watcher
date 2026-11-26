@@ -181,6 +181,9 @@ In React Native, `elevation.1` and `elevation.2` map to shadow properties, and t
 | Live point | Halo pulses, 2 s loop | Static halo |
 | Search dropdown (from 768 px) | Drops 6 px and fades in, 200 ms | Fades in, 120 ms |
 | List to detail (web) | Name and price move from the row into the detail header, 320 ms (only when opening from a row) | Page changes at once |
+| Empty watchlist to list (web) | Starred suggestion moves into the watchlist's first slot; the empty state's star fills, then the empty state shrinks and fades, 320 ms. Unstarring the last row reverses it, and the star pops (ADR 0050) | Swaps at once |
+| Star to Watchlist control (web) | A star copy flies along a curve into the Watchlist option, which bumps to 106%, 400 ms + 320 ms. Only when that option is on screen and not current | Nothing flies |
+| Empty watchlist to list (mobile) | The new content fades in, 200 ms; the empty state's star pops on return. Not on the first render after load | Swaps at once |
 | Haptics (mobile) | Light tap on star; selection tick on range change | Unchanged |
 | Skeleton | Pulses between 100% and 55% opacity, 1.2 s loop | Static fill |
 | Search sheet | Slides up, 320 ms | Fades in, 120 ms |
@@ -255,7 +258,7 @@ Each component lists its anatomy, states, spacing, motion and test IDs.
 - **Anatomy.** A 44 px button with a 20 px star icon, `aria-pressed`, label "Star {name}".
 - **States.** Off: outline in `color.textMuted`. On: filled in `color.accentFill`. Loading, before the watchlist is known: outline in `color.border`, not interactive, same size so nothing shifts when it resolves. Focused: focus outline.
 - **Hover and focus.** Colour answers hover with no square fill. A plain mouse click has no outline; keyboard focus keeps the standard visible focus ring. Other icon buttons keep their hover fill.
-- **Motion.** Only the button the user stars pops from 85% through 125%, settles through 95% to 100%, and emits a thin expanding ring and six tiny outward dots in `color.accentFill`, over `duration.flash` (400 ms) with `easing.standard`. Effects use only transform and opacity, sit inside the 44 px target and ignore pointer events; nothing shifts. Unstarring has no burst. Already-starred buttons stay still on hydration, mount, virtual-list re-entry and cross-view updates. Reduced motion fills immediately with no pop, ring, dots or press animation.
+- **Motion.** Only the button the user stars pops from 85% through 125%, settles through 95% to 100%, and emits a thin expanding ring and six tiny outward dots in `color.accentFill`, over `duration.flash` (400 ms) with `easing.standard`. Effects use only transform and opacity, sit inside the 44 px target and ignore pointer events; nothing shifts. Unstarring has no burst. Starring also shows where the star went: see Empty watchlist to list and Star to Watchlist control in the Motion table (ADR 0050). Already-starred buttons stay still on hydration, mount, virtual-list re-entry and cross-view updates. Reduced motion fills immediately with no pop, ring, dots or press animation.
 - **Test IDs.** `star-{SYMBOL}`, `detail-star`, `search-result-star-{SYMBOL}`.
 
 ### All and Watchlist control

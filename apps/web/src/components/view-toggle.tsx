@@ -29,6 +29,7 @@ export function ViewToggle({ view, hrefFor, onSelect }: ViewToggleProps) {
                 onClick={(event) => onSelect(option, event)}
                 data-segment
                 data-testid={`view-toggle-${option}`}
+                data-star-target={option === "watchlist" ? "" : undefined}
                 aria-current={selected ? "page" : undefined}
                 className={`grid min-h-[44px] flex-1 place-items-center rounded-sm text-label ${segmentStyle(selected, ready)}`}
               >

@@ -37,6 +37,7 @@ Preconditions:
 - **Outside the list (W7).** Open `/stocks/ABNB`, press `detail-star`, then open `/?view=watchlist`. The first row is ABNB, `stock-row-name-ABNB` reads "Airbnb, Inc." and it has a price. Evidence: `W7-outside-list.png`.
 - **Search star (S3).** On `/`, type `shop` into `search-input` and press `search-result-star-SHOP`. It is pressed and storage starts with `SHOP`. Evidence: `S3-search-star.png`.
 - **Unstar (W2).** On `/?view=watchlist`, press `star-NVDA`. `watchlist-row-NVDA` disappears within 200 ms.
+- **Star motion (W1, W5, walk).** On an empty `/?view=watchlist`, star a suggestion: the row moves up into the watchlist, the empty state's star fills amber and the empty state fades out. Unstar it: the row moves back down and the empty state fades in with a star pop. On `/`, star a row: a star flies into `view-toggle-watchlist` and the toggle bumps. To judge a frame, pause `document.getAnimations()` at about 50% and take a screenshot. With reduced motion, all three swap at once (ADR 0050).
 - **Corrupt storage (W6).** Set `watchlist:v1` to `not json` and reload. `watchlist-empty` shows. Then on `/`, press `star-MSFT`: it is pressed and storage reads `["MSFT"]`.
 - **Proof.** `storage.json` holds the final stored value. `steps.log` has PASS for W1 to W7, D8 and S3, and `console.txt` has no unexpected entries.
 
