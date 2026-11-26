@@ -57,7 +57,7 @@ export async function stockPage(
   const last = entries.at(-1);
   const symbols = entries.map((entry) => entry.symbol);
   const quotes = await fetchQuotesMap(ctx.feed, symbols, ctx.warn, ctx.now, {
-    allowEmpty: true,
+    allowEmpty: cursor !== undefined,
   });
   const stocks = entries.flatMap((entry) => {
     const quote = quotes.get(entry.symbol);

@@ -6,6 +6,7 @@ import { type AbortSignalLike, type RestClient, RestClientError } from "./rest-c
 const SECOND_MS = 1_000;
 const MINUTE_MS = 60 * SECOND_MS;
 const MAX_RETRIES = 3;
+const MAX_EMPTY_PAGES_SKIPPED = 2;
 
 export const STOCK_STALE_MS = MINUTE_MS;
 
@@ -65,7 +66,8 @@ async function pageSkippingEmpty(
   signal: AbortSignalLike,
 ): Promise<StockPageResponse> {
   let page = await rest.listStockPage(cursor, signal);
-  while (page.stocks.length === 0 && page.nextCursor !== null) {
+  for (let skipped = 0; skipped < MAX_EMPTY_PAGES_SKIPPED; skipped += 1) {
+    if (page.stocks.length > 0 || page.nextCursor === null) break;
     page = await rest.listStockPage(page.nextCursor, signal);
   }
   return page;

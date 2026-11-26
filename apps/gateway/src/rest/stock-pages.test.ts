@@ -1,11 +1,12 @@
 import { RestErrorResponseSchema, StockPageResponseSchema } from "@mini/contracts";
 import { afterEach, describe, expect, it } from "vitest";
-import { type RestGateway, startRestGateway } from "./testing.ts";
+import type { LiveFeed } from "../feeds/types.ts";
+import { type RestGateway, type RestGatewayOptions, startRestGateway } from "./testing.ts";
 
 const active: RestGateway[] = [];
 
-async function launch(): Promise<RestGateway> {
-  const gateway = await startRestGateway();
+async function launch(options?: RestGatewayOptions): Promise<RestGateway> {
+  const gateway = await startRestGateway(options);
   active.push(gateway);
   return gateway;
 }
@@ -62,6 +63,33 @@ describe("REST stock pages", () => {
     expect((await page(gw, "limit=2&cursor=A0")).stocks.map((s) => s.symbol)).toEqual(
       later.slice(0, 2),
     );
+  });
+
+  it("returns an empty page with its cursor when no quote is current, and 503 when the snapshot fails", async () => {
+    const upstream = { mode: "ok" as "ok" | "stale" | "down" };
+    const wrapLive = (base: LiveFeed): LiveFeed => ({
+      ...base,
+      snapshot: async (symbols) => {
+        if (upstream.mode === "down") throw new Error("upstream down");
+        const quotes = await base.snapshot(symbols);
+        return upstream.mode === "stale"
+          ? quotes.map((quote) => ({ ...quote, timestamp: 0 }))
+          : quotes;
+      },
+    });
+    const gw = await launch({ wrapLive });
+    const { nextCursor } = await page(gw, "limit=5");
+
+    upstream.mode = "stale";
+    const empty = await page(gw, `limit=5&cursor=${nextCursor}`);
+    expect(empty.stocks).toEqual([]);
+    expect(empty.nextCursor).not.toBeNull();
+    expect((await gw.get("/stocks?limit=5")).status).toBe(503);
+
+    upstream.mode = "down";
+    const failed = await gw.get(`/stocks?limit=5&cursor=${nextCursor}`);
+    expect(failed.status).toBe(503);
+    expect(RestErrorResponseSchema.parse(await failed.json()).error.code).toBe("unavailable");
   });
 
   it("rejects symbols combined with a cursor or a limit, and limits over 100", async () => {

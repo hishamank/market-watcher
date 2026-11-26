@@ -2,7 +2,13 @@ import type { AddressInfo } from "node:net";
 import type { FastifyInstance, FastifyServerOptions } from "fastify";
 import { buildApp } from "../app.ts";
 import { createSimulatorFeed, type SimulatorFeed } from "../feeds/simulator/index.ts";
-import type { Feed, HistoryRequest, HistorySeries, HistorySource } from "../feeds/types.ts";
+import type {
+  Feed,
+  HistoryRequest,
+  HistorySeries,
+  HistorySource,
+  LiveFeed,
+} from "../feeds/types.ts";
 import type { RestRateLimitOptions } from "./plugins.ts";
 
 export const TEST_ORIGIN = "http://localhost:3000";
@@ -19,6 +25,7 @@ export interface RestGatewayOptions {
   historySourceTimeoutMs?: number;
   rateLimit?: RestRateLimitOptions;
   wrapHistory?: (base: HistorySource) => HistorySource;
+  wrapLive?: (base: LiveFeed) => LiveFeed;
 }
 
 export interface RestGateway {
@@ -50,7 +57,7 @@ export async function startRestGateway(options: RestGatewayOptions = {}): Promis
     },
   };
   const wiredFeed: Feed = {
-    live: feed.live,
+    live: options.wrapLive ? options.wrapLive(feed.live) : feed.live,
     history: spiedHistory,
     catalogue: feed.catalogue,
     calendar: feed.calendar,
