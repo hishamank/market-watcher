@@ -14,7 +14,7 @@ This folder is the source for proving the web app's user-facing behaviour with `
 - Paths are relative to `WEB_URL`, which is `http://localhost:3000` unless `VERIFY_WEB_PORT` is set. Check with `bin/stack env`.
 - Wait for `app-root[data-connection="connected"]` before acting on prices or stars. Stars are disabled until the page hydrates.
 - Prefer `data-testid` and ARIA state. Per-symbol IDs end in the uppercase symbol, for example `star-AAPL`.
-- Layout depends on width. At 1440 px a list pane sits beside the detail page, at 768 px there is a `detail-back` link, and at 360 px there is a `header-back` button and search sits behind a "Search" button.
+- Layout depends on width. At 1440 px a list pane sits beside the detail page, from 768 px up there is a `detail-back` link that returns to the list view the stock was opened from, and at 360 px there is a `header-back` button and search sits behind a "Search" button.
 - Switch any chaos control you turn on back off before the journey ends. They are gateway-wide and otherwise revert only after 60 s.
 
 ## Proof and skip reporting

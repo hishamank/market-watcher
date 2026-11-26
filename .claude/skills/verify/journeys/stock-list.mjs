@@ -17,15 +17,32 @@ await step("L2", "open / and wait for ticks", async () => {
   await openConnected("/");
   const prices = page.locator('[data-testid^="stock-row-price-"]');
   const before = await prices.allTextContents();
+  await page.evaluate(() => {
+    const selector = '[data-testid^="stock-row-price-"]';
+    const valueOf = (node) => Number((node.textContent ?? "").replace(/[^0-9.]/g, ""));
+    const history = new Map([...document.querySelectorAll(selector)].map((node) => [node, [valueOf(node)]]));
+    window.seenFlashes = [];
+    new MutationObserver((records) => {
+      for (const record of records) {
+        const target = record.target instanceof Element ? record.target : record.target.parentElement;
+        const node = target?.closest(selector);
+        if (!node) continue;
+        const values = history.get(node) ?? [];
+        if (values.at(-1) !== valueOf(node)) values.push(valueOf(node));
+        history.set(node, values);
+        const flash = node.getAttribute("data-flash");
+        if (record.type === "attributes" && record.oldValue === null && flash !== null && values.length > 1) {
+          window.seenFlashes.push({ id: node.dataset.testid, flash, delta: values.at(-1) - values.at(-2) });
+        }
+      }
+    }).observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeOldValue: true, attributeFilter: ["data-flash"] });
+  });
   await expect.poll(async () => (await prices.allTextContents()).join() !== before.join(), { timeout: 10_000 }).toBe(true);
-  const flash = await page.waitForFunction(() => {
-    const node = document.querySelector('[data-testid^="stock-row-price-"][data-flash]');
-    return node && { id: node.dataset.testid, flash: node.dataset.flash, direction: node.dataset.direction };
-  }, null, { timeout: 10_000 });
-  const seen = await flash.jsonValue();
-  expect(seen.flash).toBe(seen.direction);
+  await expect.poll(() => page.evaluate(() => window.seenFlashes.length), { timeout: 10_000 }).toBeGreaterThan(0);
+  const seen = await page.evaluate(() => window.seenFlashes);
+  for (const flash of seen) expect(flash.flash).toBe(flash.delta > 0 ? "up" : "down");
   await shot("L2-ticking");
-  return `prices changed; ${seen.id} flashed ${seen.flash}, matching its day direction`;
+  return `prices changed; ${seen.length} flash(es), each matching its tick's direction (first: ${seen[0].id} ${seen[0].flash})`;
 });
 
 await step("L5", "press view-toggle-watchlist, browser back, then view-toggle-all from the watchlist", async () => {
