@@ -84,11 +84,15 @@ export function StockRow(props: StockRowProps) {
         <span className="flex min-w-0 flex-1 flex-col items-start gap-[3px] list-table:contents list-compact:contents">
           <Morph name={`stock-name-${symbol}`} enabled={props.morph}>
             <span
-              data-testid={`stock-row-name-${symbol}`}
-              dir="auto"
-              className={`max-w-full overflow-x-clip text-ellipsis whitespace-nowrap rtl:text-end text-body-strong list-table:text-body list-table:font-medium list-compact:text-body list-compact:font-medium ${pinnedName} list-custom:leading-[56px] transition-colors duration-(--duration-fast) ease-standard list-custom:group-hover:bg-hover`}
+              className={`max-w-full overflow-x-clip whitespace-nowrap text-body-strong list-table:text-body list-table:font-medium list-compact:text-body list-compact:font-medium ${pinnedName} list-custom:leading-[56px] transition-colors duration-(--duration-fast) ease-standard list-custom:group-hover:bg-hover`}
             >
-              {name}
+              <span
+                data-testid={`stock-row-name-${symbol}`}
+                dir="auto"
+                className="block overflow-x-clip text-ellipsis rtl:text-end"
+              >
+                {name}
+              </span>
             </span>
           </Morph>
           <bdi
