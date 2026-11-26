@@ -13,37 +13,39 @@ function Quarter({ quarter, zero }: { quarter: ReadyEarnings["quarters"][number]
   return (
     <View style={styles.quarter}>
       <View accessible={false} style={styles.plot}>
-        <View style={[styles.zero, { bottom: `${zero}%`, borderColor: palette.border }]} />
-        {quarter.actualBar && (
-          <View
-            style={[
-              styles.bar,
-              {
-                start: "50%",
-                marginStart: -17,
-                bottom: `${quarter.actualBar.bottom}%`,
-                height: `${quarter.actualBar.height}%`,
-                backgroundColor: palette.text,
-              },
-            ]}
-          />
-        )}
-        {quarter.estimateBar && (
-          <View
-            style={[
-              styles.bar,
-              styles.estimate,
-              {
-                start: "50%",
-                marginStart: 3,
-                bottom: `${quarter.estimateBar.bottom}%`,
-                height: `${quarter.estimateBar.height}%`,
-                backgroundColor: palette.fill,
-                borderColor: palette.borderStrong,
-              },
-            ]}
-          />
-        )}
+        <View style={styles.plotInner}>
+          <View style={[styles.zero, { bottom: `${zero}%`, borderColor: palette.border }]} />
+          {quarter.actualBar && (
+            <View
+              style={[
+                styles.bar,
+                {
+                  start: "50%",
+                  marginStart: -17,
+                  bottom: `${quarter.actualBar.bottom}%`,
+                  height: `${quarter.actualBar.height}%`,
+                  backgroundColor: palette.text,
+                },
+              ]}
+            />
+          )}
+          {quarter.estimateBar && (
+            <View
+              style={[
+                styles.bar,
+                styles.estimate,
+                {
+                  start: "50%",
+                  marginStart: 3,
+                  bottom: `${quarter.estimateBar.bottom}%`,
+                  height: `${quarter.estimateBar.height}%`,
+                  backgroundColor: palette.fill,
+                  borderColor: palette.borderStrong,
+                },
+              ]}
+            />
+          )}
+        </View>
       </View>
       <Text
         style={[text.caption, styles.center, styles.quarterLabel, { color: palette.textSecondary }]}
@@ -53,10 +55,15 @@ function Quarter({ quarter, zero }: { quarter: ReadyEarnings["quarters"][number]
       <Text
         accessibilityLabel={`${t("earnings.actual")} ${quarter.actual}`}
         style={[
-          text.label,
+          text.caption,
           styles.center,
           styles.value,
-          { color: palette.text, borderTopWidth: 1, borderColor: palette.border },
+          {
+            fontWeight: "500",
+            color: palette.text,
+            borderTopWidth: 1,
+            borderColor: palette.border,
+          },
         ]}
       >
         {quarter.actual}
@@ -88,9 +95,15 @@ export function EarningsChart({ view }: { view: ReadyEarnings }) {
             </Text>
           </View>
           <View style={styles.rowLabel}>
-            <View style={[styles.dot, styles.estimate, { borderColor: palette.borderStrong }]} />
+            <View
+              style={[
+                styles.dot,
+                styles.estimate,
+                { borderColor: palette.borderStrong, backgroundColor: palette.fill },
+              ]}
+            />
             <Text style={[text.caption, { color: palette.textSecondary }]}>
-              {t("earnings.estimate")}
+              {t("earnings.estimateShort")}
             </Text>
           </View>
         </View>
@@ -105,16 +118,17 @@ export function EarningsChart({ view }: { view: ReadyEarnings }) {
 
 const styles = StyleSheet.create({
   section: { borderTopWidth: 1, paddingTop: space[20], gap: space[16] },
-  labels: { width: 64 },
+  labels: { width: 56 },
   labelSpacer: { height: 180 },
-  rowLabel: { height: 32, flexDirection: "row", alignItems: "center", gap: space[6] },
-  dot: { height: 6, width: 6, borderRadius: 1 },
+  rowLabel: { height: 32, flexDirection: "row", alignItems: "center", gap: space[4] },
+  dot: { height: 8, width: 8, borderRadius: 1 },
   chart: { flexDirection: "row", direction: "ltr", marginTop: space[8] },
   quarter: { flex: 1, minWidth: 0 },
   plot: { height: 136 },
+  plotInner: { position: "absolute", start: 0, end: 0, top: space[8], bottom: space[8] },
   quarterLabel: { height: 44, textAlignVertical: "center", paddingTop: space[12] },
   value: { height: 32, paddingTop: space[6] },
-  bar: { position: "absolute", width: 14, borderRadius: 3 },
+  bar: { position: "absolute", width: 14, minHeight: 2, borderRadius: 3 },
   estimate: { borderWidth: 1 },
   zero: { position: "absolute", start: 0, end: 0, borderTopWidth: 1 },
   center: { textAlign: "center", writingDirection: "ltr", fontVariant: ["tabular-nums"] },

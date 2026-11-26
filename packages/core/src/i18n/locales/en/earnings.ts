@@ -4,6 +4,7 @@ export const earningsStrings = {
   "earnings.latest": "Last reported EPS",
   "earnings.actual": "Actual",
   "earnings.estimate": "Estimate",
+  "earnings.estimateShort": "Est.",
   "earnings.history": "Earnings per share",
   "earnings.quarter": "Q{{quarter}} {{year}}",
   "earnings.scheduled": "Scheduled",

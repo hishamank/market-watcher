@@ -140,3 +140,49 @@ for (const width of [360, 1440]) {
     }
   });
 }
+
+test("D12 large EPS and an unconfirmed date fit 320px in both languages", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 900 });
+  await page.route("**/stocks/AAPL/earnings", (route) =>
+    route.fulfill({
+      json: {
+        ...response,
+        earnings: {
+          ...response.earnings,
+          nextReport: { dates: [1801170000000], confidence: "unknown" },
+          quarters: [1, 2, 3, 4].map((fiscalQuarter) => ({
+            fiscalQuarter,
+            fiscalYear: 2026,
+            periodEnd: 1782777600000 + fiscalQuarter,
+            actual: "-12.34",
+            estimate: "-10.50",
+          })),
+        },
+      },
+    }),
+  );
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/stocks/AAPL");
+  await expect(page.getByTestId("stock-earnings")).toHaveAttribute("data-state", "ready");
+  for (const direction of ["ltr", "rtl"]) {
+    if (direction === "rtl") await page.getByTestId("language-toggle").click();
+    await expect(page.locator("html")).toHaveAttribute("dir", direction);
+    expect(
+      await page
+        .getByTestId("stock-earnings")
+        .evaluate((section) => section.scrollWidth <= section.clientWidth),
+    ).toBe(true);
+    expect(
+      await page
+        .getByTestId("earnings-quarter")
+        .evaluateAll((quarters) =>
+          quarters.every((quarter) => quarter.scrollWidth <= quarter.clientWidth),
+        ),
+    ).toBe(true);
+    expect(
+      await page
+        .getByTestId("earnings-next")
+        .evaluate((next) => next.scrollWidth <= next.clientWidth),
+    ).toBe(true);
+  }
+});

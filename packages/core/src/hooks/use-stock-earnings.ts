@@ -29,9 +29,11 @@ export function useStockEarnings(symbol: string) {
     status: "ready",
     next: earnings.nextReport
       ? {
-          date: earnings.nextReport.dates
-            .map((date) => formatMarketDate(date, { locale, includeYear: true }))
-            .join(" – "),
+          needsWideSummary:
+            earnings.nextReport.dates.length > 1 || earnings.nextReport.confidence === "unknown",
+          dates: earnings.nextReport.dates.map((date) =>
+            formatMarketDate(date, { locale, includeYear: true }),
+          ),
           confidence: t(
             earnings.nextReport.confidence === "unknown"
               ? "earnings.dateUnknown"

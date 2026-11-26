@@ -7,6 +7,7 @@ export const arEarningsStrings = {
   "earnings.latest": "آخر ربحية سهم مُعلنة",
   "earnings.actual": "الفعلي",
   "earnings.estimate": "التقديري",
+  "earnings.estimateShort": "تقدير",
   "earnings.history": "ربحية السهم",
   "earnings.quarter": "ر{{quarter}} {{year}}",
   "earnings.scheduled": "مجدول",
