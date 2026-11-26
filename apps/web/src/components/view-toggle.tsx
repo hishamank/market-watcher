@@ -17,7 +17,7 @@ export function ViewToggle({ view, hrefFor, onSelect }: ViewToggleProps) {
   const t = useT();
   const selectedIndex = views.indexOf(view);
   return (
-    <nav aria-label={t("list.view.label")} className="md:w-[320px]">
+    <nav aria-label={t("list.view.label")} className="w-full md:w-[320px]">
       <SegmentTrack selected={selectedIndex} className="flex gap-2">
         {(ready) =>
           views.map((option) => {
