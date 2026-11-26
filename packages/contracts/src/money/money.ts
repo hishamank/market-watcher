@@ -50,3 +50,26 @@ export function changeBetween(from: string, to: string): Change {
     changePercent: percentChange(from, to),
   };
 }
+
+export type PriceRange = { readonly low: string; readonly high: string };
+
+export function widenRange(range: PriceRange | undefined, price: string): PriceRange {
+  if (range === undefined) {
+    return { low: price, high: price };
+  }
+  if (rangeHolds(range, price)) {
+    return range;
+  }
+  return toUnits(price) < toUnits(range.low)
+    ? { low: price, high: range.high }
+    : { low: range.low, high: price };
+}
+
+export function rangeHolds(range: PriceRange, price: string): boolean {
+  const units = toUnits(price);
+  return toUnits(range.low) <= units && units <= toUnits(range.high);
+}
+
+export function joinRanges(first: PriceRange, second: PriceRange): PriceRange {
+  return widenRange(widenRange(first, second.low), second.high);
+}

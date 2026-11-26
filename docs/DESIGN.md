@@ -10,7 +10,7 @@ Graphite is a calm, layered interface for reading prices. Surfaces stack in thre
 
 ## Rules that always hold
 
-- **Data.** Only draw what the gateway provides. Per stock: symbol, name, price, day change (money and percent), previous close, time of the last update. Charts: one price per bar. Global: feed mode and market status. Search: symbol and name. No volume, market cap, news, logos, holdings or portfolio value.
+- **Data.** Only draw what the gateway provides. Per stock: symbol, name, price, day change (money and percent), previous close, day high and low, time of the last update. Charts: one price per bar. Global: feed mode and market status. Search: symbol and name. No volume, market cap, news, logos, holdings or portfolio value.
 - **Gain and loss.** Never colour alone. Every change carries a sign (+ or −) and an up or down arrow. Flat shows a dash and no sign.
 - **Contrast.** Every text and background pair below passes WCAG AA (4.5:1) in both themes. Two limits: do not put `color.textMuted`, `color.accent` or `color.loss` text on `color.fill` in light, and do not put `color.textMuted` on `color.raised` in dark.
 - **Focus.** Every control shows a 2 px `color.focus` outline with a 2 px offset on keyboard focus.
@@ -193,7 +193,7 @@ In React Native, `elevation.1` and `elevation.2` map to shadow properties, and t
 | --- | --- |
 | 360 px | One column. The list runs edge to edge on `color.surface`. Search opens as a full-screen sheet. Chaos controls open as a bottom sheet. |
 | 768 px | One centred column, at most 720 px wide. The list and the detail sit in cards (`radius.xl`, `elevation.1`). From 768 px to 1279 px the list is a compact table with a header row: name, symbol, price, day change (money and percent) and the star (ADR 0049). Search is a 380 px field in the header with a dropdown. |
-| 1440 px | `/` shows the list as a table, at most 1120 px wide, with columns for name, symbol, price, day change, day change %, previous close and last update. `/stocks/[symbol]` keeps the list visible in a 400 px pane at the start, with the detail card beside it. |
+| 1440 px | From 1280 px, `/` shows the list as a table, at most 1120 px wide, with columns for name, symbol, price, day change, day change %, previous close and last update. From 1440 px it is at most 1344 px wide and adds day high and day low after previous close, with a dash when the quote has no day range (ADR 0050). `/stocks/[symbol]` keeps the list visible in a 400 px pane at the start, with the detail card beside it. |
 
 The list and the detail stay separate routes at every width. From 768 px a back link stays visible above the detail card, including beside the desktop pane. It returns to `/` or `/?view=watchlist`. Row and search links carry `?view=watchlist` into detail URLs; range changes and pane navigation retain it. Missing or unknown view values default to all. The phone header back button uses the same destination. The 1440 px detail layout is a proposal: the list pane is the same list component, with the open symbol marked by `aria-current`. Page padding is `space.16` at 360 px and `space.24` from 768 px.
 
@@ -248,7 +248,7 @@ Each component lists its anatomy, states, spacing, motion and test IDs.
   - Current (1440 px list pane): `color.fill` background and `aria-current`.
   - Star loading: see Star.
 - **Table row (1440 px list).** Minimum height 56 px, one grid row per stock with the columns named under Layout. Numbers align to the end.
-- **Test IDs.** `stock-row-{SYMBOL}`, `stock-row-name-{SYMBOL}`, `stock-row-price-{SYMBOL}` (with `data-direction` and `data-flash`), `stock-row-change-{SYMBOL}`. In the watchlist: `watchlist-row-{SYMBOL}`.
+- **Test IDs.** `stock-row-{SYMBOL}`, `stock-row-name-{SYMBOL}`, `stock-row-price-{SYMBOL}` (with `data-direction` and `data-flash`), `stock-row-change-{SYMBOL}`, `stock-row-high-{SYMBOL}` and `stock-row-low-{SYMBOL}`. In the watchlist: `watchlist-row-{SYMBOL}`.
 
 ### Star
 

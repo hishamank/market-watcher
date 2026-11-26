@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { changeBetween, fromUnits, percentChange, subtract, toUnits } from "./money.ts";
+import { changeBetween, fromUnits, percentChange, subtract, toUnits, widenRange } from "./money.ts";
 
 describe("units of 1/10,000 dollar", () => {
   it("parses decimal strings into exact units", () => {
@@ -97,5 +97,21 @@ describe("changeBetween", () => {
 
   it("reports a flat change as unsigned zero", () => {
     expect(changeBetween("150.004", "150.00")).toEqual({ change: "0.00", changePercent: "0.00" });
+  });
+});
+
+describe("day range", () => {
+  it("starts at the first price", () => {
+    expect(widenRange(undefined, "187.42")).toEqual({ low: "187.42", high: "187.42" });
+  });
+
+  it("compares by value, not by text", () => {
+    const range = widenRange(widenRange(undefined, "9.99"), "10.00");
+    expect(widenRange(range, "0.9990")).toEqual({ low: "0.9990", high: "10.00" });
+  });
+
+  it("keeps a range that already holds the price", () => {
+    const range = { low: "186.10", high: "191.25" };
+    expect(widenRange(range, "187.42")).toBe(range);
   });
 });

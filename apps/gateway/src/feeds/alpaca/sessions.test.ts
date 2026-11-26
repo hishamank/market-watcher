@@ -100,6 +100,7 @@ test("a trade after a failed open resync waits for the new session's baseline", 
     change: "3.50",
     changePercent: "1.74",
     previousClose: "201.50",
+    dayRange: { low: "205.00", high: "205.00" },
     timestamp: Date.parse("2025-06-25T13:31:00.250Z"),
   });
 });
@@ -122,6 +123,7 @@ test("a failed close resync is retried, and the last trade is not served as the 
     change: "1.20",
     changePercent: "0.60",
     previousClose: "200.30",
+    dayRange: { low: "200.55", high: "202.10" },
     timestamp: SESSION_CLOSE,
   };
   expect(quotes.at(-1)).toEqual(close);
@@ -162,6 +164,7 @@ test("a snapshot started before the open and answered after it is discarded", as
     change: "3.50",
     changePercent: "1.74",
     previousClose: "201.50",
+    dayRange: { low: "205.00", high: "205.00" },
     timestamp: Date.parse("2025-06-25T13:31:00.250Z"),
   });
 });

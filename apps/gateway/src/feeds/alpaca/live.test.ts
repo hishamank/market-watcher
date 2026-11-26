@@ -52,6 +52,7 @@ test("streams the first 30 symbols and polls the rest in one batch every 5 s", a
     change: "1.26",
     changePercent: "0.63",
     previousClose: "200.30",
+    dayRange: { low: "200.55", high: "202.10" },
     timestamp: Date.parse("2025-06-24T18:15:21.670Z"),
   });
 
@@ -101,6 +102,7 @@ test("trades become rounded quotes during the session and are dropped after hour
       change: "1.83",
       changePercent: "0.91",
       previousClose: "200.30",
+      dayRange: { low: "200.55", high: "202.13" },
       timestamp: Date.parse("2025-06-24T18:16:44.208Z"),
     },
   ]);
@@ -108,6 +110,18 @@ test("trades become rounded quotes during the session and are dropped after hour
   now = AFTER_HOURS_NOW;
   rig.sockets.last().push("stream-trade-after-hours.json");
   expect(quotes).toHaveLength(1);
+});
+
+test("a later poll keeps a day high that a trade set", async () => {
+  rig = await startAlpaca(undefined, { now: () => SESSION_NOW });
+  rig.feed.live.subscribe(["AAPL"]);
+  await rig.feed.live.snapshot(["AAPL"]);
+  authenticate(rig.sockets.last());
+  rig.sockets.last().push("stream-trades.json");
+
+  await rig.feed.live.resync();
+  const [polled] = await rig.feed.live.snapshot(["AAPL"]);
+  expect(polled?.dayRange).toEqual({ low: "200.55", high: "202.13" });
 });
 
 test("reconnects with backoff and resubscribes the whole set after auth", async () => {

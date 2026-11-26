@@ -80,6 +80,10 @@ _Avoid_: current bar, latest candle
 The last close of the session before the current one. Today's change is measured against it.
 _Avoid_: yesterday's close, open
 
+**Day range**:
+The lowest and highest price so far in the session a quote prices, as `low` and `high`. It always holds the price. In Live mode a symbol with no trades in that session has none.
+_Avoid_: day's range, high-low, daily range
+
 **Day change**:
 A quote's change, in money and percent, against the previous close.
 _Avoid_: daily change, today's performance

@@ -7,7 +7,7 @@ import { PriceCell } from "./price-cell.tsx";
 import { StarButton } from "./star-button.tsx";
 
 export const tableColumns =
-  "list-table:grid list-table:grid-cols-[minmax(0,1fr)_88px_110px_128px_96px_124px_124px_44px] list-table:gap-x-16 list-table:ps-20 list-table:pe-8 list-compact:grid list-compact:grid-cols-[minmax(0,1fr)_72px_104px_172px_44px] list-compact:gap-x-16 list-compact:ps-20 list-compact:pe-8";
+  "list-table:grid list-table:grid-cols-[minmax(0,1fr)_88px_110px_128px_96px_124px_124px_44px] list-table:gap-x-16 list-table:ps-20 list-table:pe-8 list-wide:grid-cols-[minmax(0,1fr)_88px_110px_128px_96px_124px_104px_104px_124px_44px] list-compact:grid list-compact:grid-cols-[minmax(0,1fr)_72px_104px_172px_44px] list-compact:gap-x-16 list-compact:ps-20 list-compact:pe-8";
 
 export interface StockRowProps {
   symbol: string;
@@ -16,6 +16,8 @@ export interface StockRowProps {
   change: string;
   changePercent: string;
   previousClose: string;
+  dayHigh: string;
+  dayLow: string;
   lastUpdate: string;
   asOf?: string | undefined;
   stale: boolean;
@@ -30,7 +32,28 @@ export interface StockRowProps {
 
 const tableOnly = "hidden text-end text-label font-normal text-text-secondary list-table:block";
 
+const wideOnly = "hidden text-end text-label font-normal text-text-secondary list-wide:block";
+
 const percentTones = { up: "text-gain", down: "text-loss", flat: "text-flat" } as const;
+
+function ReferenceCells(props: StockRowProps) {
+  return (
+    <>
+      <bdi dir="ltr" className={tableOnly}>
+        {formatPrice(props.previousClose)}
+      </bdi>
+      <bdi dir="ltr" data-testid={`stock-row-high-${props.symbol}`} className={wideOnly}>
+        {props.dayHigh}
+      </bdi>
+      <bdi dir="ltr" data-testid={`stock-row-low-${props.symbol}`} className={wideOnly}>
+        {props.dayLow}
+      </bdi>
+      <bdi dir="ltr" className={tableOnly}>
+        {props.lastUpdate}
+      </bdi>
+    </>
+  );
+}
 
 export function StockRow(props: StockRowProps) {
   const { symbol, name, stale, flash } = props;
@@ -42,7 +65,7 @@ export function StockRow(props: StockRowProps) {
       <Link
         href={props.href ?? `/stocks/${symbol}`}
         transitionTypes={[OPEN_STOCK]}
-        className="-ms-8 flex min-w-0 flex-1 items-center gap-12 self-stretch rounded-md ps-8 focus-visible:outline-offset-[-2px] list-table:col-span-7 list-table:-mx-8 list-table:grid list-table:grid-cols-subgrid list-table:px-8 list-compact:col-span-4 list-compact:-mx-8 list-compact:grid list-compact:grid-cols-subgrid list-compact:px-8"
+        className="-ms-8 flex min-w-0 flex-1 items-center gap-12 self-stretch rounded-md ps-8 focus-visible:outline-offset-[-2px] list-table:col-span-7 list-wide:col-span-9 list-table:-mx-8 list-table:grid list-table:grid-cols-subgrid list-table:px-8 list-compact:col-span-4 list-compact:-mx-8 list-compact:grid list-compact:grid-cols-subgrid list-compact:px-8"
       >
         <span className="flex min-w-0 flex-1 flex-col items-start gap-[3px] list-table:contents list-compact:contents">
           <Morph name={`stock-name-${symbol}`} enabled={props.morph}>
@@ -91,12 +114,7 @@ export function StockRow(props: StockRowProps) {
           >
             {formatSignedPercent(props.changePercent)}
           </bdi>
-          <bdi dir="ltr" className={tableOnly}>
-            {formatPrice(props.previousClose)}
-          </bdi>
-          <bdi dir="ltr" className={tableOnly}>
-            {props.lastUpdate}
-          </bdi>
+          <ReferenceCells {...props} />
         </span>
       </Link>
       <StarButton

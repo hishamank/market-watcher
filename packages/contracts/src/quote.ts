@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { DECIMAL_PATTERN, UNSIGNED_DECIMAL_PATTERN } from "./money/decimal.ts";
-import { roundPercent, roundToDisplay, toUnits } from "./money/money.ts";
+import { rangeHolds, roundPercent, roundToDisplay, toUnits } from "./money/money.ts";
 import {
   DecimalStringSchema,
   EpochMsSchema,
@@ -31,6 +31,11 @@ export const BaselinePriceSchema = PriceStringSchema.refine(isBaseline, {
   message: "A baseline price must be positive, pre-rounded and below the price cap",
 });
 
+export const DayRangeSchema = z.object({
+  low: DisplayPriceSchema,
+  high: DisplayPriceSchema,
+});
+
 export const QuoteSchema = z
   .object({
     symbol: SymbolSchema,
@@ -39,6 +44,7 @@ export const QuoteSchema = z
     changePercent: DecimalStringSchema,
     previousClose: BaselinePriceSchema,
     timestamp: EpochMsSchema,
+    dayRange: DayRangeSchema.optional(),
     lastKnown: z.literal(true).optional(),
   })
   .refine((quote) => isDisplayChange(quote.change, quote.price), {
@@ -48,6 +54,12 @@ export const QuoteSchema = z
   .refine((quote) => isDisplayPercent(quote.changePercent), {
     message: "Percent change has two decimals",
     path: ["changePercent"],
+  })
+  .refine((quote) => quote.dayRange === undefined || rangeHolds(quote.dayRange, quote.price), {
+    message: "The day range holds the price",
+    path: ["dayRange"],
   });
+
+export type DayRange = z.infer<typeof DayRangeSchema>;
 
 export type Quote = z.infer<typeof QuoteSchema>;
