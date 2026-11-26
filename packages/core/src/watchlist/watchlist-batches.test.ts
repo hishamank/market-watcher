@@ -1,12 +1,8 @@
 import type { Stock } from "@mini/contracts";
-import { stockQueryKeys } from "@mini/core";
+import { STOCK_STALE_MS, stockQueryKeys } from "../rest/stock-queries.ts";
 import { QueryClient } from "@tanstack/react-query";
 import { describe, expect, it } from "vitest";
-import {
-  inspectStockCache,
-  planWatchlistBatches,
-  WATCHLIST_STOCK_FRESH_MS,
-} from "./watchlist-cache.ts";
+import { inspectStockCache, planWatchlistBatches } from "./watchlist-batches.ts";
 
 function makeStock(symbol: string): Stock {
   return {
@@ -41,7 +37,7 @@ describe("planWatchlistBatches cache coverage", () => {
 
   it("refetches stale cached symbols while still keeping their stock data for display", () => {
     const queryClient = new QueryClient();
-    const staleAt = Date.now() - WATCHLIST_STOCK_FRESH_MS - 1_000;
+    const staleAt = Date.now() - STOCK_STALE_MS - 1_000;
     queryClient.setQueryData(
       stockQueryKeys.detail("ABNB"),
       { stock: makeStock("ABNB") },
