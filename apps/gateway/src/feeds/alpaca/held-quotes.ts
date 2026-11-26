@@ -1,4 +1,4 @@
-import { joinRanges, type Quote } from "@mini/contracts";
+import { joinRanges, type Quote, widenRange } from "@mini/contracts";
 import { buildQuote } from "./quotes.ts";
 import type { MarketMoment } from "./snapshots.ts";
 
@@ -41,10 +41,14 @@ function sameQuote(a: Quote | undefined, b: Quote): boolean {
 }
 
 function keepRange(held: Held | undefined, quote: Quote, session: string): Quote {
-  if (held?.session !== session || !held.quote.dayRange || !quote.dayRange) {
+  const kept = held?.session === session ? held.quote.dayRange : undefined;
+  if (kept === undefined) {
     return quote;
   }
-  return { ...quote, dayRange: joinRanges(held.quote.dayRange, quote.dayRange) };
+  const dayRange = quote.dayRange
+    ? joinRanges(kept, quote.dayRange)
+    : widenRange(kept, quote.price);
+  return { ...quote, dayRange };
 }
 
 export function createHeldQuotes(

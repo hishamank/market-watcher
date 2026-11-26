@@ -20,6 +20,12 @@ const isBaseline = (value: string) => isDisplayPrice(value) && toUnits(value) > 
 const isDisplayChange = (change: string, price: string) =>
   DECIMAL_PATTERN.test(change) && isDisplayPrice(price) && roundToDisplay(change, price) === change;
 
+const holdsPrice = (range: { low: string; high: string }, price: string) =>
+  isDisplayPrice(range.low) &&
+  isDisplayPrice(range.high) &&
+  isDisplayPrice(price) &&
+  rangeHolds(range, price);
+
 const isDisplayPercent = (value: string) =>
   DECIMAL_PATTERN.test(value) && roundPercent(value) === value;
 
@@ -55,7 +61,7 @@ export const QuoteSchema = z
     message: "Percent change has two decimals",
     path: ["changePercent"],
   })
-  .refine((quote) => quote.dayRange === undefined || rangeHolds(quote.dayRange, quote.price), {
+  .refine((quote) => quote.dayRange === undefined || holdsPrice(quote.dayRange, quote.price), {
     message: "The day range holds the price",
     path: ["dayRange"],
   });
