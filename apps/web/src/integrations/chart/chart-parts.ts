@@ -12,12 +12,14 @@ export interface ChartParts {
 export interface OverlayRefs {
   readonly livePoint: RefObject<HTMLSpanElement | null>;
   readonly previousClose: RefObject<HTMLSpanElement | null>;
+  readonly plot: RefObject<HTMLDivElement | null>;
 }
 
 export interface OverlayState {
   points: readonly ChartPoint[];
   previousClose: number | undefined;
   livePoint: boolean;
+  future: boolean;
 }
 
 export function useChartParts(containerRef: RefObject<HTMLDivElement | null>): ChartParts | null {
@@ -65,7 +67,18 @@ function placePreviousClose(parts: ChartParts, node: HTMLSpanElement | null, pri
   node.style.transform = `translateY(${y ?? 0}px) translateY(-50%)`;
 }
 
+function placePlot(parts: ChartParts, node: HTMLDivElement | null, state: OverlayState) {
+  if (node === null) return;
+  const height = parts.api.chartElement().clientHeight - parts.api.timeScale().height();
+  const last = state.points.at(-1);
+  const x = last === undefined ? null : parts.api.timeScale().timeToCoordinate(last.time);
+  node.style.height = `${Math.max(0, height)}px`;
+  node.style.setProperty("--future-x", `${x ?? 0}px`);
+  node.dataset.future = String(state.future && state.livePoint && x !== null);
+}
+
 export function placeOverlays(parts: ChartParts, refs: OverlayRefs, state: OverlayState) {
+  placePlot(parts, refs.plot.current, state);
   placeLivePoint(parts, refs.livePoint.current, state.points.at(-1), state.livePoint);
   placePreviousClose(parts, refs.previousClose.current, state.previousClose);
 }

@@ -4,6 +4,7 @@ import { chart, type Theme } from "@mini/tokens";
 import type { AutoscaleInfoProvider } from "lightweight-charts";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { useMediaQuery } from "../use-media-query.ts";
+import { animateDraw } from "./chart-motion.ts";
 import { chartOptions, seriesOptions, type ChartFormatters } from "./chart-options.ts";
 import {
   placeOverlays,
@@ -53,6 +54,7 @@ function useChartData(
   latestRef: RefObject<OverlayState>,
 ) {
   const applied = useRef<Applied>({ key: "", points: [] });
+  const animated = useRef("");
   const { datasetKey, bars, range, session, previousClose, muted } = input;
   useEffect(() => {
     if (parts === null) return undefined;
@@ -65,6 +67,13 @@ function useChartData(
       const slots = sessionSlots(session);
       parts.slots.setData(slots);
       fitRange(parts, slots.length);
+      if (points.length > 0 && animated.current !== key) {
+        animateDraw(
+          parts.api.chartElement().parentElement?.parentElement ?? null,
+          !animated.current,
+        );
+        animated.current = key;
+      }
     } else {
       for (const point of points.slice(tail)) parts.area.update(point);
     }
@@ -73,6 +82,7 @@ function useChartData(
       points,
       previousClose: previousClose === undefined ? undefined : Number(previousClose),
       livePoint: !muted,
+      future: session !== undefined,
     };
     latestRef.current = state;
     const place = () => placeOverlays(parts, refs, state);
@@ -158,8 +168,14 @@ export function usePriceChart(input: PriceChartInput): PriceChartHandles {
   const containerRef = useRef<HTMLDivElement>(null);
   const livePoint = useRef<HTMLSpanElement>(null);
   const previousClose = useRef<HTMLSpanElement>(null);
-  const latestRef = useRef<OverlayState>({ points: [], previousClose: undefined, livePoint: true });
-  const [overlays] = useState<OverlayRefs>(() => ({ livePoint, previousClose }));
+  const plot = useRef<HTMLDivElement>(null);
+  const latestRef = useRef<OverlayState>({
+    points: [],
+    previousClose: undefined,
+    livePoint: true,
+    future: false,
+  });
+  const [overlays] = useState<OverlayRefs>(() => ({ livePoint, previousClose, plot }));
   const theme: Theme = useMediaQuery("(prefers-color-scheme: dark)") ? "dark" : "light";
   const parts = useChartParts(containerRef);
   useChartStyle(parts, containerRef, theme, input);

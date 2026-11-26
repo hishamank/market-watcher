@@ -64,7 +64,7 @@ export function themeOptions(theme: Theme, fontFamily: string): DeepPartial<Char
       fontFamily,
       fontSize: 11,
     },
-    grid: { vertLines: { visible: false }, horzLines: { color: chart[theme].grid } },
+    grid: { vertLines: { visible: false }, horzLines: { visible: false } },
     crosshair: {
       vertLine: { color: chart[theme].crosshair, width: 1, style: SOLID, labelVisible: false },
       horzLine: { visible: false, labelVisible: false },
@@ -85,7 +85,7 @@ export function chartOptions(
     autoSize: true,
     handleScroll: false,
     handleScale: false,
-    rightPriceScale: { visible: false },
+    rightPriceScale: { visible: false, scaleMargins: { top: 0.1, bottom: 0.08 } },
     leftPriceScale: { visible: false },
     localization: {
       locale: "en-US",

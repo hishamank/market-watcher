@@ -94,6 +94,7 @@ export function ConnectedPriceChart({ symbol, range, scrub, onScrub }: Connected
       containerRef={chart.containerRef}
       livePointRef={chart.overlays.livePoint}
       previousCloseRef={chart.overlays.previousClose}
+      plotRef={chart.overlays.plot}
     />
   );
 }

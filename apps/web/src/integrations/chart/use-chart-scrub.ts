@@ -56,6 +56,9 @@ export function useChartScrub(
       }
       index.current = nearestIndex(points, Number(param.time));
       const point = points[index.current];
+      if (point !== undefined && Number(param.time) > point.time) {
+        parts.api.setCrosshairPosition(point.value, point.time, parts.area);
+      }
       onScrub(point === undefined ? undefined : scrubAt(parts, point));
     };
     parts.api.subscribeCrosshairMove(handle);

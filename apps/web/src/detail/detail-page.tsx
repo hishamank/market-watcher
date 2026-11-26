@@ -33,7 +33,7 @@ function DetailCard({ symbol }: { symbol: string }) {
       <div className="px-16 pt-16 md:p-0">
         <ConnectedDetailHeader stock={stock} range={range} scrub={scrub} />
       </div>
-      <div className="px-16 md:px-0 md:pt-8">
+      <div className="px-16 md:px-0">
         <ConnectedPriceChart
           symbol={symbol}
           range={range}
