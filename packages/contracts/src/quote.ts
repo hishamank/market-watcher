@@ -39,6 +39,7 @@ export const QuoteSchema = z
     changePercent: DecimalStringSchema,
     previousClose: BaselinePriceSchema,
     timestamp: EpochMsSchema,
+    lastKnown: z.literal(true).optional(),
   })
   .refine((quote) => isDisplayChange(quote.change, quote.price), {
     message: "Change uses the price's display precision",

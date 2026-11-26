@@ -233,6 +233,7 @@ Each component lists its anatomy, states, spacing, motion and test IDs.
   - Ticking up or down: the flash ring on the pill. `data-direction` on the price is `up`, `down` or `flat`.
   - Flat: dash icon, "0.00 (0.00%)", `color.flat` on `color.fill`.
   - Stale: price in `color.textMuted`, pill in `color.textSecondary` on `color.fill` (muted text on fill fails AA in light), arrow and sign kept, no flash.
+  - Last-known quote: 14 px clock in `color.stale` before the LTR price; digits remain `color.text`. Neutral change pill keeps arrow, sign and numbers. The clock has a native title and screen-reader text on web, and the sentence joins the mobile row accessibility label. No nested tap target. Desktop Last update includes date and time. Connection stale wins for digits and keeps the clock.
   - Hovered: `color.hover` background.
   - Focused: focus outline on the link area, inset by 2 px.
   - Current (1440 px list pane): `color.fill` background and `aria-current`.
@@ -289,7 +290,8 @@ Each component lists its anatomy, states, spacing, motion and test IDs.
   - Scrubbing: the price and change show the scrubbed point, and the label shows its time in ET.
   - Chart loading: a skeleton pill of the final size.
   - Chart error on a range never loaded: a neutral pill with a dash, because the range change is unknown.
-  - Market closed: a line under the change with the moon icon, "Market closed" and "Last close {time} ET", where the time is the session close the gateway reports.
+  - Last-known quote: always-visible `detail-price-as-of` note below the change, with the ChartAsOf staleTint pill, stale clock, text label and textSecondary help. Last update includes date and time. No animation or “Last close” caption; chart fallback remains visible independently.
+  - Market closed (separate pending ticket): a line under the change with the moon icon, "Market closed" and "Last close {time} ET", where the time is the session close the gateway reports.
   - Stale: price and pill in `color.textMuted`.
 - **Below the tabs.** Two facts from the quote: "Previous close" and "Last update" (time in ET).
 - **Test IDs.** `detail-header`, `detail-name`, `detail-price`, `detail-change`, `detail-change-label`, `detail-star`.

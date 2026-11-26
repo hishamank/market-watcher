@@ -53,9 +53,55 @@ async function recordSnapshots(
   const session = sessionOf(moment);
   const finished = sessionOf(calendar.moment(now()));
   if (finished !== session) {
-    throw new Error(`Alpaca snapshot for ${session} finished in ${finished}`);
+    return;
   }
   quotes.forEach((quote) => held.record(quote, session));
+  if (symbols.some((symbol) => !quotes.has(symbol)))
+    throw new Error("Alpaca snapshot missing symbols");
+}
+
+function snapshotRequests(
+  options: AlpacaLiveOptions,
+  held: HeldQuotes,
+  failed: Map<string, string>,
+) {
+  return createSnapshotRequests(async (symbols) => {
+    const session = sessionOf(options.calendar.moment(options.now()));
+    try {
+      await recordSnapshots(options, held, symbols);
+      symbols.forEach((symbol) => failed.delete(symbol));
+    } catch (err) {
+      symbols.forEach((symbol) => failed.set(symbol, session));
+      throw err;
+    }
+  }, options.now);
+}
+
+async function readSnapshot(
+  symbols: readonly string[],
+  held: HeldQuotes,
+  requests: ReturnType<typeof createSnapshotRequests>,
+  failed: ReadonlyMap<string, string>,
+  now: () => number,
+  sessionNow: () => string,
+) {
+  const time = now();
+  const session = sessionNow();
+  const due = symbols.filter(
+    (symbol) =>
+      !held.fresh(symbol, session, time - SNAPSHOT_REUSE_MS) && requests.shouldAsk(symbol, time),
+  );
+  if (due.length > 0) await requests.fetch(due);
+  if (
+    symbols.some(
+      (symbol) =>
+        failed.get(symbol) === sessionNow() &&
+        !held.fresh(symbol, sessionNow(), time - SNAPSHOT_REUSE_MS),
+    )
+  ) {
+    throw new Error("Alpaca snapshot failed recently");
+  }
+  return symbols.flatMap((symbol) => held.current(symbol, sessionNow())?.quote ?? []);
 }
 
 export function createAlpacaLive(options: AlpacaLiveOptions): AlpacaLive {
@@ -75,10 +121,8 @@ export function createAlpacaLive(options: AlpacaLiveOptions): AlpacaLive {
   };
   const stream = options.openStream(onTrade);
 
-  const requests = createSnapshotRequests(
-    (symbols) => recordSnapshots(options, held, symbols),
-    now,
-  );
+  const failed = new Map<string, string>();
+  const requests = snapshotRequests(options, held, failed);
 
   const rebalance = (): void => {
     const next = pickStreamed({ order, counts }, streamed, STREAM_SYMBOL_LIMIT);
@@ -113,21 +157,12 @@ export function createAlpacaLive(options: AlpacaLiveOptions): AlpacaLive {
       else counts.delete(symbol);
       if (order.has(symbol)) rebalance();
     },
-    async snapshot(symbols) {
-      const time = now();
-      const session = sessionNow();
-      const due = symbols.filter(
-        (symbol) =>
-          !held.fresh(symbol, session, time - SNAPSHOT_REUSE_MS) &&
-          requests.shouldAsk(symbol, time),
-      );
-      if (due.length > 0) await requests.fetch(due);
-      return symbols.flatMap((symbol) => held.current(symbol, sessionNow())?.quote ?? []);
-    },
+    snapshot: (symbols) => readSnapshot(symbols, held, requests, failed, now, sessionNow),
     onQuote(listener) {
       held.listeners.add(listener);
       return () => void held.listeners.delete(listener);
     },
+    lastKnown: held.lastKnown,
     streamed: () => streamed,
     resync: () => (order.size > 0 ? requests.fetch([...order.keys()]) : Promise.resolve()),
     close() {

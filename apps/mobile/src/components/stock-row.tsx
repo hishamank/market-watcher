@@ -1,4 +1,9 @@
-import type { FlashDirection } from "@mini/core";
+import {
+  formatPrice,
+  formatSignedAmount,
+  formatSignedPercent,
+  type FlashDirection,
+} from "@mini/core";
 import { space } from "@mini/tokens";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { usePalette } from "../theme/palette.ts";
@@ -17,6 +22,7 @@ export interface StockRowProps {
   price: string;
   change: string;
   changePercent: string;
+  asOf?: string | undefined;
   stale: boolean;
   flash: FlashDirection | undefined;
   flashKey: number | undefined;
@@ -35,6 +41,11 @@ export function StockRow(props: StockRowProps) {
     >
       <Pressable
         accessibilityRole="link"
+        accessibilityLabel={
+          props.asOf
+            ? `${name}, ${symbol}, ${formatPrice(props.price)}, ${formatSignedAmount(props.change)}, ${formatSignedPercent(props.changePercent)}, ${props.asOf}`
+            : undefined
+        }
         onPress={props.onOpen}
         style={({ pressed }) => [styles.link, pressed && { backgroundColor: palette.hover }]}
       >
@@ -49,12 +60,17 @@ export function StockRow(props: StockRowProps) {
           <Text style={[textStyles.caption, { color: palette.textMuted }]}>{ltr(symbol)}</Text>
         </View>
         <View style={styles.numbers}>
-          <PriceText price={props.price} stale={stale} testID={`stock-row-price-${symbol}`} />
+          <PriceText
+            price={props.price}
+            stale={stale}
+            asOf={props.asOf}
+            testID={`stock-row-price-${symbol}`}
+          />
           <ChangePill
             change={props.change}
             changePercent={props.changePercent}
-            stale={stale}
-            flash={props.flash}
+            stale={stale || !!props.asOf}
+            flash={props.asOf ? undefined : props.flash}
             flashKey={props.flashKey}
             testID={`stock-row-change-${symbol}`}
           />

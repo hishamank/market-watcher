@@ -1,5 +1,11 @@
 import type { Stock } from "@mini/contracts";
-import { useConnectionStatus, useQuote, useWatchlist } from "@mini/core";
+import {
+  formatMarketDateTime,
+  useConnectionStatus,
+  useQuote,
+  useT,
+  useWatchlist,
+} from "@mini/core";
 import { useRouter } from "expo-router";
 import { StockRow } from "../components/stock-row.tsx";
 import { useTickFlash } from "../integrations/use-tick-flash.ts";
@@ -10,6 +16,7 @@ export interface ConnectedStockRowProps {
 }
 
 export function ConnectedStockRow({ stock, testID }: ConnectedStockRowProps) {
+  const t = useT();
   const router = useRouter();
   const quote = useQuote(stock.symbol) ?? stock.quote;
   const { status } = useConnectionStatus();
@@ -24,6 +31,11 @@ export function ConnectedStockRow({ stock, testID }: ConnectedStockRowProps) {
       price={quote.price}
       change={quote.change}
       changePercent={quote.changePercent}
+      asOf={
+        quote.lastKnown
+          ? t("quote.lastKnown.label", { time: formatMarketDateTime(quote.timestamp) })
+          : undefined
+      }
       stale={stale}
       flash={flash}
       flashKey={flashKey}

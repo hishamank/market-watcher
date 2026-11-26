@@ -1,4 +1,6 @@
 export const detailStrings = {
+  "quote.lastKnown.label": "Price as of {{time}}",
+  "quote.lastKnown.help": "Waiting for the latest price.",
   "detail.range.1D": "Today",
   "detail.range.1W": "Past week",
   "detail.range.1M": "Past month",

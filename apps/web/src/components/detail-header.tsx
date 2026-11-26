@@ -2,6 +2,7 @@ import type { Change } from "@mini/contracts";
 import type { FlashDirection } from "@mini/core";
 import { ChangePill } from "./change-pill.tsx";
 import { PriceCell } from "./price-cell.tsx";
+import { QuoteAsOf } from "./quote-as-of.tsx";
 import { Skeleton } from "./skeleton.tsx";
 import { StarButton } from "./star-button.tsx";
 
@@ -13,6 +14,8 @@ export interface DetailHeaderProps {
   rangeChange: Change | undefined;
   changeLoading: boolean;
   rangeLabel: string;
+  asOf?: string | undefined;
+  asOfHelp: string;
   stale: boolean;
   flash: FlashDirection | undefined;
   flashKey: number | undefined;
@@ -61,7 +64,7 @@ export function DetailHeader(props: DetailHeaderProps) {
           price={props.price}
           change={props.change}
           stale={stale}
-          flash={props.flash}
+          flash={props.asOf ? undefined : props.flash}
           testId="detail-price"
           display
         />
@@ -75,8 +78,8 @@ export function DetailHeader(props: DetailHeaderProps) {
           <ChangePill
             change={rangeChange.change}
             changePercent={rangeChange.changePercent}
-            stale={stale}
-            flash={props.flash}
+            stale={stale || !!props.asOf}
+            flash={props.asOf ? undefined : props.flash}
             flashKey={props.flashKey}
             testId="detail-change"
             large
@@ -84,6 +87,7 @@ export function DetailHeader(props: DetailHeaderProps) {
         )}
         <bdi data-testid="detail-change-label">{props.rangeLabel}</bdi>
       </div>
+      {props.asOf ? <QuoteAsOf label={props.asOf} help={props.asOfHelp} /> : null}
     </header>
   );
 }

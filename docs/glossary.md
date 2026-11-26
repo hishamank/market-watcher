@@ -121,3 +121,7 @@ _Avoid_: correlation ID, sequence number
 **Chaos controls**:
 The debug panel, available only in Simulated mode, that triggers dropped connections, frozen feeds, offline, tick spikes, slow or failing history, and a closed market on demand.
 _Avoid_: debug menu, dev tools
+
+## Last-known quote
+
+A held quote from an earlier trading phase, served with `lastKnown: true` after a refresh cannot supply the current phase. Avoid calling it stale: stale describes connection health. The price carries its source timestamp, shown as a date and time in ET.

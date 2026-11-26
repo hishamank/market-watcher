@@ -7,6 +7,7 @@ import { textStyles } from "../theme/text-styles.ts";
 import { ChangePill } from "./change-pill.tsx";
 import { ltr } from "./ltr.ts";
 import { PriceText } from "./price-text.tsx";
+import { QuoteAsOf } from "./quote-as-of.tsx";
 import { StarButton } from "./star-button.tsx";
 
 export interface DetailHeaderProps {
@@ -15,6 +16,8 @@ export interface DetailHeaderProps {
   price: string;
   rangeChange: Change | undefined;
   rangeLabel: string;
+  asOf?: string | undefined;
+  asOfHelp: string;
   stale: boolean;
   flash: FlashDirection | undefined;
   flashKey: number | undefined;
@@ -66,8 +69,8 @@ export function DetailHeader(props: DetailHeaderProps) {
           <ChangePill
             change={rangeChange.change}
             changePercent={rangeChange.changePercent}
-            stale={stale}
-            flash={props.flash}
+            stale={stale || !!props.asOf}
+            flash={props.asOf ? undefined : props.flash}
             flashKey={props.flashKey}
             testID="detail-change"
           />
@@ -79,6 +82,7 @@ export function DetailHeader(props: DetailHeaderProps) {
           {props.rangeLabel}
         </Text>
       </View>
+      {props.asOf ? <QuoteAsOf label={props.asOf} help={props.asOfHelp} /> : null}
     </View>
   );
 }

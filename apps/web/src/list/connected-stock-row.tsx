@@ -1,7 +1,14 @@
 "use client";
 
 import type { Stock } from "@mini/contracts";
-import { formatMarketTime, useConnectionStatus, useQuote, useT, useWatchlist } from "@mini/core";
+import {
+  formatMarketDateTime,
+  formatMarketTime,
+  useConnectionStatus,
+  useQuote,
+  useT,
+  useWatchlist,
+} from "@mini/core";
 import { StockRow } from "../components/stock-row.tsx";
 import { useTickFlash } from "../integrations/use-tick-flash.ts";
 
@@ -20,9 +27,18 @@ export function ConnectedStockRow({ stock }: { stock: Stock }) {
       change={quote.change}
       changePercent={quote.changePercent}
       previousClose={quote.previousClose}
-      lastUpdate={t("list.lastUpdate", {
-        time: formatMarketTime(quote.timestamp, { label: false }),
-      })}
+      lastUpdate={
+        quote.lastKnown
+          ? formatMarketDateTime(quote.timestamp)
+          : t("list.lastUpdate", {
+              time: formatMarketTime(quote.timestamp, { label: false }),
+            })
+      }
+      asOf={
+        quote.lastKnown
+          ? t("quote.lastKnown.label", { time: formatMarketDateTime(quote.timestamp) })
+          : undefined
+      }
       stale={stale}
       flash={flash}
       flashKey={flashKey}

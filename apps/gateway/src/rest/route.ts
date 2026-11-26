@@ -4,7 +4,6 @@ import {
   HistoryQuerySchema,
   type HistoryResponse,
   HistoryResponseSchema,
-  type Quote,
   type StockDetailResponse,
   StockDetailResponseSchema,
   StockListQuerySchema,
@@ -18,6 +17,7 @@ import type { Warn } from "../hub/quote-book.ts";
 import { RestError } from "./errors.ts";
 import { type ConnectionStats, healthResponse } from "./health.ts";
 import { createHistoryCache, type HistoryCache } from "./history-cache.ts";
+import { fetchQuotesMap } from "./quotes.ts";
 import { handleStockSearch } from "./search-catalogue.ts";
 
 export interface RestRouteOptions {
@@ -49,21 +49,6 @@ function resolveEntries(feed: Feed, symbols: readonly string[]): CatalogueEntry[
   return entries;
 }
 
-async function fetchQuotesMap(
-  feed: Feed,
-  symbols: readonly string[],
-  warn: Warn,
-): Promise<Map<string, Quote>> {
-  if (symbols.length === 0) return new Map();
-  try {
-    const quotes = await feed.live.snapshot(symbols);
-    return new Map(quotes.map((quote) => [quote.symbol, quote]));
-  } catch (err) {
-    warn({ err, symbols }, "live snapshot failed for REST request");
-    throw new RestError(503, "unavailable", "Market quotes are temporarily unavailable");
-  }
-}
-
 async function handleStockList(
   request: FastifyRequest,
   ctx: RouteContext,
@@ -78,6 +63,7 @@ async function handleStockList(
     ctx.feed,
     entries.map((entry) => entry.symbol),
     ctx.warn,
+    ctx.now,
   );
   const stocks = entries.flatMap((entry) => {
     const quote = quotes.get(entry.symbol);
@@ -102,7 +88,7 @@ async function handleStockDetail(
   if (entry === undefined) {
     throw new RestError(404, "not_found", `Symbol ${parsedParams.data.symbol} not found`);
   }
-  const quotes = await fetchQuotesMap(ctx.feed, [entry.symbol], ctx.warn);
+  const quotes = await fetchQuotesMap(ctx.feed, [entry.symbol], ctx.warn, ctx.now);
   const quote = quotes.get(entry.symbol);
   if (quote === undefined) {
     throw new RestError(503, "unavailable", `Quote for ${entry.symbol} is unavailable`);

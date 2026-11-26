@@ -89,7 +89,7 @@ test("a trade after a failed open resync waits for the new session's baseline", 
 
   rig.sockets.last().push("stream-trade-next-session.json");
   expect(quotes).toEqual([]);
-  await expect(rig.feed.live.snapshot(["AAPL"])).resolves.toEqual([]);
+  await expect(rig.feed.live.snapshot(["AAPL"])).rejects.toThrow("failed recently");
 
   rig.alpaca.failing.clear();
   await vi.advanceTimersByTimeAsync(10_000);
@@ -112,7 +112,7 @@ test("a failed close resync is retried, and the last trade is not served as the 
   expect(quotes.at(-1)?.price).toBe("202.13");
   await crossInto(rig, SESSION_CLOSE + 1_000);
 
-  await expect(rig.feed.live.snapshot(["AAPL"])).resolves.toEqual([]);
+  await expect(rig.feed.live.snapshot(["AAPL"])).rejects.toThrow("failed recently");
 
   rig.alpaca.failing.clear();
   await vi.advanceTimersByTimeAsync(10_000);
@@ -152,7 +152,7 @@ test("a snapshot started before the open and answered after it is discarded", as
   rig.sockets.last().push("stream-trade-next-session.json");
   const boundary = quotes.length;
   release();
-  await expect(old).resolves.toBe("rejected");
+  await expect(old).resolves.toBe("resolved");
 
   await vi.advanceTimersByTimeAsync(POLL_INTERVAL_MS);
   expect(quotes.slice(boundary).some((quote) => quote.previousClose === "200.30")).toBe(false);
@@ -169,7 +169,7 @@ test("a snapshot started before the open and answered after it is discarded", as
 test("a waiting trade expires with its session, so the symbol is not polled after the close", async () => {
   vi.setSystemTime(SESSION_NOW);
   rig = await startAlpaca((alpaca) => alpaca.omitted.add("AAPL"), { now: () => Date.now() });
-  await watchAapl(rig);
+  await expect(watchAapl(rig)).rejects.toThrow("missing symbols");
   rig.sockets.last().push("stream-trades.json");
   const calls = (): number => rig?.alpaca.calls(SNAPSHOTS).length ?? 0;
   const waiting = calls();

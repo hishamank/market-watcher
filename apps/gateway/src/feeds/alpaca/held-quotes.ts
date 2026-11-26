@@ -16,6 +16,7 @@ interface Held {
 
 export interface HeldQuotes {
   readonly listeners: Set<(quote: Quote) => void>;
+  lastKnown(symbols: readonly string[]): Quote[];
   current(symbol: string, session: string): Held | undefined;
   fresh(symbol: string, session: string, since: number): boolean;
   stale(symbol: string, session: string): boolean;
@@ -67,6 +68,7 @@ export function createHeldQuotes(
 
   return {
     listeners,
+    lastKnown: (symbols) => symbols.flatMap((symbol) => latest.get(symbol)?.quote ?? []),
     current: (symbol, session) => {
       const held = latest.get(symbol);
       return held?.session === session ? held : undefined;

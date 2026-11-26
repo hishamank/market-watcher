@@ -15,6 +15,7 @@ export interface StockRowProps {
   changePercent: string;
   previousClose: string;
   lastUpdate: string;
+  asOf?: string | undefined;
   stale: boolean;
   flash: FlashDirection | undefined;
   flashKey: number | undefined;
@@ -57,7 +58,8 @@ export function StockRow(props: StockRowProps) {
               price={props.price}
               change={props.change}
               stale={stale}
-              flash={flash}
+              asOf={props.asOf}
+              flash={props.asOf ? undefined : flash}
               testId={`stock-row-price-${symbol}`}
             />
           </span>
@@ -65,8 +67,8 @@ export function StockRow(props: StockRowProps) {
             <ChangePill
               change={props.change}
               changePercent={props.changePercent}
-              stale={stale}
-              flash={flash}
+              stale={stale || !!props.asOf}
+              flash={props.asOf ? undefined : flash}
               flashKey={props.flashKey}
               testId={`stock-row-change-${symbol}`}
               percentClassName="list-table:hidden"
@@ -75,7 +77,7 @@ export function StockRow(props: StockRowProps) {
           <bdi
             dir="ltr"
             data-testid={`stock-row-percent-${symbol}`}
-            className={`hidden text-end text-numeric-change list-table:block ${stale ? "text-text-secondary" : percentTones[directionOf(props.change)]}`}
+            className={`hidden text-end text-numeric-change list-table:block ${stale || props.asOf ? "text-text-secondary" : percentTones[directionOf(props.change)]}`}
           >
             {formatSignedPercent(props.changePercent)}
           </bdi>

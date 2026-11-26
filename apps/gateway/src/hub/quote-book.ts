@@ -1,5 +1,6 @@
 import type { Quote } from "@mini/contracts";
 import type { LiveFeed, MarketCalendar } from "../feeds/types.ts";
+import { withLastKnown } from "./last-known.ts";
 import { isCurrentQuote, phaseStart } from "./quote-phase.ts";
 
 export type Warn = (detail: object, message: string) => void;
@@ -17,7 +18,7 @@ export interface QuoteBook {
 function expireBefore(latest: Map<string, Quote>, floor: number): string[] {
   const dropped: string[] = [];
   for (const [symbol, quote] of latest) {
-    if (quote.timestamp < floor) {
+    if (quote.timestamp < floor && !quote.lastKnown) {
       latest.delete(symbol);
       dropped.push(symbol);
     }
@@ -40,7 +41,7 @@ export function createQuoteBook(
     const current = latest.get(quote.symbol);
     if (
       !isWatched(quote.symbol) ||
-      !isCurrentQuote(quote, calendar, now()) ||
+      (!quote.lastKnown && !isCurrentQuote(quote, calendar, now())) ||
       (current && current.timestamp > quote.timestamp)
     ) {
       return false;
@@ -58,6 +59,7 @@ export function createQuoteBook(
       return true;
     } catch (err: unknown) {
       warn({ err, symbols }, "snapshot failed, will retry");
+      if (!closed) withLastKnown([], symbols, live, calendar, now()).forEach(remember);
       return false;
     }
   }
@@ -77,7 +79,9 @@ export function createQuoteBook(
   }
 
   async function fetch(symbols: readonly string[]): Promise<Quote[]> {
-    const missing = [...new Set(symbols)].filter((symbol) => !latest.has(symbol));
+    const missing = [...new Set(symbols)].filter(
+      (symbol) => !latest.has(symbol) || latest.get(symbol)?.lastKnown,
+    );
     if (closed || missing.length === 0) {
       return [];
     }

@@ -142,7 +142,7 @@ The owner's manual run, from the repo root:
 5. Open `/`. Expect:
    - **G1:** the badge reads "Live", and `data-feed-mode="live"` is in the server-rendered HTML.
    - **G2:** outside 09:30 to 16:00 New York time on a trading day, including pre-market and after-hours, "Market closed" shows, `data-market-status="closed"`, and prices hold the last close without ticking. During the session the label is gone and streamed prices tick.
-     If Alpaca is unreachable at the close, a new subscription gets `unavailable` and its snapshot omits the symbol. An already open screen holds its last real trade. On recovery both subscriptions receive the closing quote as a tick (#52, ADR 0044).
+     If Alpaca is unreachable at the close, held quotes are marked last-known after a failed refresh. Watchers get a tick and new subscribers get the marked snapshot; only symbols with no held copy get `unavailable`. Recovery supplies the unmarked close (#58, ADR 0045).
    - **C1:** `/?debug=1` shows no chaos panel.
 6. Open a stock and switch through every range. Each chart draws, and 1D covers the regular session only.
 
@@ -238,3 +238,16 @@ If prices show but never change, the socket is being refused: re-run doctor step
 ### Stop
 
 Press `Ctrl+C` in both terminals. An agent stops only the sessions it started, as in step 7.
+
+### N08 lifecycle and connection walk
+
+- **M4 quick switch:** on a ticking detail chart, record `/health` connections and reconnects. Press Home, return in under 10 s, and confirm neither reconnects nor the chart resets.
+- **M4 long background:** press Home for at least 12 s. Confirm `/health` connections drops by one. Reopen Expo Go; fresh prices and a refetched visible history must fill the interval without a gap. Record health before, during and after.
+- **M5 stale:** stop only your gateway process. Markets, Watchlist and detail show `connection-banner`, muted prices and `connection-retry`. Tap Retry, restart the gateway and confirm recovery without reloading.
+- **M5 offline:** disable emulator Wi-Fi and data with `adb shell svc wifi disable` and `adb shell svc data disable`. Expect Offline, muted prices and no Retry. Observe zero gateway connections while offline; enable both radios and confirm recovery. Connecting and connected have no banner (DESIGN.md).
+- **M2 batch coverage:** star a catalogue symbol outside Markets via its detail route, then visit Watchlist. Confirm its name and ticking price. Remove another star; fresh cached symbols must not fetch again. Failed symbol batches show a retry on each unresolved row; loaded rows stay usable.
+- Always restore Wi-Fi and data, stop the emulator with `adb emu kill`, and stop only the Expo and gateway process groups you started. Save screenshots and health samples alongside the report. If the host cannot complete a step, report "not verified, host overloaded" rather than PASS.
+
+## G5: last-known quotes
+
+G5 is Live-only and proved by automated tests, not a simulator walk: the simulator always stamps quotes now. Run contracts schema tests, Alpaca last-known gateway seam tests, web rendered view tests and mobile props-mapping tests. Check their failure with the feature removed. Also run the full web E2E suite and mobile typecheck, tests, Expo dependency check and Android export. Report these separately from any device walk; no keyed run is required for G5.

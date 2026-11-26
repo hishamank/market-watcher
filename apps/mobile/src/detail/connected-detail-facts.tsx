@@ -1,5 +1,12 @@
 import type { Stock } from "@mini/contracts";
-import { formatMarketTime, formatPrice, useConnectionStatus, useQuote, useT } from "@mini/core";
+import {
+  formatMarketDateTime,
+  formatMarketTime,
+  formatPrice,
+  useConnectionStatus,
+  useQuote,
+  useT,
+} from "@mini/core";
 import { ChangePill } from "../components/change-pill.tsx";
 import { DetailFacts } from "../components/detail-facts.tsx";
 
@@ -18,7 +25,7 @@ export function ConnectedDetailFacts({ stock }: { stock: Stock }) {
             <ChangePill
               change={quote.change}
               changePercent={quote.changePercent}
-              stale={stale}
+              stale={stale || !!quote.lastKnown}
               flash={undefined}
               flashKey={undefined}
               testID="detail-day-change-pill"
@@ -33,7 +40,9 @@ export function ConnectedDetailFacts({ stock }: { stock: Stock }) {
         {
           label: t("detail.lastUpdate"),
           testID: "detail-last-update",
-          value: formatMarketTime(quote.timestamp),
+          value: quote.lastKnown
+            ? formatMarketDateTime(quote.timestamp)
+            : formatMarketTime(quote.timestamp),
         },
       ]}
     />

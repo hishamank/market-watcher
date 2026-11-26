@@ -19,7 +19,7 @@ import {
   whenWritable,
 } from "./member.ts";
 import { createQuoteBook, type QuoteBook, type Warn } from "./quote-book.ts";
-import { adopt, expire } from "./quote-watchers.ts";
+import { adopt, changed, expire, trackUnquoted } from "./quote-watchers.ts";
 import { planSubscribe } from "./subscribe-plan.ts";
 import { sendAnswer, type SubscribeRequest, withDeadline } from "./subscribe-reply.ts";
 import { createUpstream, type Upstream } from "./upstream.ts";
@@ -82,7 +82,7 @@ async function answerSubscribe(
   if (isOpen()) {
     expire(book, watchers);
     const unavailable = sendAnswer(member.peer, request.requestId, plan, book.latest);
-    unavailable.forEach((symbol) => member.unquoted.add(symbol));
+    trackUnquoted(member, plan.accepted, unavailable, book.latest);
   }
 }
 
@@ -126,7 +126,7 @@ export function createHub({ feed, now, warn }: HubOptions): Hub {
     if (book.remember(quote)) {
       for (const member of watchers.of(quote.symbol)) {
         member.unquoted.delete(quote.symbol);
-        member.changed.add(quote.symbol);
+        changed(member, quote);
       }
     }
   }

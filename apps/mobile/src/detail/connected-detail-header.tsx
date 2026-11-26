@@ -1,5 +1,12 @@
 import { changeBetween, type Range, type Stock } from "@mini/contracts";
-import { useConnectionStatus, useLiveHistory, useQuote, useT, useWatchlist } from "@mini/core";
+import {
+  formatMarketDateTime,
+  useConnectionStatus,
+  useLiveHistory,
+  useQuote,
+  useT,
+  useWatchlist,
+} from "@mini/core";
 import { DetailHeader } from "../components/detail-header.tsx";
 import { useTickFlash } from "../integrations/use-tick-flash.ts";
 import { formatScrubTime } from "./chart-time.ts";
@@ -30,6 +37,12 @@ export function ConnectedDetailHeader({ stock, range, selection }: ConnectedDeta
       price={scrubbed ? scrub.close : quote.price}
       rangeChange={rangeChange}
       rangeLabel={scrubbed ? formatScrubTime(range, scrub.time) : t(`detail.range.${range}`)}
+      asOf={
+        quote.lastKnown
+          ? t("quote.lastKnown.label", { time: formatMarketDateTime(quote.timestamp) })
+          : undefined
+      }
+      asOfHelp={t("quote.lastKnown.help")}
       stale={stale}
       flash={scrubbed ? undefined : flash}
       flashKey={flashKey}

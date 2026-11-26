@@ -1,7 +1,7 @@
 "use client";
 
 import type { Stock } from "@mini/contracts";
-import { formatMarketTime, useQuote } from "@mini/core";
+import { formatMarketDateTime, formatMarketTime, useQuote } from "@mini/core";
 import { DetailFacts } from "../components/detail-facts.tsx";
 
 export function ConnectedDetailFacts({ stock }: { stock: Stock }) {
@@ -9,7 +9,9 @@ export function ConnectedDetailFacts({ stock }: { stock: Stock }) {
   return (
     <DetailFacts
       previousClose={quote.previousClose}
-      lastUpdate={formatMarketTime(quote.timestamp)}
+      lastUpdate={
+        quote.lastKnown ? formatMarketDateTime(quote.timestamp) : formatMarketTime(quote.timestamp)
+      }
     />
   );
 }

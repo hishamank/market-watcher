@@ -16,6 +16,7 @@ export interface LiveFeed {
   unsubscribe(symbols: readonly string[]): void;
   snapshot(symbols: readonly string[]): Promise<Quote[]>;
   onQuote(listener: (quote: Quote) => void): () => void;
+  lastKnown?(symbols: readonly string[]): Quote[];
   watchCount?(symbol: string, count: number): void;
 }
 

@@ -1,6 +1,8 @@
 import { directionOf, formatPrice, type FlashDirection } from "@mini/core";
+import { ClockIcon } from "./icons.tsx";
 
 export interface PriceCellProps {
+  asOf?: string | undefined;
   price: string;
   change: string;
   stale: boolean;
@@ -10,6 +12,7 @@ export interface PriceCellProps {
 }
 
 export function PriceCell({
+  asOf,
   price,
   change,
   stale,
@@ -26,6 +29,16 @@ export function PriceCell({
       data-flash={flash}
       className={`${size} ${stale ? "text-text-muted" : "text-text"}`}
     >
+      {asOf ? (
+        <span
+          title={asOf}
+          data-testid={testId.replace("price-", "as-of-")}
+          className="me-4 inline-flex align-middle text-stale"
+        >
+          <ClockIcon className="size-[14px]" />
+          <span className="sr-only">{asOf}, </span>
+        </span>
+      ) : null}
       {formatPrice(price)}
     </bdi>
   );
