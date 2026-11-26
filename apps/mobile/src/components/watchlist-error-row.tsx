@@ -1,7 +1,7 @@
 import { space } from "@mini/tokens";
 import { StyleSheet, Text, View } from "react-native";
 import { usePalette } from "../theme/palette.ts";
-import { textStyles } from "../theme/text-styles.ts";
+import { useTextStyles } from "../theme/text-styles.ts";
 import { ListError } from "./list-error.tsx";
 import { ltr } from "./ltr.ts";
 import { ROW_MIN_HEIGHT } from "./stock-row.tsx";
@@ -14,6 +14,7 @@ export interface WatchlistErrorRowProps {
 }
 
 export function WatchlistErrorRow({ symbol, onRetry, onToggleStar }: WatchlistErrorRowProps) {
+  const textStyles = useTextStyles();
   const palette = usePalette();
   return (
     <View

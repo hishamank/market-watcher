@@ -2,7 +2,7 @@ import { directionOf, formatSignedAmount, formatSignedPercent, type Direction } 
 import { radius, space } from "@mini/tokens";
 import { StyleSheet, Text, View } from "react-native";
 import { usePalette, type Palette } from "../theme/palette.ts";
-import { textStyles } from "../theme/text-styles.ts";
+import { useTextStyles } from "../theme/text-styles.ts";
 import { ltr } from "./ltr.ts";
 
 export interface ChangePillProps {
@@ -22,6 +22,7 @@ function pillTone(direction: Direction, stale: boolean, palette: Palette) {
 }
 
 export function ChangePill(props: ChangePillProps) {
+  const textStyles = useTextStyles();
   const { change, changePercent, stale, testID } = props;
   const palette = usePalette();
   const direction = directionOf(change);

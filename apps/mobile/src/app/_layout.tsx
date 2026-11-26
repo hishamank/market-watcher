@@ -1,7 +1,10 @@
-import { Stack } from "expo-router";
+import { useLanguage } from "@mini/core";
+import { LocaleProvider, Stack } from "expo-router";
+import type { ReactNode } from "react";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useSavedLocale } from "../integrations/use-saved-locale.ts";
 import { Providers } from "../providers/providers.tsx";
 import { usePalette } from "../theme/palette.ts";
 
@@ -20,11 +23,23 @@ function AppStack() {
   );
 }
 
+function DirectionRoot({ children }: { children: ReactNode }) {
+  const { direction } = useLanguage();
+  useSavedLocale();
+  return (
+    <LocaleProvider direction={direction}>
+      <View style={[styles.root, { direction }]}>{children}</View>
+    </LocaleProvider>
+  );
+}
+
 export default function RootLayout() {
   return (
     <GestureHandlerRootView testID="app-root" style={styles.root}>
       <Providers>
-        <AppStack />
+        <DirectionRoot>
+          <AppStack />
+        </DirectionRoot>
       </Providers>
       <StatusBar style="auto" />
     </GestureHandlerRootView>

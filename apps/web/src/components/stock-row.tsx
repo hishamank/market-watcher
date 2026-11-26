@@ -48,7 +48,8 @@ export function StockRow(props: StockRowProps) {
           <Morph name={`stock-name-${symbol}`} enabled={props.morph}>
             <span
               data-testid={`stock-row-name-${symbol}`}
-              className="max-w-full overflow-x-clip text-ellipsis whitespace-nowrap text-body-strong list-table:text-body list-table:font-medium list-compact:text-body list-compact:font-medium"
+              dir="auto"
+              className="max-w-full overflow-x-clip text-ellipsis whitespace-nowrap rtl:text-end text-body-strong list-table:text-body list-table:font-medium list-compact:text-body list-compact:font-medium"
             >
               {name}
             </span>

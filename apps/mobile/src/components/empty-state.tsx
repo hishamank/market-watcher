@@ -1,7 +1,7 @@
 import { space } from "@mini/tokens";
 import { StyleSheet, Text, View } from "react-native";
 import { usePalette } from "../theme/palette.ts";
-import { textStyles } from "../theme/text-styles.ts";
+import { useTextStyles } from "../theme/text-styles.ts";
 import { Button } from "./button.tsx";
 
 export interface EmptyStateProps {
@@ -15,6 +15,7 @@ export interface EmptyStateProps {
 }
 
 export function EmptyState(props: EmptyStateProps) {
+  const textStyles = useTextStyles();
   const palette = usePalette();
   return (
     <View testID={props.testID} style={styles.container}>

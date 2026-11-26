@@ -124,9 +124,9 @@ function SearchResultRow({
         <bdi dir="ltr" className="w-[60px] shrink-0 text-label font-semibold text-text">
           <HighlightedText text={item.symbol} query={query} mode="prefix" />
         </bdi>
-        <span className="min-w-0 flex-1 overflow-x-clip text-ellipsis whitespace-nowrap text-label font-normal text-text-secondary">
+        <bdi className="min-w-0 flex-1 overflow-x-clip text-ellipsis whitespace-nowrap rtl:text-end text-label font-normal text-text-secondary">
           <HighlightedText text={item.name} query={query} mode="word" />
-        </span>
+        </bdi>
       </Link>
       <StarButton
         name={item.name}

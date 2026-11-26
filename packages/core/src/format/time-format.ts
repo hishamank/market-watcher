@@ -1,3 +1,4 @@
+import { parseLocale } from "../i18n/locale.ts";
 import { DEFAULT_LOCALE, MARKET_TIME_ZONE, MARKET_TIME_ZONE_LABEL } from "./constants.ts";
 
 export interface MarketTimeOptions {
@@ -8,6 +9,15 @@ export interface MarketTimeOptions {
 export interface MarketDateOptions {
   readonly locale?: string | undefined;
   readonly includeYear?: boolean | undefined;
+}
+
+const RIGHT_TO_LEFT_ISOLATE = "\u2067";
+const POP_DIRECTIONAL_ISOLATE = "\u2069";
+
+function isolateDate(formatted: string, locale: string): string {
+  return parseLocale(locale) === "ar"
+    ? `${RIGHT_TO_LEFT_ISOLATE}${formatted}${POP_DIRECTIONAL_ISOLATE}`
+    : formatted;
 }
 
 const formatterCache = new Map<string, Intl.DateTimeFormat>();
@@ -25,6 +35,7 @@ function getDateTimeFormat(
     ...options,
     timeZone: MARKET_TIME_ZONE,
     numberingSystem: "latn",
+    calendar: "gregory",
   });
   formatterCache.set(cacheKey, formatter);
   return formatter;
@@ -51,7 +62,7 @@ export function formatMarketDate(epochMs: number, options: MarketDateOptions = {
       ? { month: "short", day: "numeric", year: "numeric" }
       : { month: "short", day: "numeric" },
   );
-  return formatter.format(new Date(epochMs));
+  return isolateDate(formatter.format(new Date(epochMs)), locale);
 }
 
 export function formatMarketDateTime(epochMs: number, options: MarketTimeOptions = {}): string {
@@ -64,5 +75,8 @@ export function formatMarketDateTime(epochMs: number, options: MarketTimeOptions
     hourCycle: "h23",
   });
   const formatted = formatter.format(new Date(epochMs));
-  return options.label === false ? formatted : `${formatted} ${MARKET_TIME_ZONE_LABEL}`;
+  return isolateDate(
+    options.label === false ? formatted : `${formatted} ${MARKET_TIME_ZONE_LABEL}`,
+    locale,
+  );
 }

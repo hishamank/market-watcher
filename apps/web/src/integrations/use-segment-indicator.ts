@@ -40,7 +40,15 @@ export function useSegmentIndicator(selected: number): SegmentIndicator {
     const observer = new ResizeObserver(place);
     observer.observe(track);
     for (const option of options) observer.observe(option);
-    return () => observer.disconnect();
+    const direction = new MutationObserver(() => {
+      placed.current = false;
+      place();
+    });
+    direction.observe(document.documentElement, { attributeFilter: ["dir"] });
+    return () => {
+      observer.disconnect();
+      direction.disconnect();
+    };
   }, [selected]);
 
   return { trackRef, indicatorRef, ready };

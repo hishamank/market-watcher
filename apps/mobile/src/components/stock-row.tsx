@@ -7,7 +7,7 @@ import {
 import { space } from "@mini/tokens";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { usePalette } from "../theme/palette.ts";
-import { textStyles } from "../theme/text-styles.ts";
+import { useTextStyles } from "../theme/text-styles.ts";
 import { ChangePill } from "./change-pill.tsx";
 import { ltr } from "./ltr.ts";
 import { PriceText } from "./price-text.tsx";
@@ -32,6 +32,7 @@ export interface StockRowProps {
 }
 
 export function StockRow(props: StockRowProps) {
+  const textStyles = useTextStyles();
   const { symbol, name, stale } = props;
   const palette = usePalette();
   return (
@@ -55,7 +56,7 @@ export function StockRow(props: StockRowProps) {
             numberOfLines={1}
             style={[textStyles.bodyStrong, { color: palette.text }]}
           >
-            {name}
+            {ltr(name)}
           </Text>
           <Text style={[textStyles.caption, { color: palette.textMuted }]}>{ltr(symbol)}</Text>
         </View>

@@ -21,6 +21,10 @@ vi.mock("../theme/palette.ts", () => ({
     staleTint: "tint",
   }),
 }));
+vi.mock("@mini/core", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@mini/core")>()),
+  useLocale: () => "en-US",
+}));
 vi.mock("./star-button.tsx", () => ({ StarButton: () => null }));
 vi.mock("./flash-tint.tsx", () => ({ FlashTint: () => null }));
 
