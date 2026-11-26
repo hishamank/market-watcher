@@ -29,7 +29,7 @@ export function ConnectedDetailHeader({ stock, range, selection }: ConnectedDeta
   const scrub = scrubPointOf(selection, range, history);
   const scrubbed = scrub !== undefined && baseline !== undefined;
   const rangeChange = scrubbed ? changeBetween(baseline, scrub.close) : history.rangeChange;
-  const { flash, flashKey } = useTickFlash(quote.timestamp, rangeChange?.change, stale);
+  const { flash, flashKey } = useTickFlash(quote.price, stale);
   return (
     <DetailHeader
       symbol={stock.symbol}

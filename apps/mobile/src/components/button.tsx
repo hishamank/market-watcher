@@ -16,7 +16,11 @@ export function Button({ label, onPress, testID }: ButtonProps) {
       testID={testID}
       accessibilityRole="button"
       onPress={onPress}
-      style={[styles.button, { backgroundColor: palette.text }]}
+      style={({ pressed }) => [
+        styles.button,
+        { backgroundColor: palette.text },
+        pressed && styles.pressed,
+      ]}
     >
       <Text style={[textStyles.label, { color: palette.surface }]}>{label}</Text>
     </Pressable>
@@ -32,4 +36,5 @@ const styles = StyleSheet.create({
     paddingInline: space[16],
     borderRadius: radius.md,
   },
+  pressed: { opacity: 0.85, transform: [{ scale: 0.985 }] },
 });

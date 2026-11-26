@@ -26,8 +26,6 @@ export function ConnectedDetailFacts({ stock }: { stock: Stock }) {
               change={quote.change}
               changePercent={quote.changePercent}
               stale={stale || !!quote.lastKnown}
-              flash={undefined}
-              flashKey={undefined}
               testID="detail-day-change-pill"
             />
           ),

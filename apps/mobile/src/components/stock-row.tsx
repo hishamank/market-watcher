@@ -64,14 +64,14 @@ export function StockRow(props: StockRowProps) {
             price={props.price}
             stale={stale}
             asOf={props.asOf}
+            flash={props.asOf ? undefined : props.flash}
+            flashKey={props.flashKey}
             testID={`stock-row-price-${symbol}`}
           />
           <ChangePill
             change={props.change}
             changePercent={props.changePercent}
             stale={stale || !!props.asOf}
-            flash={props.asOf ? undefined : props.flash}
-            flashKey={props.flashKey}
             testID={`stock-row-change-${symbol}`}
           />
         </View>

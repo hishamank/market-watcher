@@ -1,7 +1,10 @@
 import { RANGES, type Range } from "@mini/contracts";
 import { useT } from "@mini/core";
-import { radius, space } from "@mini/tokens";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { duration, easing, radius, space } from "@mini/tokens";
+import { useState } from "react";
+import { I18nManager, Pressable, StyleSheet, Text, View, type LayoutRectangle } from "react-native";
+import Animated, { cubicBezier } from "react-native-reanimated";
+import { useReduceMotion } from "../integrations/use-reduce-motion.ts";
 import { useElevation, usePalette } from "../theme/palette.ts";
 import { textStyles } from "../theme/text-styles.ts";
 
@@ -10,36 +13,74 @@ export interface RangeTabsProps {
   onSelect: (range: Range) => void;
 }
 
+type Layouts = Partial<Record<Range, LayoutRectangle>>;
+
+function offsetX(option: LayoutRectangle, trackWidth: number): number {
+  return I18nManager.isRTL ? option.x + option.width - trackWidth : option.x;
+}
+
 export function RangeTabs({ range, onSelect }: RangeTabsProps) {
   const t = useT();
   const palette = usePalette();
   const raised = useElevation(1);
+  const reduceMotion = useReduceMotion();
+  const [layouts, setLayouts] = useState<Layouts>({});
+  const [trackWidth, setTrackWidth] = useState(0);
+  const selected = layouts[range];
   return (
     <View
       accessibilityRole="tablist"
       accessibilityLabel={t("detail.rangeTabs")}
+      onLayout={(event) => setTrackWidth(event.nativeEvent.layout.width)}
       style={[styles.track, { backgroundColor: palette.fill }]}
     >
+      {selected === undefined ? null : (
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.indicator,
+            {
+              backgroundColor: palette.raised,
+              boxShadow: raised,
+              width: selected.width,
+              height: selected.height,
+              transform: [
+                { translateX: offsetX(selected, trackWidth) },
+                { translateY: selected.y },
+              ],
+              transitionProperty: ["transform", "width"],
+              transitionDuration: reduceMotion ? 0 : duration.base,
+              transitionTimingFunction: cubicBezier(...easing.standard),
+            },
+          ]}
+        />
+      )}
       {RANGES.map((option) => {
-        const selected = option === range;
+        const isSelected = option === range;
         return (
           <Pressable
             key={option}
             testID={`range-tab-${option}`}
             accessibilityRole="tab"
-            accessibilityState={{ selected }}
+            accessibilityState={{ selected: isSelected }}
             onPress={() => onSelect(option)}
-            style={[
+            onLayout={(event) => {
+              const layout = event.nativeEvent.layout;
+              setLayouts((previous) => ({ ...previous, [option]: layout }));
+            }}
+            style={({ pressed }) => [
               styles.option,
-              selected && { backgroundColor: palette.raised, boxShadow: raised },
+              isSelected &&
+                selected === undefined && { backgroundColor: palette.raised, boxShadow: raised },
+              pressed && styles.pressed,
             ]}
           >
             <Text
               numberOfLines={1}
               style={[
                 textStyles.label,
-                { color: selected ? palette.text : palette.textSecondary },
-                selected && styles.selectedLabel,
+                { color: isSelected ? palette.text : palette.textSecondary },
+                isSelected && styles.selectedLabel,
               ]}
             >
               {t(`detail.tab.${option}`)}
@@ -58,6 +99,12 @@ const styles = StyleSheet.create({
     gap: space[2],
     borderRadius: radius.lg,
   },
+  indicator: {
+    position: "absolute",
+    start: 0,
+    top: 0,
+    borderRadius: radius.sm,
+  },
   option: {
     flexGrow: 1,
     minHeight: 44,
@@ -66,5 +113,6 @@ const styles = StyleSheet.create({
     paddingInline: space[8],
     borderRadius: radius.sm,
   },
+  pressed: { opacity: 0.7 },
   selectedLabel: { fontWeight: 600 },
 });

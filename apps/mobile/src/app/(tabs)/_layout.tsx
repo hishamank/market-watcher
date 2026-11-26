@@ -22,7 +22,7 @@ export default function TabsLayout() {
         options={{
           title: t("header.title"),
           tabBarButtonTestID: "tab-markets",
-          tabBarIcon: ({ color }) => <TabIcon glyph="▤" color={color} />,
+          tabBarIcon: ({ color }) => <TabIcon name="markets" color={color} />,
         }}
       />
       <Tabs.Screen
@@ -30,7 +30,7 @@ export default function TabsLayout() {
         options={{
           title: t("list.view.watchlist"),
           tabBarButtonTestID: "tab-watchlist",
-          tabBarIcon: ({ color }) => <TabIcon glyph="★" color={color} />,
+          tabBarIcon: ({ color }) => <TabIcon name="star" color={color} />,
         }}
       />
     </Tabs>

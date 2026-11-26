@@ -71,8 +71,6 @@ export function ChartReadout({ value }: { value: ChartReadoutValue }) {
         change={value.change.change}
         changePercent={value.change.changePercent}
         stale={false}
-        flash={undefined}
-        flashKey={undefined}
         testID="chart-readout-change"
       />
     </View>

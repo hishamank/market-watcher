@@ -21,7 +21,7 @@ export function ConnectedStockRow({ stock, testID }: ConnectedStockRowProps) {
   const quote = useQuote(stock.symbol) ?? stock.quote;
   const { status } = useConnectionStatus();
   const stale = status === "stale" || status === "offline";
-  const { flash, flashKey } = useTickFlash(quote.timestamp, quote.change, stale);
+  const { flash, flashKey } = useTickFlash(quote.price, stale);
   const watchlist = useWatchlist();
   return (
     <StockRow
