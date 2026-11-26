@@ -7,7 +7,7 @@ import { ConnectedStockRow } from "./connected-stock-row.tsx";
 
 const SUGGESTION_COUNT = 3;
 
-export function WatchlistSuggestions() {
+export function WatchlistSuggestions({ onStar }: { onStar: (symbol: string) => void }) {
   const t = useT();
   const stocks = useStockList().data?.stocks.slice(0, SUGGESTION_COUNT) ?? [];
   if (stocks.length === 0) return null;
@@ -24,7 +24,7 @@ export function WatchlistSuggestions() {
             style={{ "--star-row": starRowName(stock.symbol) } as CSSProperties}
             className="border-t border-border"
           >
-            <ConnectedStockRow stock={stock} reflowOnStar />
+            <ConnectedStockRow stock={stock} reflowStar={onStar} />
           </li>
         ))}
       </ul>

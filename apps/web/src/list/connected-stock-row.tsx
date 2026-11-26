@@ -9,7 +9,6 @@ import {
   useT,
   useWatchlist,
 } from "@mini/core";
-import { startStarTransition } from "../integrations/star-motion.ts";
 import { useListNavigation } from "../integrations/use-list-navigation.ts";
 import { StockRow } from "../components/stock-row.tsx";
 import { useTickFlash } from "../integrations/use-tick-flash.ts";
@@ -17,10 +16,10 @@ import { useTickFlash } from "../integrations/use-tick-flash.ts";
 export interface ConnectedStockRowProps {
   stock: Stock;
   morph?: boolean;
-  reflowOnStar?: boolean | undefined;
+  reflowStar?: ((symbol: string) => void) | undefined;
 }
 
-export function ConnectedStockRow({ stock, morph = true, reflowOnStar }: ConnectedStockRowProps) {
+export function ConnectedStockRow({ stock, morph = true, reflowStar }: ConnectedStockRowProps) {
   const t = useT();
   const { stockHref } = useListNavigation();
   const quote = useQuote(stock.symbol) ?? stock.quote;
@@ -56,7 +55,7 @@ export function ConnectedStockRow({ stock, morph = true, reflowOnStar }: Connect
       flashKey={flashKey}
       flashRoll={roll}
       starred={starred}
-      onToggleStar={reflowOnStar ? () => startStarTransition(starred !== true, toggle) : toggle}
+      onToggleStar={reflowStar ? () => reflowStar(stock.symbol) : toggle}
       morph={morph}
     />
   );

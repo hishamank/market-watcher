@@ -4,6 +4,7 @@ import { duration } from "@mini/tokens";
 import { FlatList, StyleSheet } from "react-native";
 import Animated, { FadeIn, LayoutAnimationConfig } from "react-native-reanimated";
 import { EmptyState } from "../components/empty-state.tsx";
+import { useReduceMotion } from "../integrations/use-reduce-motion.ts";
 import { ListSkeleton, SkeletonRow } from "../components/skeleton.tsx";
 import { WatchlistErrorRow } from "../components/watchlist-error-row.tsx";
 import { ConnectedStockRow } from "./connected-stock-row.tsx";
@@ -14,13 +15,14 @@ export function WatchlistList() {
   const router = useRouter();
   const { isLoaded, symbols, toggle } = useWatchlist();
   const rows = useWatchlistStocks(symbols, isLoaded);
+  const entering = useReduceMotion() ? {} : { entering: swap };
   if (!isLoaded) {
     return <ListSkeleton testID="watchlist-skeleton" />;
   }
   return (
     <LayoutAnimationConfig skipEntering>
       {symbols.length === 0 ? (
-        <Animated.View key="empty" entering={swap} style={styles.fill}>
+        <Animated.View key="empty" {...entering} style={styles.fill}>
           <EmptyState
             testID="watchlist-empty"
             icon="☆"
@@ -33,7 +35,7 @@ export function WatchlistList() {
           />
         </Animated.View>
       ) : (
-        <Animated.View key="list" entering={swap} style={styles.fill}>
+        <Animated.View key="list" {...entering} style={styles.fill}>
           <FlatList
             testID="watchlist"
             data={rows}

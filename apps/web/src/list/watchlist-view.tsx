@@ -5,6 +5,7 @@ import Link from "next/link";
 import { buttonClassName } from "../components/button.tsx";
 import { EmptyState } from "../components/empty-state.tsx";
 import { StarIcon } from "../components/icons.tsx";
+import { useStarTransition } from "../integrations/star-motion.ts";
 import { ListError } from "../components/list-error.tsx";
 import { ListSkeleton } from "../components/list-skeleton.tsx";
 import { VirtualStockList } from "./virtual-stock-list.tsx";
@@ -13,7 +14,8 @@ import { useWatchlistStocks } from "./watchlist-stocks.ts";
 
 export function WatchlistView() {
   const t = useT();
-  const { isLoaded, symbols } = useWatchlist();
+  const { isLoaded, symbols, toggle } = useWatchlist();
+  const reflowStar = useStarTransition(symbols, toggle);
   const state = useWatchlistStocks(symbols, isLoaded);
   if (state.status === "loading") {
     return <ListSkeleton testId="watchlist-skeleton" />;
@@ -36,7 +38,7 @@ export function WatchlistView() {
             </Link>
           }
         />
-        <WatchlistSuggestions />
+        <WatchlistSuggestions onStar={reflowStar} />
       </>
     );
   }
@@ -45,7 +47,7 @@ export function WatchlistView() {
       stocks={state.stocks}
       listTestId="watchlist"
       rowTestId={(symbol) => `watchlist-row-${symbol}`}
-      reflowOnStar={state.stocks.length === 1}
+      reflowStar={state.stocks.length === 1 ? reflowStar : undefined}
     />
   );
 }

@@ -1,4 +1,5 @@
 import { duration, easing } from "@mini/tokens";
+import { useLayoutEffect, useRef } from "react";
 import { flushSync } from "react-dom";
 
 const ease = `cubic-bezier(${easing.standard.join(", ")})`;
@@ -28,6 +29,22 @@ export function startStarTransition(starring: boolean, update: () => void): void
   void transition.finished.finally(() => {
     if (current === transition) delete root.dataset.starMotion;
   });
+}
+
+export function useStarTransition(
+  symbols: readonly string[],
+  toggle: (symbol: string) => void,
+): (symbol: string) => void {
+  const latest = useRef(symbols);
+  useLayoutEffect(() => {
+    latest.current = symbols;
+  });
+  return (symbol) => {
+    const starring = !symbols.includes(symbol);
+    startStarTransition(starring, () => {
+      if (latest.current.includes(symbol) !== starring) toggle(symbol);
+    });
+  };
 }
 
 function flightKeyframes(dx: number, dy: number): Keyframe[] {

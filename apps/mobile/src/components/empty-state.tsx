@@ -1,6 +1,7 @@
 import { duration, space } from "@mini/tokens";
 import { StyleSheet, Text, View } from "react-native";
 import Animated, { Keyframe } from "react-native-reanimated";
+import { useReduceMotion } from "../integrations/use-reduce-motion.ts";
 import { usePalette } from "../theme/palette.ts";
 import { textStyles } from "../theme/text-styles.ts";
 import { Button } from "./button.tsx";
@@ -25,10 +26,12 @@ const iconPop = new Keyframe({
 
 export function EmptyState(props: EmptyStateProps) {
   const palette = usePalette();
+  const reduceMotion = useReduceMotion();
+  const pop = props.popIcon === true && !reduceMotion;
   return (
     <View testID={props.testID} style={styles.container}>
       <View style={[styles.icon, { backgroundColor: palette.fill }]}>
-        <Animated.View {...(props.popIcon ? { entering: iconPop } : {})}>
+        <Animated.View {...(pop ? { entering: iconPop } : {})}>
           <Text style={[styles.iconGlyph, { color: palette.textSecondary }]}>{props.icon}</Text>
         </Animated.View>
       </View>
