@@ -66,6 +66,11 @@ describe("day range", () => {
     expect(QuoteSchema.safeParse(withRange("187.43", "191.25")).success).toBe(false);
   });
 
+  it("rejects a malformed range in a frame instead of throwing", () => {
+    const frame = JSON.stringify({ type: "quotes", quotes: [withRange("bad", "191.25")] });
+    expect(parseServerFrame(frame).ok).toBe(false);
+  });
+
   it("rejects a high that is not pre-rounded", () => {
     expect(QuoteSchema.safeParse(withRange("186.10", "191.255")).success).toBe(false);
   });
