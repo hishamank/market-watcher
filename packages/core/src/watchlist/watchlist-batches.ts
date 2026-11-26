@@ -1,12 +1,8 @@
 import { MAX_STOCKS_QUERY_SYMBOLS, type Stock } from "@mini/contracts";
-import { createRestClient, stockQueryKeys, stocksBySymbolsQueryOptions } from "@mini/core";
 import type { QueryClient } from "@tanstack/react-query";
-import { gatewayUrl } from "../config/gateway-url.ts";
+import { normaliseSymbols, STOCK_STALE_MS, stockQueryKeys } from "../rest/stock-queries.ts";
 
-const staleTime = stocksBySymbolsQueryOptions(createRestClient({ gatewayUrl }), []).staleTime;
-export const WATCHLIST_STOCK_FRESH_MS = typeof staleTime === "number" ? staleTime : 60_000;
-
-export interface StockCacheCoverage {
+interface StockCacheCoverage {
   readonly bySymbol: Map<string, Stock>;
   readonly freshCovered: Set<string>;
   readonly fetchingBatches: string[][];
@@ -16,7 +12,7 @@ function chunkSymbols(
   symbols: readonly string[],
   maxChunkSize = MAX_STOCKS_QUERY_SYMBOLS,
 ): string[][] {
-  const sorted = [...new Set(symbols)].sort();
+  const sorted = normaliseSymbols(symbols);
   const chunks: string[][] = [];
   for (let index = 0; index < sorted.length; index += maxChunkSize) {
     chunks.push(sorted.slice(index, index + maxChunkSize));
@@ -30,7 +26,7 @@ function isStringArray(value: unknown): value is readonly string[] {
 
 export function inspectStockCache(
   queryClient: QueryClient,
-  freshMs = WATCHLIST_STOCK_FRESH_MS,
+  freshMs = STOCK_STALE_MS,
 ): StockCacheCoverage {
   const bySymbol = new Map<string, Stock>();
   const freshCovered = new Set<string>();

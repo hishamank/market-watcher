@@ -42,6 +42,7 @@ const FROZEN_RUNTIME_EXPORTS = [
   "useTableColumns",
   "useTrack",
   "useWatchlist",
+  "useWatchlistStocks",
 ];
 
 describe("core public API", () => {

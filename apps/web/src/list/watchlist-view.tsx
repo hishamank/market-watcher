@@ -1,6 +1,6 @@
 "use client";
 
-import { useT, useWatchlist } from "@mini/core";
+import { useT, useWatchlist, useWatchlistStocks } from "@mini/core";
 import Link from "next/link";
 import type { MouseEvent } from "react";
 import { buttonClassName } from "../components/button.tsx";
@@ -12,7 +12,6 @@ import { ListSkeleton } from "../components/list-skeleton.tsx";
 import type { ListView } from "../components/view-toggle.tsx";
 import { VirtualStockList } from "./virtual-stock-list.tsx";
 import { WatchlistSuggestions } from "./watchlist-suggestions.tsx";
-import { useWatchlistStocks } from "./watchlist-stocks.ts";
 
 export interface WatchlistViewProps {
   onShowAll: (view: ListView, event: MouseEvent) => void;
@@ -20,9 +19,9 @@ export interface WatchlistViewProps {
 
 export function WatchlistView({ onShowAll }: WatchlistViewProps) {
   const t = useT();
-  const { isLoaded, symbols, toggle } = useWatchlist();
+  const { symbols, toggle } = useWatchlist();
   const reflowStar = useStarTransition(symbols, toggle);
-  const state = useWatchlistStocks(symbols, isLoaded);
+  const state = useWatchlistStocks();
   if (state.status === "loading") {
     return <ListSkeleton testId="watchlist-skeleton" />;
   }

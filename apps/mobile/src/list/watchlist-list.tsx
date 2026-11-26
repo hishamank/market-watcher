@@ -1,4 +1,4 @@
-import { useT, useWatchlist } from "@mini/core";
+import { useT, useWatchlist, useWatchlistStocks } from "@mini/core";
 import { useRouter } from "expo-router";
 import { duration } from "@mini/tokens";
 import { FlatList, StyleSheet } from "react-native";
@@ -8,13 +8,12 @@ import { useReduceMotion } from "../integrations/use-reduce-motion.ts";
 import { ListSkeleton, SkeletonRow } from "../components/skeleton.tsx";
 import { WatchlistErrorRow } from "../components/watchlist-error-row.tsx";
 import { ConnectedStockRow } from "./connected-stock-row.tsx";
-import { useWatchlistStocks } from "./use-watchlist-stocks.ts";
 
 export function WatchlistList() {
   const t = useT();
   const router = useRouter();
   const { isLoaded, symbols, toggle } = useWatchlist();
-  const rows = useWatchlistStocks(symbols, isLoaded);
+  const { rows } = useWatchlistStocks();
   const entering = useReduceMotion() ? {} : { entering: swap };
   if (!isLoaded) {
     return <ListSkeleton testID="watchlist-skeleton" />;
