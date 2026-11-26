@@ -9,9 +9,11 @@ export interface VirtualStockListProps {
   stocks: readonly Stock[];
   listTestId: string;
   rowTestId?: (symbol: string) => string;
+  morph?: boolean;
 }
 
-export function VirtualStockList({ stocks, listTestId, rowTestId }: VirtualStockListProps) {
+export function VirtualStockList(props: VirtualStockListProps) {
+  const { stocks, listTestId, rowTestId, morph = true } = props;
   const { rows, paddingStart, paddingEnd, listRef, measureRow } = useWindowRows(
     stocks.map((stock) => stock.symbol),
   );
@@ -33,7 +35,7 @@ export function VirtualStockList({ stocks, listTestId, rowTestId }: VirtualStock
               ref={measureRow}
               className="border-b border-border last:border-b-0"
             >
-              <ConnectedStockRow stock={stock} />
+              <ConnectedStockRow stock={stock} morph={morph} />
             </li>
           );
         })}

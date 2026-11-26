@@ -1,6 +1,7 @@
 import { directionOf, formatPrice, formatSignedPercent, type FlashDirection } from "@mini/core";
 import Link from "next/link";
 import { ChangePill } from "./change-pill.tsx";
+import { Morph } from "./morph.tsx";
 import { PriceCell } from "./price-cell.tsx";
 import { StarButton } from "./star-button.tsx";
 
@@ -22,6 +23,7 @@ export interface StockRowProps {
   flashFrom?: string | undefined;
   starred: boolean | undefined;
   onToggleStar: () => void;
+  morph?: boolean;
 }
 
 const tableOnly = "hidden text-end text-label font-normal text-text-secondary list-table:block";
@@ -40,12 +42,14 @@ export function StockRow(props: StockRowProps) {
         className="-ms-8 flex min-w-0 flex-1 items-center gap-12 self-stretch rounded-md ps-8 focus-visible:outline-offset-[-2px] list-table:col-span-7 list-table:-mx-8 list-table:grid list-table:grid-cols-subgrid list-table:px-8 list-compact:col-span-4 list-compact:-mx-8 list-compact:grid list-compact:grid-cols-subgrid list-compact:px-8"
       >
         <span className="flex min-w-0 flex-1 flex-col items-start gap-[3px] list-table:contents list-compact:contents">
-          <span
-            data-testid={`stock-row-name-${symbol}`}
-            className="max-w-full overflow-x-clip text-ellipsis whitespace-nowrap text-body-strong list-table:text-body list-table:font-medium list-compact:text-body list-compact:font-medium"
-          >
-            {name}
-          </span>
+          <Morph name={`stock-name-${symbol}`} enabled={props.morph}>
+            <span
+              data-testid={`stock-row-name-${symbol}`}
+              className="max-w-full overflow-x-clip text-ellipsis whitespace-nowrap text-body-strong list-table:text-body list-table:font-medium list-compact:text-body list-compact:font-medium"
+            >
+              {name}
+            </span>
+          </Morph>
           <bdi
             dir="ltr"
             className="text-caption text-text-muted list-table:text-label list-table:font-normal list-compact:text-label list-compact:font-normal"
@@ -55,16 +59,18 @@ export function StockRow(props: StockRowProps) {
         </span>
         <span className="flex shrink-0 flex-col items-end gap-4 list-table:contents list-compact:contents">
           <span className="list-table:text-end list-compact:text-end">
-            <PriceCell
-              price={props.price}
-              change={props.change}
-              stale={stale}
-              asOf={props.asOf}
-              flash={props.asOf ? undefined : flash}
-              flashKey={props.flashKey}
-              flashFrom={props.flashFrom}
-              testId={`stock-row-price-${symbol}`}
-            />
+            <Morph name={`stock-price-${symbol}`} enabled={props.morph}>
+              <PriceCell
+                price={props.price}
+                change={props.change}
+                stale={stale}
+                asOf={props.asOf}
+                flash={props.asOf ? undefined : flash}
+                flashKey={props.flashKey}
+                flashFrom={props.flashFrom}
+                testId={`stock-row-price-${symbol}`}
+              />
+            </Morph>
           </span>
           <span className="list-table:justify-self-end list-compact:justify-self-end">
             <ChangePill

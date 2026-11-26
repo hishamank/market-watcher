@@ -12,7 +12,7 @@ import {
 import { StockRow } from "../components/stock-row.tsx";
 import { useTickFlash } from "../integrations/use-tick-flash.ts";
 
-export function ConnectedStockRow({ stock }: { stock: Stock }) {
+export function ConnectedStockRow({ stock, morph = true }: { stock: Stock; morph?: boolean }) {
   const t = useT();
   const quote = useQuote(stock.symbol) ?? stock.quote;
   const { status } = useConnectionStatus();
@@ -45,6 +45,7 @@ export function ConnectedStockRow({ stock }: { stock: Stock }) {
       flashFrom={from}
       starred={watchlist.isLoaded ? watchlist.isStarred(stock.symbol) : undefined}
       onToggleStar={() => watchlist.toggle(stock.symbol)}
+      morph={morph}
     />
   );
 }
