@@ -62,7 +62,7 @@ export function DetailPage({ symbol }: { symbol: string }) {
           <Link
             href="/"
             data-testid="detail-back"
-            className="hidden min-h-[44px] items-center gap-4 self-start rounded-md pe-12 text-label text-text-secondary md:inline-flex xl:hidden"
+            className="hidden min-h-[44px] items-center gap-4 self-start rounded-md pe-12 text-label text-text-secondary transition-colors duration-(--duration-fast) hover:text-text md:inline-flex xl:hidden"
           >
             <ChevronStartIcon />
             {t("detail.back")}

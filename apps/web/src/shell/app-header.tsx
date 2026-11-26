@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { ChevronStartIcon } from "../components/icons.tsx";
 import { FeedModeBadge } from "./feed-mode-badge.tsx";
 import { MarketClosedLabel } from "./market-closed-label.tsx";
+import { iconPressMotion } from "../components/button.tsx";
 
 export interface AppHeaderProps {
   feedMode: FeedMode | null;
@@ -22,7 +23,7 @@ export function AppHeader({ feedMode, marketStatus, showBack, search }: AppHeade
           href="/"
           aria-label={t("detail.back")}
           data-testid="header-back"
-          className="-ms-10 grid size-[44px] shrink-0 place-items-center rounded-md text-text-secondary md:hidden"
+          className={`-ms-10 grid size-[44px] shrink-0 place-items-center rounded-md text-text-secondary md:hidden ${iconPressMotion}`}
         >
           <ChevronStartIcon />
         </Link>

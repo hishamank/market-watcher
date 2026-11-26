@@ -1,5 +1,6 @@
 import { RANGES, type Range } from "@mini/contracts";
 import { useT } from "@mini/core";
+import { SegmentTrack, segmentStyle } from "./segment-track.tsx";
 
 export interface RangeTabsProps {
   range: Range;
@@ -9,30 +10,31 @@ export interface RangeTabsProps {
 export function RangeTabs({ range, onSelect }: RangeTabsProps) {
   const t = useT();
   return (
-    <div
+    <SegmentTrack
+      selected={RANGES.indexOf(range)}
       role="tablist"
-      aria-label={t("detail.rangeTabs")}
-      className="flex gap-2 rounded-lg bg-fill p-4 md:w-[420px] md:max-w-full"
+      label={t("detail.rangeTabs")}
+      className="flex gap-2 md:w-[420px] md:max-w-full"
     >
-      {RANGES.map((option) => {
-        const selected = option === range;
-        const style = selected
-          ? "bg-raised font-semibold text-text shadow-1"
-          : "font-medium text-text-secondary";
-        return (
-          <button
-            key={option}
-            type="button"
-            role="tab"
-            aria-selected={selected}
-            data-testid={`range-tab-${option}`}
-            onClick={() => onSelect(option)}
-            className={`grid min-h-[44px] flex-1 place-items-center rounded-sm px-8 text-label whitespace-nowrap ${style}`}
-          >
-            {t(`detail.tab.${option}`)}
-          </button>
-        );
-      })}
-    </div>
+      {(ready) =>
+        RANGES.map((option) => {
+          const selected = option === range;
+          return (
+            <button
+              key={option}
+              type="button"
+              role="tab"
+              data-segment
+              aria-selected={selected}
+              data-testid={`range-tab-${option}`}
+              onClick={() => onSelect(option)}
+              className={`grid min-h-[44px] flex-1 place-items-center rounded-sm px-8 text-label whitespace-nowrap ${segmentStyle(selected, ready)}`}
+            >
+              {t(`detail.tab.${option}`)}
+            </button>
+          );
+        })
+      }
+    </SegmentTrack>
   );
 }

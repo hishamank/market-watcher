@@ -1,4 +1,5 @@
 import { useT } from "@mini/core";
+import { iconPressMotion } from "./button.tsx";
 import { StarIcon } from "./icons.tsx";
 
 export interface StarButtonProps {
@@ -18,7 +19,7 @@ export function StarButton({ name, starred, onToggle, testId }: StarButtonProps)
       aria-label={t("star.label", { name })}
       disabled={starred === undefined}
       onClick={onToggle}
-      className="grid size-[44px] shrink-0 place-items-center rounded-md text-text-muted aria-pressed:text-accent-fill disabled:text-border"
+      className={`grid size-[44px] shrink-0 place-items-center rounded-md text-text-muted aria-pressed:text-accent-fill disabled:text-border disabled:hover:bg-transparent ${iconPressMotion}`}
     >
       <StarIcon
         filled={starred === true}

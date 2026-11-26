@@ -113,7 +113,7 @@ function SearchResultRow({
       role="option"
       aria-selected={highlighted}
       data-testid={`search-result-${item.symbol}`}
-      className={`flex min-h-[56px] items-center pe-6 ${highlighted ? "bg-fill" : "hover:bg-hover"}`}
+      className={`flex min-h-[56px] items-center pe-6 transition-colors duration-(--duration-fast) ease-standard ${highlighted ? "bg-fill" : "hover:bg-hover"}`}
     >
       <Link
         href={`/stocks/${item.symbol}`}

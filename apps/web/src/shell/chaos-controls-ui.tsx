@@ -1,6 +1,7 @@
 import type { HistoryFailureRate } from "@mini/contracts";
 import { useT } from "@mini/core";
 import { ClockIcon } from "../components/icons.tsx";
+import { SegmentTrack, segmentStyle } from "../components/segment-track.tsx";
 
 export interface CountdownPillProps {
   secondsLeft: number | null;
@@ -45,7 +46,7 @@ export function ChaosSwitch({ label, checked, onChange, testId }: ChaosSwitchPro
     >
       <span className={`flex h-[26px] w-[44px] items-center rounded-pill p-[3px] ${track}`}>
         <span
-          className={`size-[20px] rounded-pill motion-safe:transition-[margin] duration-fast ease-standard ${knob}`}
+          className={`size-[20px] rounded-pill motion-safe:transition-[margin] duration-(--duration-fast) ease-standard ${knob}`}
         />
       </span>
     </button>
@@ -99,31 +100,32 @@ export function FailureRateControl({ rate, secondsLeft, onChange }: FailureRateC
         <span className="text-body-strong">{t("chaos.historyFailures")}</span>
         <CountdownPill secondsLeft={secondsLeft} testId="chaos-countdown-history-failures" />
       </div>
-      <div
+      <SegmentTrack
+        selected={options.findIndex((option) => option.value === rate)}
         role="radiogroup"
-        aria-label={t("chaos.historyFailures")}
-        className="grid grid-cols-3 gap-2 rounded-lg bg-fill p-4"
+        label={t("chaos.historyFailures")}
+        className="grid grid-cols-3 gap-2"
       >
-        {options.map((option) => {
-          const selected = rate === option.value;
-          const style = selected
-            ? "bg-raised font-semibold text-text shadow-1"
-            : "text-text-secondary";
-          return (
-            <button
-              key={option.value}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              data-testid={option.testId}
-              onClick={() => onChange(option.value)}
-              className={`min-h-[44px] rounded-sm px-8 text-label ${style}`}
-            >
-              {option.label}
-            </button>
-          );
-        })}
-      </div>
+        {(ready) =>
+          options.map((option) => {
+            const selected = rate === option.value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                role="radio"
+                data-segment
+                aria-checked={selected}
+                data-testid={option.testId}
+                onClick={() => onChange(option.value)}
+                className={`min-h-[44px] rounded-sm px-8 text-label ${segmentStyle(selected, ready)}`}
+              >
+                {option.label}
+              </button>
+            );
+          })
+        }
+      </SegmentTrack>
     </div>
   );
 }
