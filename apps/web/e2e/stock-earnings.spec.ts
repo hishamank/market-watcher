@@ -165,7 +165,7 @@ test("D12 large EPS and an unconfirmed date fit 320px in both languages", async 
   await page.goto("/stocks/AAPL");
   await expect(page.getByTestId("stock-earnings")).toHaveAttribute("data-state", "ready");
   for (const direction of ["ltr", "rtl"]) {
-    if (direction === "rtl") await page.getByTestId("language-toggle").click();
+    if (direction === "rtl") await page.getByTestId("language-option-ar").click();
     await expect(page.locator("html")).toHaveAttribute("dir", direction);
     expect(
       await page

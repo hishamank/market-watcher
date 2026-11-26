@@ -1,0 +1,92 @@
+.language-switch {
+  view-transition-name: language-switch;
+  view-transition-class: morph;
+  --swipe: 1;
+  --ease-in-quad: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+  --ease-in-expo: cubic-bezier(0.95, 0.05, 0.795, 0.035);
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.language-switch[data-swipe="back"] {
+  --swipe: -1;
+}
+
+::view-transition-old(language-switch) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(language-switch) {
+  animation: none;
+}
+
+.language-option:first-child:not([aria-pressed="true"]) .language-fill {
+  translate: 100%;
+}
+
+.language-option:last-child:not([aria-pressed="true"]) .language-fill {
+  translate: -100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .language-fill {
+    transition: translate 200ms var(--ease-in-quad) 100ms;
+  }
+
+  .language-option[aria-pressed="true"] .language-fill {
+    transition-delay: 0ms;
+  }
+
+  .language-switch[data-swipe] .language-label {
+    animation: language-trail 600ms;
+  }
+
+  .language-switch[data-swipe] [aria-pressed="true"] .language-label {
+    animation-name: language-lead;
+  }
+}
+
+@keyframes language-lead {
+  0% {
+    translate: 0;
+    color: var(--color-text-secondary);
+    animation-timing-function: var(--ease-in-expo);
+  }
+  16.667%,
+  50% {
+    translate: calc(var(--swipe) * 100%);
+    color: var(--color-text-secondary);
+  }
+  50.001% {
+    translate: calc(var(--swipe) * -100%);
+    color: var(--color-bg);
+    animation-timing-function: var(--ease-out-expo);
+  }
+  83.333%,
+  100% {
+    translate: 0;
+    color: var(--color-bg);
+  }
+}
+
+@keyframes language-trail {
+  0% {
+    translate: 0;
+    color: var(--color-bg);
+    animation-timing-function: var(--ease-in-expo);
+  }
+  16.667%,
+  66.667% {
+    translate: calc(var(--swipe) * 100%);
+    color: var(--color-bg);
+  }
+  66.668% {
+    translate: calc(var(--swipe) * -100%);
+    color: var(--color-text-secondary);
+    animation-timing-function: var(--ease-out-expo);
+  }
+  100% {
+    translate: 0;
+    color: var(--color-text-secondary);
+  }
+}

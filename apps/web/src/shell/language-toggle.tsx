@@ -1,21 +1,68 @@
 "use client";
 
-import { useLanguage, useT } from "@mini/core";
+import { useLanguage, useT, type Locale } from "@mini/core";
+import { useState } from "react";
+
+const options = [
+  {
+    locale: "en-US",
+    lang: "en",
+    name: "language.english",
+    short: "language.englishShort",
+    nudge: "",
+  },
+  {
+    locale: "ar",
+    lang: "ar",
+    name: "language.arabic",
+    short: "language.arabicShort",
+    nudge: "-top-[0.3em]",
+  },
+] as const;
 
 export function LanguageToggle() {
   const t = useT();
   const { locale, setLocale } = useLanguage();
-  const next = locale === "ar" ? "en-US" : "ar";
+  const [movedTo, setMovedTo] = useState<Locale | null>(null);
+  const swipe = movedTo === locale ? (locale === "ar" ? "forward" : "back") : undefined;
+  const select = (next: Locale) => {
+    if (next === locale) return;
+    setMovedTo(next);
+    setLocale(next);
+  };
   return (
-    <button
-      type="button"
-      lang={next}
+    <div
+      role="group"
+      dir="ltr"
+      aria-label={t("language.label")}
       data-testid="language-toggle"
       data-locale={locale}
-      onClick={() => setLocale(next)}
-      className="inline-flex min-h-[44px] shrink-0 items-center rounded-md px-10 text-label font-medium text-text-secondary transition-[scale,background-color,color] duration-(--duration-fast) ease-standard hover:bg-hover hover:text-text motion-safe:active:scale-95"
+      data-swipe={swipe}
+      className="language-switch flex shrink-0"
     >
-      {t("language.switch")}
-    </button>
+      {options.map((option) => {
+        const pressed = option.locale === locale;
+        return (
+          <button
+            key={option.locale}
+            type="button"
+            lang={option.lang}
+            aria-label={t(option.name)}
+            aria-pressed={pressed}
+            data-testid={`language-option-${option.lang}`}
+            onClick={() => select(option.locale)}
+            className={`language-option relative grid size-[44px] place-items-center overflow-hidden text-label leading-none font-semibold first:rounded-s-md last:rounded-e-md ${pressed ? "text-bg" : "text-text-secondary hover:bg-hover hover:text-text"}`}
+          >
+            <span aria-hidden="true" className="language-fill absolute inset-0 bg-text" />
+            <span
+              aria-hidden="true"
+              className={`language-label relative grid w-full place-items-center ${option.nudge}`}
+            >
+              {t(option.short)}
+            </span>
+          </button>
+        );
+      })}
+    </div>
   );
 }

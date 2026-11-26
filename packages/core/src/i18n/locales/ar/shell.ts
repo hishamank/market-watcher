@@ -14,4 +14,9 @@ export const arShellStrings = {
   "connection.offline.help": "تحقّق من اتصالك. قد لا تكون الأسعار محدّثة.",
   "connection.retry": "إعادة المحاولة",
   "language.switch": "English",
+  "language.label": "اللغة",
+  "language.english": "English",
+  "language.englishShort": "EN",
+  "language.arabic": "العربية",
+  "language.arabicShort": "ع",
 } satisfies Translation<typeof shellStrings>;

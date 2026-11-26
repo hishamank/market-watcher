@@ -11,4 +11,9 @@ export const shellStrings = {
   "connection.offline.help": "Check your connection. Prices may be out of date.",
   "connection.retry": "Retry",
   "language.switch": "العربية",
+  "language.label": "Language",
+  "language.english": "English",
+  "language.englishShort": "EN",
+  "language.arabic": "العربية",
+  "language.arabicShort": "ع",
 } as const;

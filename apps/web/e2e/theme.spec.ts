@@ -97,7 +97,7 @@ test("G6 G7 language and theme choices coexist in the header", async ({ page }) 
   });
   await page.emulateMedia({ colorScheme: "light" });
   await page.goto("/");
-  await page.getByTestId("language-toggle").click();
+  await page.getByTestId("language-option-ar").click();
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   const toggle = page.getByRole("switch", { name: "الوضع الداكن" });
   await toggle.click();
@@ -117,7 +117,7 @@ test("G6 G7 language and theme choices coexist in the header", async ({ page }) 
   await expect(page.getByTestId("price-chart")).toHaveAttribute("data-state", "ready");
   await toggle.click();
   await expect(page.locator("body")).toHaveCSS("background-color", "rgb(241, 241, 239)");
-  await page.getByTestId("language-toggle").click();
+  await page.getByTestId("language-option-en").click();
   await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
   await expect(page.getByRole("switch", { name: "Dark mode" })).toHaveAttribute(
     "aria-checked",

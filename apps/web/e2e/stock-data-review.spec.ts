@@ -38,7 +38,7 @@ test("D9 Yahoo overview timestamps follow Arabic locale", async ({ page }) => {
   await page.route("**/stocks/AAPL/profile", (route) => route.fulfill({ json: profile }));
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/stocks/AAPL");
-  await page.getByTestId("language-toggle").click();
+  await page.getByTestId("language-option-ar").click();
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   await expect(page.getByTestId("company-profile-source")).toContainText("نوفمبر");
   await expect(page.getByTestId("company-profile-source")).not.toContainText("Nov");
@@ -99,7 +99,7 @@ test("D12 estimate-only earnings omit the summary and give the chart the full de
 test("D10 Arabic last-price prose follows locale while the range stays LTR", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/stocks/AAPL");
-  await page.getByTestId("language-toggle").click();
+  await page.getByTestId("language-option-ar").click();
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   const range = page.getByTestId("statistics-year-range");
   await expect(range.locator("p")).toBeVisible();
