@@ -1,0 +1,18 @@
+export const profileStrings = {
+  "profile.about": "About the company",
+  "profile.aboutFund": "About the fund",
+  "profile.sector": "Sector",
+  "profile.industry": "Industry",
+  "profile.exchange": "Exchange",
+  "profile.website": "Website",
+  "profile.more": "Read more",
+  "profile.less": "Show less",
+  "profile.sample": "Sample company information",
+  "profile.source": "Source: Yahoo Finance",
+  "profile.retrieved": "Retrieved {{time}}",
+  "profile.noDescription": "No description is available for this security.",
+  "profile.error": "Company information couldn't be loaded.",
+  "profile.retry": "Try again",
+  "profile.loading": "Loading company information",
+  "profile.external": "{{website}} (opens in a new tab)",
+} as const;

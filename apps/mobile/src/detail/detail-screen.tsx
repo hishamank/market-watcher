@@ -3,12 +3,16 @@ import type { Range, Stock } from "@mini/contracts";
 import { radius, space } from "@mini/tokens";
 import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { EmptyState } from "../components/empty-state.tsx";
 import { RangeTabs } from "../components/range-tabs.tsx";
 import { SkeletonBlock } from "../components/skeleton.tsx";
 import { useTrackStockOpened } from "../integrations/use-track-stock-opened.ts";
 import { selectionHaptic } from "../platform/haptics.ts";
+import { ConnectedStockStatistics } from "./connected-stock-statistics.tsx";
+import { ConnectedStockNews } from "./connected-stock-news.tsx";
+import { ConnectedStockEarnings } from "./connected-stock-earnings.tsx";
+import { ConnectedCompanyProfile } from "./connected-company-profile.tsx";
 import { ConnectedDetailFacts } from "./connected-detail-facts.tsx";
 import { ConnectedDetailHeader } from "./connected-detail-header.tsx";
 import { ConnectedPriceChart } from "./connected-price-chart.tsx";
@@ -25,7 +29,7 @@ function DetailContent({ stock }: { stock: Stock }) {
     setRange(next);
   };
   return (
-    <View style={styles.content}>
+    <ScrollView contentContainerStyle={styles.content}>
       <ConnectedDetailHeader stock={stock} range={range} selection={selection} />
       <ConnectedPriceChart
         symbol={stock.symbol}
@@ -35,7 +39,11 @@ function DetailContent({ stock }: { stock: Stock }) {
       />
       <RangeTabs range={range} onSelect={selectRange} />
       <ConnectedDetailFacts stock={stock} />
-    </View>
+      <ConnectedStockStatistics key={`statistics-${stock.symbol}`} symbol={stock.symbol} />
+      <ConnectedStockEarnings key={`earnings-${stock.symbol}`} symbol={stock.symbol} />
+      <ConnectedCompanyProfile key={stock.symbol} symbol={stock.symbol} />
+      <ConnectedStockNews key={`news-${stock.symbol}`} symbol={stock.symbol} />
+    </ScrollView>
   );
 }
 

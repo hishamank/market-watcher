@@ -10,7 +10,7 @@ Graphite is a calm, layered interface for reading prices. Surfaces stack in thre
 
 ## Rules that always hold
 
-- **Data.** Only draw what the gateway provides. Per stock: symbol, name, price, day change (money and percent), previous close, day high and low, time of the last update. Charts: one price per bar. Global: feed mode and market status. Search: symbol and name. No volume, market cap, news, logos, holdings or portfolio value.
+- **Data.** Only draw what the gateway provides. Per stock: symbol, name, price, day change (money and percent), previous close, day high and low, time of the last update. Charts: one price per bar. Global: feed mode and market status. Search: symbol and name. Earnings adds report dates and fiscal EPS comparisons. Company overview adds description, sector, industry, exchange and website with separate source attribution. Key statistics adds market cap, trailing P/E and EPS, dividend yield, average volume and the 52-week range. News adds feed headlines, sources, dates and optional thumbnails. No logos, holdings or portfolio value in this increment.
 - **Gain and loss.** Never colour alone. Every change carries a sign (+ or −) and an up or down arrow. Flat shows a dash and no sign.
 - **Contrast.** Every text and background pair below passes WCAG AA (4.5:1) in both themes. Two limits: do not put `color.textMuted`, `color.accent` or `color.loss` text on `color.fill` in light, and do not put `color.textMuted` on `color.raised` in dark.
 - **Focus.** Every control shows a 2 px `color.focus` outline with a 2 px offset on keyboard focus.
@@ -363,3 +363,21 @@ All sample prices are made-up Simulated values.
 - **1D baseline (decided).** On 1D the header change and the scrub readout measure from the previous close, as drawn (ADR 0029). Every other range measures from its first bar.
 - **Range change when history fails (decided).** For a range that never loaded, the header shows a dash in place of the change. The quote stays as it is: sending each range's first bar with it would change the contract for a rare failure.
 - **Arabic copy.** All Arabic strings on the canvas are placeholders for layout. They need a translator.
+
+### Company overview
+
+A separate surface below the price card on desktop, with the same 24 px inset and aligned edges. On narrow screens use a divider and 16 px page inset. Keep the chart first. Use a 17 px heading, a 15 px description with relaxed line height, an understated Read more control, and a two-column facts grid. Show only supplied fields. Website links keep a visible external-link indicator. A muted source line closes the section. Loading, empty and retry states occupy only this section. Long content scrolls with the page; the expanded detail column is not sticky. Both themes use the existing Graphite tokens.
+
+### Key statistics
+
+Place the section between the chart and company overview. Match the overview surface on desktop and its simple divider on phones. Use a two-column grid below 768 px and three columns above, with light row dividers, quiet labels and tabular values. Labels are plain text, with no information icons, click targets or expanding explanations. Keep the 52-week range neutral, with both endpoints and a Last price label; it expresses position, not gain/loss. Numbers and range geometry remain left to right in both languages. Missing values use — without collapsing the grid. Loading reserves six metric spaces. Source and retrieval time use the same treatment as the overview.
+
+### Company news
+
+Use the same section surface as statistics and overview. Three text-led rows, separated by quiet dividers, keep the initial section compact. Put publisher/site and publication time above each headline. Use a thumbnail at the end only if supplied, with no empty placeholder; a failed image yields a text-only row. Live rows are whole-row links with a small external arrow and a keyboard focus ring. Sample rows have no hover affordance or links. Show more/Show less sits beneath the list; source attribution follows in muted text. Headlines can wrap naturally at phone widths. No inline article summaries, carousels or popovers.
+
+### Earnings and unavailable sections
+
+Place earnings between statistics and overview, using their existing surface and heading style. The latest reported EPS is the primary 32 px readout, with its estimate and fiscal quarter beneath it. The next report occupies a separate summary area with a quiet confidence badge. Date ranges and unconfirmed dates use the full summary width on phones. Dates wrap as whole date segments, and source metadata forms one inline text run. The summary packs toward the top on desktop; RTL numbers stay in inline direction isolates so their alignment follows surrounding labels. On wide screens, the summary sits beside the chart; on phones and tablets, it sits above it. Slim paired bars compare actual and estimated EPS by fiscal quarter. Actual bars are solid and estimates have a continuous outline. Aligned Actual and Estimate rows beneath the plot double as the legend, so every value has a visible label. The narrow legend uses Est. (تقدير in Arabic) and caption-sized values to preserve gaps at 320 px. A true zero draws a 2 px baseline mark; missing data draws none. The plot reserves headroom around the zero line. Keep the chart chronological left to right in both languages. Losses extend below a shared zero baseline. Dates and accounting basis have explicit labels. No tooltips or expandable explanations are needed.
+
+When a supplemental response is empty, omit the section and its spacing entirely. Partial data keeps the available section content; empty earnings subparts are omitted. Loading placeholders remain while resolving a request; temporary errors keep their local retry.

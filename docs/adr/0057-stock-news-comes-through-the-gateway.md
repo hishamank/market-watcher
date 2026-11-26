@@ -1,0 +1,13 @@
+# Stock news comes through the gateway
+
+A company-news section follows the overview, backed by Yahoo ticker RSS through our gateway. The fast-xml-parser dependency is gateway-only. Web and mobile use the same `StockNewsResponse` contract and `useStockNews` hook; this explicitly extends the frozen core API.
+
+`GET /stocks/:symbol/news` checks the catalogue and returns up to nine stories, newest first, with IDs, plain-text titles, article URLs, destination sites, optional publishers, UTC publication times and optional thumbnail URLs. Live mode fetches `https://finance.yahoo.com/rss/headline?s=<symbol>&region=US&lang=en-US` with an identifying RSS-reader user agent. The older feeds.finance.yahoo.com URL returned 404 during this implementation. Direct AAPL and SPY requests to the current URL succeeded on 27 November 2026.
+
+The gateway parses XML, rejects document/entity declarations and malformed feed envelopes, skips invalid articles, validates HTTP(S) links without credentials, and deduplicates IDs and article URLs ignoring common tracking parameters. It preserves the original destination URL. Responses are limited to 1 MiB and eight seconds. A ten-minute cache holds at most 500 symbols; concurrent work is limited to eight symbols and requests for the same symbol are coalesced. Upstream failure is a retryable news-only error, independent of quotes, statistics and profiles.
+
+The feeds inspected supplied neither original publisher names nor thumbnails. If publisher is absent, the UI names the destination hostname rather than inferring a publisher. It renders thumbnails only when supplied by the feed, loads those image assets from their original URLs, and falls back to text if an image fails. News metadata always comes through the gateway; articles open at the feed's supplied URL. No article scraping, full article bodies, sentiment scoring or AI summaries are added. Yahoo Finance receives linked attribution.
+
+The UI shows three stories initially and reveals the rest of the cached batch with Show more. Publication dates include the year and ET. Simulator mode makes no external feed calls and serves clearly labelled fictional headlines; those sample rows are not article links. Live rows open externally (a new tab on web). Empty, loading and retry states stay local to the section.
+
+This retains ADR 0055's demo provider decision. Feed availability and symbol relevance are controlled by Yahoo and may change. Parser reference: [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser). Provider context and RSS terms are recorded in [the source research](../research/stock-page-data-sources.md).

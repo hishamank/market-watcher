@@ -1,0 +1,11 @@
+# Key statistics are independent supplemental data
+
+Key statistics are added after the company overview. Both platforms use `useStockStatistics` and the gateway's `/stocks/:symbol/statistics` contract. This explicitly adds that hook to the frozen core API. No dependency is added.
+
+Live mode reads Yahoo `summaryDetail`, `defaultKeyStatistics` and `quoteType` through the existing yahoo-finance2 adapter. Market cap, positive trailing P/E, trailing EPS, indicated dividend yield, three-month average volume and the 52-week high/low are separate from Alpaca quotes. Company valuation fields are absent for funds: Yahoo's fund P/E describes a portfolio, not the share-price-to-company-earnings ratio explained in this UI. Missing dividend yield is not replaced with Yahoo's differently defined fund yield or a zero. Only USD data is displayed. Upstream numbers become decimal strings at the gateway boundary; compact monetary formatting, yield conversion and range-position arithmetic live in the contracts money module.
+
+Statistics have their own loading, empty and retry states. The gateway caches successful responses for one hour and empty responses for five minutes, bounds the cache to 500 symbols and concurrent work to eight symbols, coalesces requests, and aborts after eight seconds. Clients consider a response fresh for fifteen minutes. Retrieval time identifies when the gateway fetched the data, not when Yahoo updated each figure. Simulator mode returns labelled fictional statistics and never calls Yahoo.
+
+The range's low and high come from Yahoo; its marker uses the latest quote from the gateway. The price is labelled Last price because it may be stale or from a closed session. The marker clamps at the endpoints without changing the range; equal endpoints omit the marker. Values and range geometry stay left to right in Arabic. Following owner design review, metric labels are static. Information icons and inline explanations were removed to keep the section stable.
+
+Source mapping was checked against the installed yahoo-finance2 4.0.6 declarations, [the upstream module](https://github.com/gadicc/yahoo-finance2/blob/dev/src/modules/quoteSummary.ts), and direct AAPL/SPY requests on 27 November 2026. This retains ADR 0055's temporary demo provider decision. News remains a separate increment.
