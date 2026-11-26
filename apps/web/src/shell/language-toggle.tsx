@@ -38,7 +38,7 @@ export function LanguageToggle() {
       data-testid="language-toggle"
       data-locale={locale}
       data-swipe={swipe}
-      className="language-switch flex shrink-0"
+      className="language-switch flex shrink-0 rounded-md border border-border bg-surface"
     >
       {options.map((option) => {
         const pressed = option.locale === locale;
@@ -51,7 +51,7 @@ export function LanguageToggle() {
             aria-pressed={pressed}
             data-testid={`language-option-${option.lang}`}
             onClick={() => select(option.locale)}
-            className={`language-option relative grid size-[44px] place-items-center overflow-hidden text-label leading-none font-semibold first:rounded-s-md last:rounded-e-md ${pressed ? "text-bg" : "text-text-secondary hover:bg-hover hover:text-text"}`}
+            className={`language-option relative grid h-[42px] focus-visible:z-10 w-[44px] place-items-center overflow-hidden text-label leading-none font-semibold first:rounded-s-[calc(var(--radius-md)-1px)] last:rounded-e-[calc(var(--radius-md)-1px)] ${pressed ? "text-bg" : "text-text-secondary hover:bg-hover hover:text-text"}`}
           >
             <span aria-hidden="true" className="language-fill absolute inset-0 bg-text" />
             <span
