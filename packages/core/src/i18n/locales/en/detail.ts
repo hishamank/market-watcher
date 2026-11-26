@@ -1,6 +1,7 @@
 export const detailStrings = {
   "quote.lastKnown.label": "Price as of {{time}}",
   "quote.lastKnown.help": "Waiting for the latest price.",
+  "quote.dayRange.none": "—",
   "detail.range.1D": "Today",
   "detail.range.1W": "Past week",
   "detail.range.1M": "Past month",
@@ -18,6 +19,8 @@ export const detailStrings = {
   "detail.chart.label": "Price chart, {{range}}",
   "detail.chart.previousCloseLine": "Previous close {{price}}",
   "detail.previousClose": "Previous close",
+  "detail.dayHigh": "Day high",
+  "detail.dayLow": "Day low",
   "detail.lastUpdate": "Last update",
   "detail.chart.error": "Couldn't load this chart",
   "detail.chart.retry": "Retry",

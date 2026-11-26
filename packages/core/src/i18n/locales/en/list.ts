@@ -17,5 +17,4 @@ export const listStrings = {
   "list.column.dayLow": "Day low",
   "list.column.lastUpdate": "Last update",
   "list.lastUpdate": "{{time}} ET",
-  "list.dayRange.none": "—",
 } as const;

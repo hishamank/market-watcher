@@ -1,14 +1,27 @@
+import type { DayRange } from "@mini/contracts";
 import { formatPrice, useT } from "@mini/core";
 
 export interface DetailFactsProps {
   previousClose: string;
+  dayRange: DayRange | undefined;
   lastUpdate: string;
 }
 
-export function DetailFacts({ previousClose, lastUpdate }: DetailFactsProps) {
+export function DetailFacts({ previousClose, dayRange, lastUpdate }: DetailFactsProps) {
   const t = useT();
+  const none = t("quote.dayRange.none");
   const facts = [
     { label: t("detail.previousClose"), value: formatPrice(previousClose), id: "previous-close" },
+    {
+      label: t("detail.dayHigh"),
+      value: dayRange ? formatPrice(dayRange.high) : none,
+      id: "day-high",
+    },
+    {
+      label: t("detail.dayLow"),
+      value: dayRange ? formatPrice(dayRange.low) : none,
+      id: "day-low",
+    },
     { label: t("detail.lastUpdate"), value: lastUpdate, id: "last-update" },
   ];
   return (

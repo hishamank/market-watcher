@@ -304,7 +304,7 @@ Each component lists its anatomy, states, spacing, motion and test IDs.
   - Last-known quote: always-visible `detail-price-as-of` note below the change, with the ChartAsOf staleTint pill, stale clock, text label and textSecondary help. Last update includes date and time. No animation or “Last close” caption; chart fallback remains visible independently.
   - Market closed (separate pending ticket): a line under the change with the moon icon, "Market closed" and "Last close {time} ET", where the time is the session close the gateway reports.
   - Stale: price and pill in `color.textMuted`.
-- **Below the tabs.** Two facts from the quote: "Previous close" and "Last update" (time in ET).
+- **Below the tabs.** Facts from the quote: "Previous close", "Day high", "Day low" (a dash when the quote has no day range) and "Last update" (time in ET) (ADR 0050).
 - **Test IDs.** `detail-header`, `detail-name`, `detail-price`, `detail-change`, `detail-change-label`, `detail-star`.
 
 ### Skeletons
