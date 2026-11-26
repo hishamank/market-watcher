@@ -17,4 +17,7 @@ export const listStrings = {
   "list.column.dayLow": "Day low",
   "list.column.lastUpdate": "Last update",
   "list.lastUpdate": "{{time}} ET",
+  "list.columns.button": "Columns",
+  "list.columns.title": "Show columns",
+  "list.columns.reset": "Reset to default",
 } as const;

@@ -27,6 +27,14 @@
   }
 }
 
+@custom-variant list-custom {
+  @media (width >= 48rem) {
+    &:where([data-custom-columns] *):not(:where([data-list-pane] *)) {
+      @slot;
+    }
+  }
+}
+
 @theme {
   --animate-flash: flash var(--duration-flash) var(--ease-standard) both;
   --animate-skeleton: skeleton 1.2s ease-in-out infinite;

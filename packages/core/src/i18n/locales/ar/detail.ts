@@ -4,6 +4,7 @@ import type { Translation } from "../en/index.ts";
 export const arDetailStrings = {
   "quote.lastKnown.label": "السعر حتى ⁦{{time}}⁩",
   "quote.lastKnown.help": "بانتظار آخر سعر.",
+  "quote.dayRange.none": "—",
   "detail.range.1D": "اليوم",
   "detail.range.1W": "الأسبوع الماضي",
   "detail.range.1M": "الشهر الماضي",
@@ -24,6 +25,8 @@ export const arDetailStrings = {
   "detail.dayHigh": "أعلى سعر اليوم",
   "detail.dayLow": "أدنى سعر اليوم",
   "detail.previousClose": "الإغلاق السابق",
+  "detail.dayHigh": "أعلى سعر اليوم",
+  "detail.dayLow": "أدنى سعر اليوم",
   "detail.lastUpdate": "آخر تحديث",
   "detail.chart.error": "تعذّر تحميل هذا المخطط",
   "detail.chart.retry": "إعادة المحاولة",

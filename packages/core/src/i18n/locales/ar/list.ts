@@ -22,6 +22,11 @@ export const arListStrings = {
   "list.column.dayHigh": "أعلى سعر اليوم",
   "list.column.dayLow": "أدنى سعر اليوم",
   "list.column.previousClose": "الإغلاق السابق",
+  "list.column.dayHigh": "أعلى سعر اليوم",
+  "list.column.dayLow": "أدنى سعر اليوم",
   "list.column.lastUpdate": "آخر تحديث",
   "list.lastUpdate": "⁦{{time}} ET⁩",
+  "list.columns.button": "الأعمدة",
+  "list.columns.title": "إظهار الأعمدة",
+  "list.columns.reset": "استعادة الافتراضي",
 } satisfies Translation<typeof listStrings>;

@@ -27,6 +27,7 @@ import { syncQuotesFromQueryCache } from "./rest/quote-cache-sync.ts";
 import { createRestClient, type HttpFetch, type RestClient } from "./rest/rest-client.ts";
 import { createSearchFetcher, type SearchFetcher } from "./rest/search-query.ts";
 import { createWatchlistStore, type WatchlistStore } from "./watchlist/watchlist-store.ts";
+import { createTableColumnsStore, type TableColumnsStore } from "./columns/table-columns-store.ts";
 
 export interface CoreProviderProps {
   gatewayUrl: string;
@@ -54,6 +55,7 @@ export interface CoreContextValue {
   restClient: RestClient;
   searchStocks: SearchFetcher;
   watchlistStore: WatchlistStore;
+  tableColumnsStore: TableColumnsStore;
   i18n: I18nService;
   switchLocale: LocaleSwitch;
   analytics: AnalyticsAdapter;
@@ -90,6 +92,7 @@ export function createCoreServices(
     restClient: createRestClient({ gatewayUrl: platform.gatewayUrl, fetch: platform.fetch }),
     searchStocks: createSearchFetcher({ gatewayUrl: platform.gatewayUrl, fetch: platform.fetch }),
     watchlistStore: createWatchlistStore(platform.storage),
+    tableColumnsStore: createTableColumnsStore(platform.storage),
     i18n,
     switchLocale: platform.switchLocale ?? ((_next, apply) => apply()),
     analytics,
