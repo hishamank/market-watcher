@@ -11,7 +11,6 @@ export const profileStrings = {
   "profile.source": "Source: Yahoo Finance",
   "profile.retrieved": "Retrieved {{time}}",
   "profile.noDescription": "No description is available for this security.",
-  "profile.empty": "Company information isn't available for this security yet.",
   "profile.error": "Company information couldn't be loaded.",
   "profile.retry": "Try again",
   "profile.loading": "Loading company information",

@@ -25,7 +25,11 @@ export function useStockStatistics(symbol: string) {
   };
   if (!query.data) return { status: query.isError ? "error" : "loading", retry } as const;
   const { statistics, source, fetchedAt } = query.data;
-  if (!statistics) return { status: "empty" } as const;
+  if (
+    !statistics ||
+    !Object.entries(statistics).some(([key, value]) => key !== "currency" && value !== null)
+  )
+    return { status: "empty" } as const;
   const stats = statistics;
   const values = {
     marketCap: stats.marketCap === null ? "—" : `$${formatCompactAmount(stats.marketCap)}`,

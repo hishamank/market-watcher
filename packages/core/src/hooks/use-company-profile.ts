@@ -17,7 +17,8 @@ export function useCompanyProfile(symbol: string) {
   };
   if (!query.data) return { status: query.isError ? "error" : "loading", retry } as const;
   const { profile, source, fetchedAt } = query.data;
-  if (!profile) return { status: "empty" } as const;
+  if (!profile || !Object.entries(profile).some(([key, value]) => key !== "kind" && value !== null))
+    return { status: "empty" } as const;
   const expanded = expandedSymbol === symbol;
   const fullDescription = profile.description ?? t("profile.noDescription");
   const hasMore = fullDescription.length > 320;

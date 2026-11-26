@@ -9,6 +9,7 @@ export function StockNews({ view }: { view: StockNewsView }) {
   const t = useT();
   const palette = usePalette();
   const text = useTextStyles();
+  if (view.status === "empty") return null;
   return (
     <View testID="stock-news" style={[styles.section, { borderColor: palette.border }]}>
       <Text accessibilityRole="header" style={[text.headingMd, { color: palette.text }]}>
@@ -19,13 +20,7 @@ export function StockNews({ view }: { view: StockNewsView }) {
       ) : (
         <>
           <Text style={[text.body, { color: palette.textSecondary }]}>
-            {t(
-              view.status === "loading"
-                ? "news.loading"
-                : view.status === "empty"
-                  ? "news.empty"
-                  : "news.error",
-            )}
+            {t(view.status === "loading" ? "news.loading" : "news.error")}
           </Text>
           {view.status === "error" && (
             <Pressable

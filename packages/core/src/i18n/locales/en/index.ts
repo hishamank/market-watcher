@@ -1,3 +1,4 @@
+import { earningsStrings } from "./earnings.ts";
 import { newsStrings } from "./news.ts";
 import { statisticsStrings } from "./statistics.ts";
 import { profileStrings } from "./profile.ts";
@@ -9,6 +10,7 @@ import { shellStrings } from "./shell.ts";
 import { watchlistStrings } from "./watchlist.ts";
 
 export const en = {
+  ...earningsStrings,
   ...newsStrings,
   ...statisticsStrings,
   ...profileStrings,

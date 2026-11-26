@@ -17,6 +17,9 @@ import type { StatisticsSource } from "./statistics/source.ts";
 import { newsRoute } from "./news/route.ts";
 import type { NewsSource } from "./news/source.ts";
 
+import { earningsRoute } from "./earnings/route.ts";
+import type { EarningsSource } from "./earnings/source.ts";
+
 export { parseRateLimitMax, parseTrustProxy } from "./rest/plugins.ts";
 
 export interface AppOptions {
@@ -30,6 +33,8 @@ export interface AppOptions {
   historyCacheMaxEntries?: number;
   historySourceTimeoutMs?: number;
   rateLimit?: RestRateLimitOptions;
+  earningsSource?: EarningsSource;
+  earningsTimeoutMs?: number;
   newsSource?: NewsSource;
   newsTimeoutMs?: number;
   statisticsSource?: StatisticsSource;
@@ -95,6 +100,15 @@ export function buildApp({
     now,
     ...(options.newsSource ? { newsSource: options.newsSource } : {}),
     ...(options.newsTimeoutMs !== undefined ? { newsTimeoutMs: options.newsTimeoutMs } : {}),
+  });
+  app.register(earningsRoute, {
+    catalogue: options.feed.catalogue,
+    feedMode: options.feedMode,
+    now,
+    ...(options.earningsSource ? { earningsSource: options.earningsSource } : {}),
+    ...(options.earningsTimeoutMs !== undefined
+      ? { earningsTimeoutMs: options.earningsTimeoutMs }
+      : {}),
   });
   app.register(websocket, { options: { maxPayload: MAX_MESSAGE_BYTES } });
   app.register(socketRoute, { ...options, now, hub });

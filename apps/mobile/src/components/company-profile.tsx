@@ -9,6 +9,7 @@ export function CompanyProfile({ view }: { view: CompanyProfileView }) {
   const palette = usePalette();
   const textStyles = useTextStyles();
   const body = [textStyles.body, { color: palette.textSecondary }];
+  if (view.status === "empty") return null;
   return (
     <View testID="company-profile" style={[styles.section, { borderColor: palette.border }]}>
       <Text accessibilityRole="header" style={[textStyles.headingMd, { color: palette.text }]}>
@@ -44,13 +45,7 @@ export function CompanyProfile({ view }: { view: CompanyProfileView }) {
       ) : (
         <>
           <Text style={body}>
-            {t(
-              view.status === "loading"
-                ? "profile.loading"
-                : view.status === "error"
-                  ? "profile.error"
-                  : "profile.empty",
-            )}
+            {t(view.status === "loading" ? "profile.loading" : "profile.error")}
           </Text>
           {view.status === "error" && (
             <Pressable

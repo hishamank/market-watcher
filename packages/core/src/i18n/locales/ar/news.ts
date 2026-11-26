@@ -9,7 +9,6 @@ export const arNewsStrings = {
   "news.sample": "أخبار تجريبية · عناوين خيالية لهذا العرض",
   "news.sampleStory": "خبر تجريبي",
   "news.loading": "جارٍ تحميل أخبار الشركة",
-  "news.empty": "لا تتوفر أخبار حديثة لهذه الورقة المالية.",
   "news.error": "تعذّر تحميل الأخبار.",
   "news.external": "{{title}} (يفتح في علامة تبويب جديدة)",
 } satisfies Translation<typeof newsStrings>;

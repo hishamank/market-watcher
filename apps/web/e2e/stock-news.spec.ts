@@ -33,8 +33,12 @@ test("D11 sample news shows three stories, expands, resets by symbol and has an 
   await expect(page.getByTestId("news-story")).toHaveCount(3);
   await page.goto("/stocks/MSFT");
   await expect(page.getByTestId("news-story")).toHaveCount(3);
+  const emptyResponse = page.waitForResponse((response) =>
+    response.url().endsWith("/stocks/NVDA/news"),
+  );
   await page.goto("/stocks/NVDA");
-  await expect(page.getByTestId("stock-news")).toHaveAttribute("data-state", "empty");
+  await emptyResponse;
+  await expect(page.getByTestId("stock-news")).toHaveCount(0);
   expect(problems).toEqual([]);
 });
 

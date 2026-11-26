@@ -12,3 +12,5 @@ export * from "./profile.ts";
 export * from "./statistics.ts";
 export * from "./money/statistics.ts";
 export * from "./news.ts";
+export * from "./earnings.ts";
+export * from "./money/earnings.ts";

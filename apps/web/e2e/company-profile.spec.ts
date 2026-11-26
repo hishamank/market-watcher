@@ -19,8 +19,12 @@ test("D9 overview expands, resets by symbol and distinguishes funds", async ({ p
   await page.goto("/stocks/SPY");
   await expect(card).toContainText("About the fund");
   await expect(page.getByTestId("company-profile-sector")).toHaveCount(0);
+  const emptyResponse = page.waitForResponse((response) =>
+    response.url().endsWith("/stocks/NVDA/profile"),
+  );
   await page.goto("/stocks/NVDA");
-  await expect(card).toHaveAttribute("data-state", "empty");
+  await emptyResponse;
+  await expect(card).toHaveCount(0);
   await expect(page.getByTestId("detail-price")).toBeVisible();
   expect(problems).toEqual([]);
 });

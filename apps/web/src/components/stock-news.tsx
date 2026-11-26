@@ -4,6 +4,7 @@ import { NewsContent } from "./news-content.tsx";
 
 export function StockNews({ view }: { view: StockNewsView }) {
   const t = useT();
+  if (view.status === "empty") return null;
   return (
     <section
       data-testid="stock-news"
@@ -28,7 +29,7 @@ export function StockNews({ view }: { view: StockNewsView }) {
         </div>
       ) : (
         <div className="mt-12 text-body text-text-secondary">
-          <p>{t(view.status === "empty" ? "news.empty" : "news.error")}</p>
+          <p>{t("news.error")}</p>
           {view.status === "error" && (
             <button
               type="button"

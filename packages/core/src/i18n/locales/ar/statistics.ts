@@ -13,6 +13,5 @@ export const arStatisticsStrings = {
   "statistics.sample": "إحصاءات تجريبية · USD",
   "statistics.note": "USD · القيم غير المتوفرة تظهر كشرطة —",
   "statistics.loading": "جارٍ تحميل الإحصاءات الرئيسية",
-  "statistics.empty": "الإحصاءات غير متوفرة لهذه الورقة المالية بعد.",
   "statistics.error": "تعذّر تحميل الإحصاءات.",
 } satisfies Translation<typeof statisticsStrings>;

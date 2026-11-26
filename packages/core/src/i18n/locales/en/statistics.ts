@@ -10,6 +10,5 @@ export const statisticsStrings = {
   "statistics.sample": "Sample statistics · USD",
   "statistics.note": "USD · Unavailable values shown as —",
   "statistics.loading": "Loading key statistics",
-  "statistics.empty": "Statistics aren't available for this security yet.",
   "statistics.error": "Statistics couldn't be loaded.",
 } as const;

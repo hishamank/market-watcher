@@ -14,7 +14,6 @@ export const arProfileStrings = {
   "profile.source": "المصدر: Yahoo Finance",
   "profile.retrieved": "تم جلب البيانات في ⁦{{time}}⁩",
   "profile.noDescription": "لا يتوفر وصف لهذه الورقة المالية.",
-  "profile.empty": "معلومات الشركة غير متوفرة لهذه الورقة المالية بعد.",
   "profile.error": "تعذّر تحميل معلومات الشركة.",
   "profile.retry": "إعادة المحاولة",
   "profile.loading": "جارٍ تحميل معلومات الشركة",

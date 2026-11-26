@@ -9,6 +9,7 @@ export function StockStatistics({ view }: { view: StockStatisticsView }) {
   const t = useT();
   const palette = usePalette();
   const text = useTextStyles();
+  if (view.status === "empty") return null;
   return (
     <View testID="stock-statistics" style={[styles.section, { borderColor: palette.border }]}>
       <Text accessibilityRole="header" style={[text.headingMd, { color: palette.text }]}>
@@ -19,13 +20,7 @@ export function StockStatistics({ view }: { view: StockStatisticsView }) {
       ) : (
         <>
           <Text style={[text.body, { color: palette.textSecondary }]}>
-            {t(
-              view.status === "loading"
-                ? "statistics.loading"
-                : view.status === "empty"
-                  ? "statistics.empty"
-                  : "statistics.error",
-            )}
+            {t(view.status === "loading" ? "statistics.loading" : "statistics.error")}
           </Text>
           {view.status === "error" && (
             <Pressable

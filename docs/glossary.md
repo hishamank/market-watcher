@@ -159,3 +159,5 @@ _Avoid_: language setting, lang, i18n mode
 **Indicated dividend yield**: Yahoo's indicated annual dividend relative to the share price, delivered as a decimal ratio and displayed as a percentage. An absent value does not mean zero.
 
 **Company news**: A ticker-focused batch of headlines and article links obtained by the gateway, independently of prices. A destination site identifies the linked host when the feed does not supply the original publisher.
+
+**Earnings**: Fiscal-quarter earnings per share (EPS), their analyst estimates and upcoming reporting dates. GAAP and non-GAAP identify the accounting basis supplied by the provider; fiscal quarter labels may differ from calendar quarters.

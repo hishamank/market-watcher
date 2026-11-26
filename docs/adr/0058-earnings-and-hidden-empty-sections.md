@@ -1,0 +1,11 @@
+# Earnings and hidden empty sections
+
+An earnings section is added, and supplemental sections disappear when no data is available. Overview, statistics, earnings and news now return no section markup for empty data. All-null profile/statistics records are also empty. A temporary request error remains distinct and retains its retry action. Partial records retain available content; no-data subparts of earnings are omitted.
+
+`GET /stocks/:symbol/earnings` is independent of prices, statistics, profiles and news. Live mode uses the existing yahoo-finance2 dependency. It first checks quoteType and omits non-equities, avoiding the earnings-module error returned for ETFs such as SPY. For equities, calendarEvents supplies upcoming report dates and estimate status; earnings supplies fiscal quarters, actual/estimated EPS, financial currency and accounting basis. EPS is displayed only when USD is explicitly supplied. The default GAAP/non-GAAP basis is shown, or marked unknown. Date ranges are preserved; an absent confirmation flag is labelled Date not confirmed, not Scheduled.
+
+Four available fiscal quarters are sorted by period end. The most recent quarter with actual EPS supplies the last-reported summary. Negative earnings and zero are real values; missing estimates remain missing. EPS values travel as decimal strings and display to cents. The contracts money module computes a shared zero baseline and bar geometry using integer arithmetic, including all-zero and loss scenarios. Both platforms use the same view model. This explicitly adds useStockEarnings to the frozen core API.
+
+The gateway uses a one-hour success cache, five-minute empty cache, eight-second deadline, maximum 500 cached symbols and eight concurrent symbols. Clients consider data fresh for fifteen minutes. Cache expiry may delay visibility of upstream changes; retrieval time is shown. Simulator mode serves labelled fictional earnings for AAPL/MSFT and no earnings for other symbols, with no external requests. No dependency is added.
+
+Live AAPL/MSFT requests supplied four quarters, future report dates and GAAP/non-GAAP respectively; SPY was omitted. The UI labels dates in ET without implying that an estimated date has a confirmed release time. Source context is in [ADR 0055](0055-yahoo-company-overviews-stay-separate-from-prices.md).

@@ -75,6 +75,7 @@ function ProfileContent({ view }: { view: Extract<CompanyProfileView, { status: 
 
 export function CompanyProfile({ view }: { view: CompanyProfileView }) {
   const t = useT();
+  if (view.status === "empty") return null;
   return (
     <section
       data-testid="company-profile"
@@ -98,7 +99,7 @@ export function CompanyProfile({ view }: { view: CompanyProfileView }) {
             </div>
           ) : (
             <div className="mt-12 text-body text-text-secondary">
-              <p>{t(view.status === "empty" ? "profile.empty" : "profile.error")}</p>
+              <p>{t("profile.error")}</p>
               {view.status === "error" && (
                 <button
                   type="button"

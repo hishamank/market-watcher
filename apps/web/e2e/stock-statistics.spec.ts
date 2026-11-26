@@ -14,8 +14,12 @@ test("D10 statistics format values and distinguish missing fund data", async ({ 
   await page.goto("/stocks/SPY");
   await expect(page.getByTestId("statistics-marketCap")).toHaveText("—");
   await expect(page.getByTestId("statistics-trailingEps")).toHaveText("—");
+  const emptyResponse = page.waitForResponse((response) =>
+    response.url().endsWith("/stocks/NVDA/statistics"),
+  );
   await page.goto("/stocks/NVDA");
-  await expect(page.getByTestId("stock-statistics")).toHaveAttribute("data-state", "empty");
+  await emptyResponse;
+  await expect(page.getByTestId("stock-statistics")).toHaveCount(0);
   await expect(page.getByTestId("detail-price")).toBeVisible();
   expect(problems).toEqual([]);
 });
