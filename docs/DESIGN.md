@@ -287,9 +287,9 @@ Each component lists its anatomy, states, spacing, motion and test IDs.
 ### Price chart
 
 - **Anatomy.** A line with an area fill under it, two horizontal gridlines, a live point, and an axis row below. Always left to right.
-- **Size.** Plot height 176 px at 360 px and 320 px from 768 px. A 36 px strip above the plot is always reserved for the scrub readout and the "as of" note, and a 24 px axis row sits below, so no state changes the height.
+- **Size.** Plot height 176 px at 360 px and 320 px from 768 px. A 36 px strip above the plot is always reserved for the scrub readout, the "as of" note and the previous close label, and a 24 px axis row sits below, so no state changes the height.
 - **Line and fill.** 2 px line with round joins in `chart.gainLine` or `chart.lossLine`, chosen by the selected range's direction. The area runs from 20% to 0% of the same colour.
-- **1D.** The x-axis spans the whole session as the gateway's history response reports it (09:30 to 16:00 ET in Live mode, one full UTC day in Simulated mode), and the line grows across it. A 1 px dashed `chart.previousClose` line marks the previous close, with a small "Previous close 230.28" label at the end.
+- **1D.** The x-axis spans the whole session as the gateway's history response reports it (09:30 to 16:00 ET in Live mode, one full UTC day in Simulated mode), and the line grows across it. A 1 px dashed `chart.previousClose` line marks the previous close. A small "Previous close 230.28" label sits at the end of the strip above the plot, so it never covers the line or the live point, and gives way to the scrub readout.
 - **Live point.** An 8 px dot with a 20 px halo at 22% opacity that pulses outward every 2 s. It equals the header price at every tick.
 - **Future (1D).** The part of the session after the live point is shaded with `color.fill` at 35% opacity, so the empty half reads as time still to come.
 - **Scrubbing.** A 1 px `chart.crosshair` line and a 10 px hollow dot. The readout shows time in ET, price, and change from the start of the range with arrow and sign. It sits in the strip above the plot, follows the crosshair and stops at the chart edges. The crosshair never goes past the last bar: in the future part of 1D it rests on the live point. The chart is focusable, and the arrow keys move the crosshair one bar.

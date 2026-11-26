@@ -11,13 +11,11 @@ export interface ChartParts {
 
 export interface OverlayRefs {
   readonly livePoint: RefObject<HTMLSpanElement | null>;
-  readonly previousClose: RefObject<HTMLSpanElement | null>;
   readonly plot: RefObject<HTMLDivElement | null>;
 }
 
 export interface OverlayState {
   points: readonly ChartPoint[];
-  previousClose: number | undefined;
   livePoint: boolean;
   future: boolean;
 }
@@ -60,13 +58,6 @@ function placeLivePoint(
   node.style.transform = `translate(${x ?? 0}px, ${y ?? 0}px)`;
 }
 
-function placePreviousClose(parts: ChartParts, node: HTMLSpanElement | null, price?: number) {
-  if (node === null) return;
-  const y = price === undefined ? null : parts.area.priceToCoordinate(price);
-  node.style.visibility = y === null ? "hidden" : "visible";
-  node.style.transform = `translateY(${y ?? 0}px) translateY(-50%)`;
-}
-
 function placePlot(parts: ChartParts, node: HTMLDivElement | null, state: OverlayState) {
   if (node === null) return;
   const height = parts.api.chartElement().clientHeight - parts.api.timeScale().height();
@@ -80,5 +71,4 @@ function placePlot(parts: ChartParts, node: HTMLDivElement | null, state: Overla
 export function placeOverlays(parts: ChartParts, refs: OverlayRefs, state: OverlayState) {
   placePlot(parts, refs.plot.current, state);
   placeLivePoint(parts, refs.livePoint.current, state.points.at(-1), state.livePoint);
-  placePreviousClose(parts, refs.previousClose.current, state.previousClose);
 }

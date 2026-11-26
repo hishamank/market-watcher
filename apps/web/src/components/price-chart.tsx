@@ -23,7 +23,6 @@ export interface PriceChartProps {
   onBlur: () => void;
   containerRef: RefObject<HTMLDivElement | null>;
   livePointRef: RefObject<HTMLSpanElement | null>;
-  previousCloseRef: RefObject<HTMLSpanElement | null>;
   plotRef: RefObject<HTMLDivElement | null>;
 }
 
@@ -41,6 +40,11 @@ export function PriceChart(props: PriceChartProps) {
     <div dir="ltr" className="relative pt-[36px]">
       <div className="absolute start-0 end-0 top-0 h-[36px]">
         {showChart && props.asOfLabel !== undefined ? <ChartAsOf label={props.asOfLabel} /> : null}
+        {showChart && props.previousCloseLabel !== undefined && props.readout === undefined ? (
+          <span className="absolute end-0 top-[4px] py-[3px] text-caption text-text-muted">
+            {props.previousCloseLabel}
+          </span>
+        ) : null}
         <ChartReadout value={showChart ? props.readout : undefined} />
       </div>
       <div
@@ -77,14 +81,6 @@ export function PriceChart(props: PriceChartProps) {
           <span className="absolute size-[20px] -translate-1/2 rounded-full bg-current opacity-0 motion-safe:animate-halo" />
           <span className="absolute size-[8px] -translate-1/2 rounded-full bg-current" />
         </span>
-        {props.previousCloseLabel === undefined || !showChart ? null : (
-          <span
-            ref={props.previousCloseRef}
-            className="pointer-events-none invisible absolute end-0 top-0 rounded-pill border border-border bg-surface px-8 py-2 text-numeric-axis text-text-secondary"
-          >
-            {props.previousCloseLabel}
-          </span>
-        )}
         {showSkeleton ? <ChartSkeleton /> : null}
         {state === "error" ? <ChartError onRetry={props.onRetry} /> : null}
       </div>

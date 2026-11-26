@@ -79,7 +79,6 @@ function useChartData(
     applied.current = { key, points };
     const state = {
       points,
-      previousClose: previousClose === undefined ? undefined : Number(previousClose),
       livePoint: !muted,
       future: session !== undefined,
     };
@@ -166,15 +165,13 @@ function usePreviousCloseLine(
 export function usePriceChart(input: PriceChartInput): PriceChartHandles {
   const containerRef = useRef<HTMLDivElement>(null);
   const livePoint = useRef<HTMLSpanElement>(null);
-  const previousClose = useRef<HTMLSpanElement>(null);
   const plot = useRef<HTMLDivElement>(null);
   const latestRef = useRef<OverlayState>({
     points: [],
-    previousClose: undefined,
     livePoint: true,
     future: false,
   });
-  const [overlays] = useState<OverlayRefs>(() => ({ livePoint, previousClose, plot }));
+  const [overlays] = useState<OverlayRefs>(() => ({ livePoint, plot }));
   const { scheme: theme } = useColorScheme();
   const parts = useChartParts(containerRef);
   useChartStyle(parts, containerRef, theme, input);
