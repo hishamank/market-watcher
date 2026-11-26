@@ -19,14 +19,12 @@ const tints: Record<FlashDirection, string> = {
   down: "bg-loss-tint",
 };
 
-function changedPositions(text: string, roll: FlashRoll): Set<number> {
+function changedFromEnd(roll: FlashRoll): Set<number> {
   const from = formatPrice(roll.from);
   const to = formatPrice(roll.to);
   const changed = new Set<number>();
-  for (let index = 0; index < to.length; index += 1) {
-    if (to[index] !== from[index - (to.length - from.length)]) {
-      changed.add(index + text.length - to.length);
-    }
+  for (let fromEnd = 0; fromEnd < to.length; fromEnd += 1) {
+    if (to.at(-1 - fromEnd) !== from.at(-1 - fromEnd)) changed.add(fromEnd);
   }
   return changed;
 }
@@ -40,16 +38,17 @@ function RollingDigits({
   roll: FlashRoll;
   rollKey: number;
 }) {
-  const changed = changedPositions(text, roll);
-  return Array.from(text, (char, index) =>
-    !changed.has(index) ? (
-      <span key={index}>{char}</span>
+  const changed = changedFromEnd(roll);
+  return Array.from(text, (char, index) => {
+    const fromEnd = text.length - 1 - index;
+    return !changed.has(fromEnd) ? (
+      <span key={fromEnd}>{char}</span>
     ) : (
-      <span key={`${rollKey}-${index}`} className="inline-block motion-safe:animate-digit-roll">
+      <span key={`${rollKey}-${fromEnd}`} className="inline-block motion-safe:animate-digit-roll">
         {char}
       </span>
-    ),
-  );
+    );
+  });
 }
 
 export function PriceCell(props: PriceCellProps) {
