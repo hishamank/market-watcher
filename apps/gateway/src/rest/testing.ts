@@ -3,6 +3,7 @@ import type { FastifyInstance, FastifyServerOptions } from "fastify";
 import { buildApp } from "../app.ts";
 import { createSimulatorFeed, type SimulatorFeed } from "../feeds/simulator/index.ts";
 import type {
+  Catalogue,
   Feed,
   HistoryRequest,
   HistorySeries,
@@ -26,6 +27,7 @@ export interface RestGatewayOptions {
   rateLimit?: RestRateLimitOptions;
   wrapHistory?: (base: HistorySource) => HistorySource;
   wrapLive?: (base: LiveFeed) => LiveFeed;
+  wrapCatalogue?: (base: Catalogue) => Catalogue;
 }
 
 export interface RestGateway {
@@ -59,7 +61,7 @@ export async function startRestGateway(options: RestGatewayOptions = {}): Promis
   const wiredFeed: Feed = {
     live: options.wrapLive ? options.wrapLive(feed.live) : feed.live,
     history: spiedHistory,
-    catalogue: feed.catalogue,
+    catalogue: options.wrapCatalogue ? options.wrapCatalogue(feed.catalogue) : feed.catalogue,
     calendar: feed.calendar,
   };
   const app = buildApp({
