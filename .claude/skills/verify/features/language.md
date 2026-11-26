@@ -8,7 +8,7 @@ The header toggle switches the app between English and Arabic in place. Strings,
 
 ## How to get to it (user POV)
 
-- Open `/` and press "ع" beside search. Press "EN" to switch back.
+- Open `/` and press "ع" beside the dark mode switch. Press "EN" to switch back.
 - From a detail page the toggle is in the same place.
 
 ## Driving it with bin/journey
