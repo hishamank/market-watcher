@@ -1,6 +1,6 @@
 # The All list pages through the catalogue
 
-Amends ADR 0007, which limited the list to the default list of 50. This adds a new paging hook. The full list of frozen core API additions below (ADR 0041) is for the owner to confirm in the PR.
+Amends ADR 0007, which limited the list to the default list of 50. The owner confirmed the core API additions below on 2026-11-26, and said the core API is not under the ADR 0041 freeze at present.
 
 The All list now scrolls through the whole catalogue: the default list first, then every other symbol in symbol order. That is 500 symbols on the simulator and about 10,000 on Alpaca. The gateway serves it one page at a time, and the list asks for the next page when its last row comes within 10 rows of the viewport.
 
