@@ -1,0 +1,10 @@
+.git
+**/node_modules
+**/.env*
+**/.next
+**/.expo
+**/.turbo
+.verify
+**/test-results
+**/playwright-report
+**/*.log
