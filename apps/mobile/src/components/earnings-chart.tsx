@@ -19,7 +19,8 @@ function Quarter({ quarter, zero }: { quarter: ReadyEarnings["quarters"][number]
             style={[
               styles.bar,
               {
-                start: "15%",
+                start: "50%",
+                marginStart: -17,
                 bottom: `${quarter.actualBar.bottom}%`,
                 height: `${quarter.actualBar.height}%`,
                 backgroundColor: palette.text,
@@ -33,7 +34,8 @@ function Quarter({ quarter, zero }: { quarter: ReadyEarnings["quarters"][number]
               styles.bar,
               styles.estimate,
               {
-                start: "55%",
+                start: "50%",
+                marginStart: 3,
                 bottom: `${quarter.estimateBar.bottom}%`,
                 height: `${quarter.estimateBar.height}%`,
                 backgroundColor: palette.fill,
@@ -43,18 +45,25 @@ function Quarter({ quarter, zero }: { quarter: ReadyEarnings["quarters"][number]
           />
         )}
       </View>
-      <Text style={[text.caption, styles.center, { color: palette.textSecondary }]}>
+      <Text
+        style={[text.caption, styles.center, styles.quarterLabel, { color: palette.textSecondary }]}
+      >
         {quarter.label}
       </Text>
       <Text
         accessibilityLabel={`${t("earnings.actual")} ${quarter.actual}`}
-        style={[text.label, styles.center, { color: palette.text }]}
+        style={[
+          text.label,
+          styles.center,
+          styles.value,
+          { color: palette.text, borderTopWidth: 1, borderColor: palette.border },
+        ]}
       >
         {quarter.actual}
       </Text>
       <Text
         accessibilityLabel={`${t("earnings.estimate")} ${quarter.estimate}`}
-        style={[text.caption, styles.center, { color: palette.textSecondary }]}
+        style={[text.caption, styles.center, styles.value, { color: palette.textSecondary }]}
       >
         {quarter.estimate}
       </Text>
@@ -69,27 +78,22 @@ export function EarningsChart({ view }: { view: ReadyEarnings }) {
   return (
     <View testID="earnings-chart" style={[styles.section, { borderColor: palette.border }]}>
       <Text style={[text.label, { color: palette.text }]}>{t("earnings.history")}</Text>
-      <View style={styles.legend}>
-        <View style={styles.legendItem}>
-          <View style={[styles.dot, { backgroundColor: palette.text }]} />
-          <Text style={[text.caption, { color: palette.textSecondary }]}>
-            {t("earnings.actual")}
-          </Text>
-        </View>
-        <View style={styles.legendItem}>
-          <View
-            style={[
-              styles.dot,
-              styles.estimate,
-              { backgroundColor: palette.fill, borderColor: palette.borderStrong },
-            ]}
-          />
-          <Text style={[text.caption, { color: palette.textSecondary }]}>
-            {t("earnings.estimate")}
-          </Text>
-        </View>
-      </View>
       <View style={styles.chart}>
+        <View style={styles.labels}>
+          <View style={styles.labelSpacer} />
+          <View style={[styles.rowLabel, { borderTopWidth: 1, borderColor: palette.border }]}>
+            <View style={[styles.dot, { backgroundColor: palette.text }]} />
+            <Text style={[text.caption, { color: palette.textSecondary }]}>
+              {t("earnings.actual")}
+            </Text>
+          </View>
+          <View style={styles.rowLabel}>
+            <View style={[styles.dot, styles.estimate, { borderColor: palette.borderStrong }]} />
+            <Text style={[text.caption, { color: palette.textSecondary }]}>
+              {t("earnings.estimate")}
+            </Text>
+          </View>
+        </View>
         {view.quarters.map((quarter) => (
           <Quarter key={quarter.id} quarter={quarter} zero={view.zero} />
         ))}
@@ -100,15 +104,18 @@ export function EarningsChart({ view }: { view: ReadyEarnings }) {
 }
 
 const styles = StyleSheet.create({
-  section: { borderTopWidth: 1, paddingTop: space[20], gap: space[12] },
-  legend: { flexDirection: "row", gap: space[16] },
-  legendItem: { flexDirection: "row", alignItems: "center", gap: space[6] },
-  dot: { height: 8, width: 8 },
-  chart: { flexDirection: "row", direction: "ltr", gap: space[12] },
-  quarter: { flex: 1, gap: space[6] },
-  plot: { height: 120, marginBottom: space[6] },
-  bar: { position: "absolute", width: "30%", borderTopStartRadius: 2, borderTopEndRadius: 2 },
-  estimate: { borderWidth: 1, borderStyle: "dashed" },
+  section: { borderTopWidth: 1, paddingTop: space[20], gap: space[16] },
+  labels: { width: 64 },
+  labelSpacer: { height: 180 },
+  rowLabel: { height: 32, flexDirection: "row", alignItems: "center", gap: space[6] },
+  dot: { height: 6, width: 6, borderRadius: 1 },
+  chart: { flexDirection: "row", direction: "ltr", marginTop: space[8] },
+  quarter: { flex: 1, minWidth: 0 },
+  plot: { height: 136 },
+  quarterLabel: { height: 44, textAlignVertical: "center", paddingTop: space[12] },
+  value: { height: 32, paddingTop: space[6] },
+  bar: { position: "absolute", width: 14, borderRadius: 3 },
+  estimate: { borderWidth: 1 },
   zero: { position: "absolute", start: 0, end: 0, borderTopWidth: 1 },
   center: { textAlign: "center", writingDirection: "ltr", fontVariant: ["tabular-nums"] },
 });

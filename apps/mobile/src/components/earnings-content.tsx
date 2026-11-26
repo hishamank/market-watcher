@@ -14,26 +14,34 @@ export function EarningsContent({ view }: { view: ReadyEarnings }) {
   return (
     <>
       <View style={styles.summary}>
-        {view.next && (
-          <View testID="earnings-next" style={styles.fact}>
-            <Text style={[text.caption, { color: palette.textSecondary }]}>
-              {t("earnings.next")}
-            </Text>
-            <Text style={[text.bodyStrong, { color: palette.text }]}>{view.next.date}</Text>
-            <Text style={[text.caption, { color: palette.textMuted }]}>{view.next.confidence}</Text>
-          </View>
-        )}
         {view.latest && (
           <View testID="earnings-latest" style={styles.fact}>
             <Text style={[text.caption, { color: palette.textSecondary }]}>
-              {t("earnings.latest")} · {view.latest.quarter}
+              {t("earnings.latest")}
             </Text>
-            <Text style={[text.headingMd, { color: palette.text, writingDirection: "ltr" }]}>
+            <Text style={[text.display, styles.amount, { color: palette.text }]}>
               {view.latest.actual}
             </Text>
             <Text style={[text.caption, { color: palette.textSecondary }]}>
               {t("earnings.estimate")} {view.latest.estimate}
             </Text>
+            <Text style={[text.caption, { color: palette.textMuted }]}>{view.latest.quarter}</Text>
+          </View>
+        )}
+        {view.next && (
+          <View
+            testID="earnings-next"
+            style={[styles.fact, view.latest && styles.next, { borderColor: palette.border }]}
+          >
+            <Text style={[text.caption, { color: palette.textSecondary }]}>
+              {t("earnings.next")}
+            </Text>
+            <Text style={[text.bodyStrong, { color: palette.text }]}>{view.next.date}</Text>
+            <View style={[styles.badge, { borderColor: palette.border }]}>
+              <Text style={[text.caption, { color: palette.textSecondary }]}>
+                {view.next.confidence}
+              </Text>
+            </View>
           </View>
         )}
       </View>
@@ -47,6 +55,15 @@ export function EarningsContent({ view }: { view: ReadyEarnings }) {
 }
 
 const styles = StyleSheet.create({
-  summary: { flexDirection: "row", flexWrap: "wrap", gap: space[20] },
-  fact: { flexGrow: 1, flexBasis: "40%", gap: space[8] },
+  summary: { flexDirection: "row", gap: space[20], marginTop: space[8] },
+  fact: { flex: 1, minWidth: 0, gap: space[8] },
+  amount: { fontSize: 32, lineHeight: 40 },
+  next: { borderStartWidth: 1, paddingStart: space[20] },
+  badge: {
+    alignSelf: "flex-start",
+    borderWidth: 1,
+    borderRadius: 99,
+    paddingHorizontal: space[8],
+    paddingVertical: space[4],
+  },
 });
