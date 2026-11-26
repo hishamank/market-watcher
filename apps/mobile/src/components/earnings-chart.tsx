@@ -83,7 +83,14 @@ export function EarningsChart({ view }: { view: ReadyEarnings }) {
   const palette = usePalette();
   const text = useTextStyles();
   return (
-    <View testID="earnings-chart" style={[styles.section, { borderColor: palette.border }]}>
+    <View
+      testID="earnings-chart"
+      style={[
+        styles.section,
+        (view.latest || view.next) && styles.divider,
+        { borderColor: palette.border },
+      ]}
+    >
       <Text style={[text.label, { color: palette.text }]}>{t("earnings.history")}</Text>
       <View style={styles.chart}>
         <View style={styles.labels}>
@@ -117,7 +124,8 @@ export function EarningsChart({ view }: { view: ReadyEarnings }) {
 }
 
 const styles = StyleSheet.create({
-  section: { borderTopWidth: 1, paddingTop: space[20], gap: space[16] },
+  section: { gap: space[16] },
+  divider: { borderTopWidth: 1, paddingTop: space[20] },
   labels: { width: 56 },
   labelSpacer: { height: 180 },
   rowLabel: { height: 32, flexDirection: "row", alignItems: "center", gap: space[4] },

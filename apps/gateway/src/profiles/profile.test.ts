@@ -99,3 +99,28 @@ describe("company profile REST seam", () => {
     expect((await app.inject("/stocks/AAPL/profile")).statusCode).toBe(200);
   });
 });
+
+it("refreshes all-null profiles after five minutes so recovered data becomes visible", async () => {
+  let now = 1_000;
+  const empty: CompanyProfile = {
+    kind: "company",
+    description: null,
+    sector: null,
+    industry: null,
+    exchange: null,
+    website: null,
+  };
+  const load = vi.fn(async () => empty);
+  const app = setup({ profileSource: { load }, now: () => now });
+  await app.inject("/stocks/AAPL/profile");
+  load.mockResolvedValue(profile);
+  now += 299_999;
+  await app.inject("/stocks/AAPL/profile");
+  expect(load).toHaveBeenCalledTimes(1);
+  now += 2;
+  const result = CompanyProfileResponseSchema.parse(
+    (await app.inject("/stocks/AAPL/profile")).json(),
+  );
+  expect(result.profile).toEqual(profile);
+  expect(load).toHaveBeenCalledTimes(2);
+});

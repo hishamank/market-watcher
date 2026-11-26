@@ -4,6 +4,7 @@ import type { StatisticsSource } from "./source.ts";
 
 function decimal(value: number | undefined, signed = false): string | null {
   if (value === undefined || !Number.isFinite(value) || (!signed && value < 0)) return null;
+  if (value === 0) return "0";
   return value.toLocaleString("en-US", { useGrouping: false, maximumFractionDigits: 20 });
 }
 

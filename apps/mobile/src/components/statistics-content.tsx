@@ -11,27 +11,29 @@ function YearRange({ range }: { range: ReadyStatistics["range"] }) {
   const text = useTextStyles();
   if (!range) return <Text style={{ color: palette.text }}>—</Text>;
   return (
-    <View style={{ direction: "ltr" }}>
-      <View style={styles.endpoints}>
-        {[range.low, range.high].map((value, index) => (
-          <Text key={index} style={[text.label, { color: palette.text }]}>
-            {value}
-          </Text>
-        ))}
-      </View>
-      <View accessible={false} style={[styles.track, { backgroundColor: palette.borderStrong }]}>
-        {range.position !== null && (
-          <View
-            style={[
-              styles.marker,
-              {
-                start: `${range.position}%`,
-                backgroundColor: palette.text,
-                borderColor: palette.bg,
-              },
-            ]}
-          />
-        )}
+    <View>
+      <View style={{ direction: "ltr" }}>
+        <View style={styles.endpoints}>
+          {[range.low, range.high].map((value, index) => (
+            <Text key={index} style={[text.label, { color: palette.text }]}>
+              {value}
+            </Text>
+          ))}
+        </View>
+        <View accessible={false} style={[styles.track, { backgroundColor: palette.borderStrong }]}>
+          {range.position !== null && (
+            <View
+              style={[
+                styles.marker,
+                {
+                  start: `${range.position}%`,
+                  backgroundColor: palette.text,
+                  borderColor: palette.bg,
+                },
+              ]}
+            />
+          )}
+        </View>
       </View>
       {range.priceLabel && (
         <Text style={[text.caption, { color: palette.textSecondary }]}>{range.priceLabel}</Text>

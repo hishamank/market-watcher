@@ -5,19 +5,21 @@ type ReadyStatistics = Extract<StockStatisticsView, { status: "ready" }>;
 function YearRange({ range }: { range: ReadyStatistics["range"] }) {
   if (!range) return <span>—</span>;
   return (
-    <div dir="ltr" data-testid="statistics-year-range">
-      <div className="flex justify-between gap-4 text-label tabular-nums">
-        <span>{range.low}</span>
-        <span>{range.high}</span>
-      </div>
-      <div aria-hidden="true" className="relative my-8 h-[4px] rounded-full bg-border-strong">
-        {range.position !== null && (
-          <span
-            data-testid="statistics-range-marker"
-            className="absolute top-1/2 h-[10px] w-[10px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface bg-text"
-            style={{ insetInlineStart: `${range.position}%` }}
-          />
-        )}
+    <div data-testid="statistics-year-range">
+      <div dir="ltr">
+        <div className="flex justify-between gap-4 text-label tabular-nums">
+          <span>{range.low}</span>
+          <span>{range.high}</span>
+        </div>
+        <div aria-hidden="true" className="relative my-8 h-[4px] rounded-full bg-border-strong">
+          {range.position !== null && (
+            <span
+              data-testid="statistics-range-marker"
+              className="absolute top-1/2 h-[10px] w-[10px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface bg-text"
+              style={{ insetInlineStart: `${range.position}%` }}
+            />
+          )}
+        </div>
       </div>
       {range.priceLabel && (
         <p className="text-caption font-normal text-text-secondary">{range.priceLabel}</p>

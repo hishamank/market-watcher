@@ -8,7 +8,11 @@ export function EarningsChart({ view }: { view: ReadyEarnings }) {
   return (
     <div
       data-testid="earnings-chart"
-      className="mt-24 border-t border-border pt-20 xl:mt-0 xl:border-t-0 xl:border-s xl:ps-32 xl:pt-0"
+      className={
+        view.latest || view.next
+          ? "mt-24 border-t border-border pt-20 xl:mt-0 xl:border-t-0 xl:border-s xl:ps-32 xl:pt-0"
+          : undefined
+      }
     >
       <h3 className="text-label">{t("earnings.history")}</h3>
       <div

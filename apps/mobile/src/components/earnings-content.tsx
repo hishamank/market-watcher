@@ -14,54 +14,58 @@ export function EarningsContent({ view }: { view: ReadyEarnings }) {
   const text = useTextStyles();
   return (
     <>
-      <View style={[styles.summary, view.next && view.next.needsWideSummary && styles.stacked]}>
-        {view.latest && (
-          <View
-            testID="earnings-latest"
-            style={[styles.fact, view.next?.needsWideSummary && styles.stackedFact]}
-          >
-            <Text style={[text.caption, { color: palette.textSecondary }]}>
-              {t("earnings.latest")}
-            </Text>
-            <Text
-              style={[
-                text.display,
-                styles.amount,
-                { color: palette.text, textAlign: locale === "ar" ? "right" : "left" },
-              ]}
+      {(view.latest || view.next) && (
+        <View style={[styles.summary, view.next && view.next.needsWideSummary && styles.stacked]}>
+          {view.latest && (
+            <View
+              testID="earnings-latest"
+              style={[styles.fact, view.next?.needsWideSummary && styles.stackedFact]}
             >
-              {view.latest.actual}
-            </Text>
-            <Text style={[text.caption, { color: palette.textSecondary }]}>
-              {t("earnings.estimate")} {view.latest.estimate}
-            </Text>
-            <Text style={[text.caption, { color: palette.textMuted }]}>{view.latest.quarter}</Text>
-          </View>
-        )}
-        {view.next && (
-          <View
-            testID="earnings-next"
-            style={[
-              styles.fact,
-              view.next.needsWideSummary && styles.stackedFact,
-              view.latest && (view.next.needsWideSummary ? styles.nextStacked : styles.next),
-              { borderColor: palette.border },
-            ]}
-          >
-            <Text style={[text.caption, { color: palette.textSecondary }]}>
-              {t("earnings.next")}
-            </Text>
-            <Text style={[text.bodyStrong, { color: palette.text }]}>
-              {view.next.dates.join(" – ")}
-            </Text>
-            <View style={[styles.badge, { borderColor: palette.border }]}>
               <Text style={[text.caption, { color: palette.textSecondary }]}>
-                {view.next.confidence}
+                {t("earnings.latest")}
+              </Text>
+              <Text
+                style={[
+                  text.display,
+                  styles.amount,
+                  { color: palette.text, textAlign: locale === "ar" ? "right" : "left" },
+                ]}
+              >
+                {view.latest.actual}
+              </Text>
+              <Text style={[text.caption, { color: palette.textSecondary }]}>
+                {t("earnings.estimate")} {view.latest.estimate}
+              </Text>
+              <Text style={[text.caption, { color: palette.textMuted }]}>
+                {view.latest.quarter}
               </Text>
             </View>
-          </View>
-        )}
-      </View>
+          )}
+          {view.next && (
+            <View
+              testID="earnings-next"
+              style={[
+                styles.fact,
+                view.next.needsWideSummary && styles.stackedFact,
+                view.latest && (view.next.needsWideSummary ? styles.nextStacked : styles.next),
+                { borderColor: palette.border },
+              ]}
+            >
+              <Text style={[text.caption, { color: palette.textSecondary }]}>
+                {t("earnings.next")}
+              </Text>
+              <Text style={[text.bodyStrong, { color: palette.text }]}>
+                {view.next.dates.join(" – ")}
+              </Text>
+              <View style={[styles.badge, { borderColor: palette.border }]}>
+                <Text style={[text.caption, { color: palette.textSecondary }]}>
+                  {view.next.confidence}
+                </Text>
+              </View>
+            </View>
+          )}
+        </View>
+      )}
       {view.quarters.length > 0 && <EarningsChart view={view} />}
       <Text testID="earnings-source" style={[text.caption, { color: palette.textMuted }]}>
         {view.attribution}

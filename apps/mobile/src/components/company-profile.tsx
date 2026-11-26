@@ -33,7 +33,7 @@ export function CompanyProfile({ view }: { view: CompanyProfileView }) {
               </Text>
             </Pressable>
           )}
-          <ProfileFacts view={view} />
+          {(view.facts.length > 0 || view.website !== null) && <ProfileFacts view={view} />}
           <Text
             testID="company-profile-source"
             style={[textStyles.caption, { color: palette.textMuted }]}

@@ -25,15 +25,19 @@ export function useStockEarnings(symbol: string) {
   const label = (quarter: number, year: number) => t("earnings.quarter", { quarter, year });
   const geometry = earningsBarGeometry(earnings.quarters);
   const latest = earnings.quarters.findLast((quarter) => quarter.actual !== null);
+  const dates = [
+    ...new Set(
+      (earnings.nextReport?.dates ?? []).map((date) =>
+        formatMarketDate(date, { locale, includeYear: true }),
+      ),
+    ),
+  ];
   return {
     status: "ready",
     next: earnings.nextReport
       ? {
-          needsWideSummary:
-            earnings.nextReport.dates.length > 1 || earnings.nextReport.confidence === "unknown",
-          dates: earnings.nextReport.dates.map((date) =>
-            formatMarketDate(date, { locale, includeYear: true }),
-          ),
+          needsWideSummary: dates.length > 1 || earnings.nextReport.confidence === "unknown",
+          dates,
           confidence: t(
             earnings.nextReport.confidence === "unknown"
               ? "earnings.dateUnknown"

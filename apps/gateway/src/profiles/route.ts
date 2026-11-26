@@ -50,11 +50,16 @@ export async function profileRoute(app: FastifyInstance, options: ProfileRouteOp
         fetchedAt: options.now(),
         profile,
       });
+      if (
+        data.profile &&
+        !Object.entries(data.profile).some(([key, value]) => key !== "kind" && value !== null)
+      )
+        data.profile = null;
       if (cache.size >= 500) {
         const oldest = cache.keys().next().value;
         if (oldest !== undefined) cache.delete(oldest);
       }
-      cache.set(symbol, { data, expires: options.now() + (profile ? 86_400_000 : 300_000) });
+      cache.set(symbol, { data, expires: options.now() + (data.profile ? 86_400_000 : 300_000) });
       return data;
     } catch {
       throw new RestError(503, "unavailable", "Company information is unavailable");

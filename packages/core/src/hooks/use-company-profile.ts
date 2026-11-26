@@ -5,11 +5,12 @@ import { useState } from "react";
 import { useCore } from "../core-provider.tsx";
 import { formatMarketDateTime } from "../format/time-format.ts";
 import { profileQueryOptions } from "../rest/profile-query.ts";
-import { useT } from "./use-t.ts";
+import { useLocale, useT } from "./use-t.ts";
 
 export function useCompanyProfile(symbol: string) {
   const { fetchProfile } = useCore();
   const t = useT();
+  const locale = useLocale();
   const query = useQuery(profileQueryOptions(fetchProfile, symbol));
   const [expandedSymbol, setExpandedSymbol] = useState<string | null>(null);
   const retry = () => {
@@ -41,7 +42,7 @@ export function useCompanyProfile(symbol: string) {
     retrieved:
       source === "simulated"
         ? null
-        : t("profile.retrieved", { time: formatMarketDateTime(fetchedAt) }),
+        : t("profile.retrieved", { time: formatMarketDateTime(fetchedAt, { locale }) }),
   } as const;
 }
 

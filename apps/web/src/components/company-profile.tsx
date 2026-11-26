@@ -30,38 +30,40 @@ function ProfileContent({ view }: { view: Extract<CompanyProfileView, { status: 
           </button>
         )}
       </div>
-      <dl className="mt-24 grid grid-cols-2 gap-x-24 gap-y-20 border-t border-border pt-20">
-        {view.facts.map((fact) => (
-          <div key={fact.id} className="min-w-0">
-            <dt className="text-caption text-text-muted">{fact.label}</dt>
-            <dd
-              dir="auto"
-              className="mt-6 break-words text-body-strong"
-              data-testid={`company-profile-${fact.id}`}
-            >
-              {fact.value}
-            </dd>
-          </div>
-        ))}
-        {view.website && (
-          <div className="min-w-0">
-            <dt className="text-caption text-text-muted">{t("profile.website")}</dt>
-            <dd>
-              <a
-                data-testid="company-profile-website"
-                href={view.website.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={t("profile.external", { website: view.website.label })}
-                className="inline-flex min-h-[44px] items-center gap-6 break-all rounded-xs text-body-strong underline decoration-border-strong underline-offset-4 transition-colors hover:text-accent"
+      {(view.facts.length > 0 || view.website !== null) && (
+        <dl className="mt-24 grid grid-cols-2 gap-x-24 gap-y-20 border-t border-border pt-20">
+          {view.facts.map((fact) => (
+            <div key={fact.id} className="min-w-0">
+              <dt className="text-caption text-text-muted">{fact.label}</dt>
+              <dd
+                dir="auto"
+                className="mt-6 break-words text-body-strong"
+                data-testid={`company-profile-${fact.id}`}
               >
-                <bdi dir="ltr">{view.website.label}</bdi>
-                <span aria-hidden="true">↗</span>
-              </a>
-            </dd>
-          </div>
-        )}
-      </dl>
+                {fact.value}
+              </dd>
+            </div>
+          ))}
+          {view.website && (
+            <div className="min-w-0">
+              <dt className="text-caption text-text-muted">{t("profile.website")}</dt>
+              <dd>
+                <a
+                  data-testid="company-profile-website"
+                  href={view.website.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={t("profile.external", { website: view.website.label })}
+                  className="inline-flex min-h-[44px] items-center gap-6 break-all rounded-xs text-body-strong underline decoration-border-strong underline-offset-4 transition-colors hover:text-accent"
+                >
+                  <bdi dir="ltr">{view.website.label}</bdi>
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </dd>
+            </div>
+          )}
+        </dl>
+      )}
       <div
         data-testid="company-profile-source"
         className="mt-24 flex flex-wrap gap-x-8 gap-y-4 text-caption text-text-muted"
