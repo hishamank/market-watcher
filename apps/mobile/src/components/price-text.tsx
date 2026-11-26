@@ -1,7 +1,7 @@
 import { formatPrice, type FlashDirection } from "@mini/core";
 import { StyleSheet, Text, View } from "react-native";
 import { usePalette } from "../theme/palette.ts";
-import { textStyles } from "../theme/text-styles.ts";
+import { useTextStyles } from "../theme/text-styles.ts";
 import { FlashTint } from "./flash-tint.tsx";
 import { ltr } from "./ltr.ts";
 
@@ -16,6 +16,7 @@ export interface PriceTextProps {
 }
 
 export function PriceText(props: PriceTextProps) {
+  const textStyles = useTextStyles();
   const { asOf, price, stale, testID, display = false, flash, flashKey } = props;
   const palette = usePalette();
   return (

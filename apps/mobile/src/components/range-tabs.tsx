@@ -1,12 +1,12 @@
 import { RANGES, type Range } from "@mini/contracts";
-import { useT } from "@mini/core";
+import { useLanguage, useT } from "@mini/core";
 import { duration, easing, radius, space } from "@mini/tokens";
 import { useState } from "react";
-import { I18nManager, Pressable, StyleSheet, Text, View, type LayoutRectangle } from "react-native";
+import { Pressable, StyleSheet, Text, View, type LayoutRectangle } from "react-native";
 import Animated, { cubicBezier } from "react-native-reanimated";
 import { useReduceMotion } from "../integrations/use-reduce-motion.ts";
 import { useElevation, usePalette } from "../theme/palette.ts";
-import { textStyles } from "../theme/text-styles.ts";
+import { useTextStyles } from "../theme/text-styles.ts";
 
 export interface RangeTabsProps {
   range: Range;
@@ -15,12 +15,14 @@ export interface RangeTabsProps {
 
 type Layouts = Partial<Record<Range, LayoutRectangle>>;
 
-function offsetX(option: LayoutRectangle, trackWidth: number): number {
-  return I18nManager.isRTL ? option.x + option.width - trackWidth : option.x;
+function offsetX(option: LayoutRectangle, trackWidth: number, rtl: boolean): number {
+  return rtl ? option.x + option.width - trackWidth : option.x;
 }
 
 export function RangeTabs({ range, onSelect }: RangeTabsProps) {
+  const textStyles = useTextStyles();
   const t = useT();
+  const { direction } = useLanguage();
   const palette = usePalette();
   const raised = useElevation(1);
   const reduceMotion = useReduceMotion();
@@ -45,7 +47,7 @@ export function RangeTabs({ range, onSelect }: RangeTabsProps) {
               width: selected.width,
               height: selected.height,
               transform: [
-                { translateX: offsetX(selected, trackWidth) },
+                { translateX: offsetX(selected, trackWidth, direction === "rtl") },
                 { translateY: selected.y },
               ],
               transitionProperty: ["transform", "width"],

@@ -9,6 +9,7 @@ import {
   type AnalyticsEvent,
 } from "./analytics/analytics.ts";
 import { createI18n, type I18nService } from "./i18n/create-i18n.ts";
+import type { LocaleSwitch } from "./i18n/locale.ts";
 import type { AppLifecycle } from "./platform/app-lifecycle.ts";
 import type { KeyValueStore } from "./platform/key-value-store.ts";
 import type { NetworkStatus } from "./platform/network-status.ts";
@@ -35,6 +36,7 @@ export interface CoreProviderProps {
   socketFactory?: SocketFactory | undefined;
   fetch?: HttpFetch | undefined;
   locale?: string | undefined;
+  switchLocale?: LocaleSwitch | undefined;
   analytics?: AnalyticsAdapter | undefined;
   children: ReactNode;
 }
@@ -53,6 +55,7 @@ export interface CoreContextValue {
   watchlistStore: WatchlistStore;
   tableColumnsStore: TableColumnsStore;
   i18n: I18nService;
+  switchLocale: LocaleSwitch;
   analytics: AnalyticsAdapter;
   track: (event: AnalyticsEvent) => void;
 }
@@ -88,6 +91,7 @@ export function createCoreServices(
     watchlistStore: createWatchlistStore(platform.storage),
     tableColumnsStore: createTableColumnsStore(platform.storage),
     i18n,
+    switchLocale: platform.switchLocale ?? ((_next, apply) => apply()),
     analytics,
     track: (event) => analytics.track(event),
   };

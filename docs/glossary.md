@@ -137,3 +137,9 @@ _Avoid_: debug menu, dev tools
 ## Last-known quote
 
 A held quote from an earlier trading phase, served with `lastKnown: true` after a refresh cannot supply the current phase. Avoid calling it stale: stale describes connection health. The price carries its source timestamp, shown as a date and time in ET.
+
+## Language
+
+**Locale**:
+The language the apps are shown in: English (`en-US`) or Arabic (`ar`). It sets the strings, the month names and the text direction, never the digits, which stay Latin. On web it lives in the `locale` cookie, and on mobile in device storage.
+_Avoid_: language setting, lang, i18n mode

@@ -1,5 +1,6 @@
 import { useT } from "@mini/core";
 import { Tabs } from "expo-router";
+import { LanguageToggle } from "../../shell/language-toggle.tsx";
 import { usePalette } from "../../theme/palette.ts";
 import { TabIcon } from "../../theme/tab-icon.tsx";
 
@@ -11,6 +12,7 @@ export default function TabsLayout() {
       screenOptions={{
         headerStyle: { backgroundColor: palette.surface },
         headerTintColor: palette.text,
+        headerRight: () => <LanguageToggle />,
         tabBarStyle: { backgroundColor: palette.surface, borderTopColor: palette.border },
         tabBarActiveTintColor: palette.text,
         tabBarInactiveTintColor: palette.textMuted,

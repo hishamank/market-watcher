@@ -20,6 +20,14 @@ type StripPluralSuffix<Key extends string> = Key extends `${infer Base}_${Plural
   ? Base
   : Key;
 
+export type Translation<Strings> = {
+  [
+    Key in keyof Strings as Key extends `${infer Base}_${PluralSuffix}`
+      ? `${Base}_${PluralSuffix}`
+      : Key
+  ]: string;
+};
+
 export type MessageKey = StripPluralSuffix<keyof typeof en>;
 
 export type TranslationValues = Readonly<Record<string, string | number>>;

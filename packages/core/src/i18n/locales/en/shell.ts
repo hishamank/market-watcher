@@ -9,4 +9,5 @@ export const shellStrings = {
   "connection.offline.title": "Offline",
   "connection.offline.help": "Check your connection. Prices may be out of date.",
   "connection.retry": "Retry",
+  "language.switch": "العربية",
 } as const;

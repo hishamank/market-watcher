@@ -2,6 +2,7 @@ import type { Stock } from "@mini/contracts";
 import {
   formatMarketDateTime,
   useConnectionStatus,
+  useLocale,
   useQuote,
   useT,
   useWatchlist,
@@ -17,6 +18,7 @@ export interface ConnectedStockRowProps {
 
 export function ConnectedStockRow({ stock, testID }: ConnectedStockRowProps) {
   const t = useT();
+  const locale = useLocale();
   const router = useRouter();
   const quote = useQuote(stock.symbol) ?? stock.quote;
   const { status } = useConnectionStatus();
@@ -33,7 +35,7 @@ export function ConnectedStockRow({ stock, testID }: ConnectedStockRowProps) {
       changePercent={quote.changePercent}
       asOf={
         quote.lastKnown
-          ? t("quote.lastKnown.label", { time: formatMarketDateTime(quote.timestamp) })
+          ? t("quote.lastKnown.label", { time: formatMarketDateTime(quote.timestamp, { locale }) })
           : undefined
       }
       stale={stale}

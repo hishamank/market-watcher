@@ -1,0 +1,57 @@
+:root[data-star-motion] [data-star-row] {
+  view-transition-name: var(--star-row);
+  view-transition-class: star-row;
+}
+
+:root[data-star-motion] [data-star-hero] {
+  view-transition-name: star-hero;
+}
+
+:root[data-star-motion="star"] [data-star-hero-icon] {
+  background-color: var(--color-accent-tint);
+  color: var(--color-accent-fill);
+}
+
+:root[data-star-motion="star"] [data-star-hero-icon] svg {
+  fill: currentColor;
+}
+
+:root[data-star-motion="unstar"] [data-star-hero-icon] svg {
+  animation: star-on var(--duration-slow) var(--ease-standard) both;
+}
+
+:root[data-star-motion]::view-transition-group(*) {
+  animation-duration: var(--duration-slow);
+  animation-timing-function: var(--ease-standard);
+}
+
+:root[data-star-motion]::view-transition-group(.star-row) {
+  z-index: 1;
+}
+
+:root[data-star-motion]::view-transition-old(.star-row),
+:root[data-star-motion]::view-transition-new(.star-row) {
+  background-color: var(--color-surface);
+}
+
+:root[data-star-motion]::view-transition-old(star-hero) {
+  animation: star-hero-out var(--duration-base) var(--ease-exit) both;
+}
+
+:root[data-star-motion]::view-transition-new(star-hero) {
+  animation: star-hero-in var(--duration-slow) var(--ease-standard) both;
+}
+
+@keyframes star-hero-out {
+  to {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+
+@keyframes star-hero-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}

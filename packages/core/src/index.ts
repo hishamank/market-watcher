@@ -36,7 +36,10 @@ export {
 export { buildRestBaseUrl, createRestClient, RestClientError } from "./rest/rest-client.ts";
 export type { RestClient, RestClientErrorCode } from "./rest/rest-client.ts";
 
-export { useLocale, useT } from "./hooks/use-t.ts";
+export { useLanguage, useLocale, useT } from "./hooks/use-t.ts";
+export type { LanguageResult } from "./hooks/use-t.ts";
+export { localeDirection, parseLocale } from "./i18n/locale.ts";
+export type { Locale, LocaleSwitch, TextDirection } from "./i18n/locale.ts";
 export type { MessageKey, Translate, TranslationValues } from "./i18n/locales/en/index.ts";
 export {
   directionOf,

@@ -6,6 +6,7 @@ import {
   formatMarketTime,
   formatPrice,
   useConnectionStatus,
+  useLocale,
   useQuote,
   useT,
   useWatchlist,
@@ -14,14 +15,23 @@ import { useListNavigation } from "../integrations/use-list-navigation.ts";
 import { StockRow } from "../components/stock-row.tsx";
 import { useTickFlash } from "../integrations/use-tick-flash.ts";
 
-export function ConnectedStockRow({ stock, morph = true }: { stock: Stock; morph?: boolean }) {
+export interface ConnectedStockRowProps {
+  stock: Stock;
+  morph?: boolean;
+  reflowStar?: ((symbol: string) => void) | undefined;
+}
+
+export function ConnectedStockRow({ stock, morph = true, reflowStar }: ConnectedStockRowProps) {
   const t = useT();
+  const locale = useLocale();
   const { stockHref } = useListNavigation();
   const quote = useQuote(stock.symbol) ?? stock.quote;
   const { status } = useConnectionStatus();
   const stale = status === "stale" || status === "offline";
   const { flash, flashKey, roll } = useTickFlash(quote.price, stale);
   const watchlist = useWatchlist();
+  const starred = watchlist.isLoaded ? watchlist.isStarred(stock.symbol) : undefined;
+  const toggle = () => watchlist.toggle(stock.symbol);
   return (
     <StockRow
       href={stockHref(stock.symbol)}
@@ -35,22 +45,22 @@ export function ConnectedStockRow({ stock, morph = true }: { stock: Stock; morph
       dayLow={quote.dayRange ? formatPrice(quote.dayRange.low) : t("quote.dayRange.none")}
       lastUpdate={
         quote.lastKnown
-          ? formatMarketDateTime(quote.timestamp)
+          ? formatMarketDateTime(quote.timestamp, { locale })
           : t("list.lastUpdate", {
-              time: formatMarketTime(quote.timestamp, { label: false }),
+              time: formatMarketTime(quote.timestamp, { locale, label: false }),
             })
       }
       asOf={
         quote.lastKnown
-          ? t("quote.lastKnown.label", { time: formatMarketDateTime(quote.timestamp) })
+          ? t("quote.lastKnown.label", { time: formatMarketDateTime(quote.timestamp, { locale }) })
           : undefined
       }
       stale={stale}
       flash={flash}
       flashKey={flashKey}
       flashRoll={roll}
-      starred={watchlist.isLoaded ? watchlist.isStarred(stock.symbol) : undefined}
-      onToggleStar={() => watchlist.toggle(stock.symbol)}
+      starred={starred}
+      onToggleStar={reflowStar ? () => reflowStar(stock.symbol) : toggle}
       morph={morph}
     />
   );

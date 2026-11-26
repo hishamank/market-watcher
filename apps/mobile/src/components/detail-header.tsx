@@ -3,7 +3,7 @@ import type { FlashDirection } from "@mini/core";
 import { radius, space } from "@mini/tokens";
 import { StyleSheet, Text, View } from "react-native";
 import { usePalette } from "../theme/palette.ts";
-import { textStyles } from "../theme/text-styles.ts";
+import { useTextStyles } from "../theme/text-styles.ts";
 import { ChangePill } from "./change-pill.tsx";
 import { ltr } from "./ltr.ts";
 import { PriceText } from "./price-text.tsx";
@@ -26,6 +26,7 @@ export interface DetailHeaderProps {
 }
 
 function UnknownChange() {
+  const textStyles = useTextStyles();
   const palette = usePalette();
   return (
     <View testID="detail-change" style={[styles.pill, { backgroundColor: palette.fill }]}>
@@ -35,6 +36,7 @@ function UnknownChange() {
 }
 
 export function DetailHeader(props: DetailHeaderProps) {
+  const textStyles = useTextStyles();
   const { symbol, name, rangeChange, stale } = props;
   const palette = usePalette();
   return (
@@ -51,7 +53,7 @@ export function DetailHeader(props: DetailHeaderProps) {
             numberOfLines={1}
             style={[textStyles.body, { color: palette.textSecondary }]}
           >
-            {name}
+            {ltr(name)}
           </Text>
         </View>
         <StarButton

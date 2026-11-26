@@ -8,6 +8,7 @@ import {
   formatMarketTime,
   formatPrice,
   useLiveHistory,
+  useLocale,
   useT,
   type LiveHistoryResult,
 } from "@mini/core";
@@ -18,13 +19,15 @@ import type { ScrubListener, ScrubPoint } from "../integrations/chart/use-chart-
 import { usePriceChart } from "../integrations/chart/use-price-chart.ts";
 import { formatScrubTime } from "./scrub-time.ts";
 
-const formatters: ChartFormatters = {
-  time: (epochMs) => formatMarketDateTime(epochMs),
-  tick: (epochMs, kind) =>
-    kind === "time"
-      ? formatMarketTime(epochMs, { label: false })
-      : formatMarketDate(epochMs, { includeYear: kind === "year" }),
-};
+function chartFormatters(locale: string): ChartFormatters {
+  return {
+    time: (epochMs) => formatMarketDateTime(epochMs, { locale }),
+    tick: (epochMs, kind) =>
+      kind === "time"
+        ? formatMarketTime(epochMs, { locale, label: false })
+        : formatMarketDate(epochMs, { locale, includeYear: kind === "year" }),
+  };
+}
 
 export interface ConnectedPriceChartProps {
   symbol: string;
@@ -42,10 +45,11 @@ function readoutOf(
   range: Range,
   baseline: string | undefined,
   scrub: ScrubPoint | undefined,
+  locale: string,
 ): ChartReadoutValue | undefined {
   if (scrub === undefined || baseline === undefined) return undefined;
   return {
-    time: formatScrubTime(range, scrub.time),
+    time: formatScrubTime(range, scrub.time, locale),
     price: scrub.close,
     change: changeBetween(baseline, scrub.close),
     fraction: scrub.fraction,
@@ -54,6 +58,7 @@ function readoutOf(
 
 export function ConnectedPriceChart({ symbol, range, scrub, onScrub }: ConnectedPriceChartProps) {
   const t = useT();
+  const locale = useLocale();
   const history = useLiveHistory(symbol, range);
   const direction =
     history.rangeChange === undefined ? "flat" : directionOf(history.rangeChange.change);
@@ -66,7 +71,7 @@ export function ConnectedPriceChart({ symbol, range, scrub, onScrub }: Connected
     previousClose,
     direction,
     muted: history.ageMs !== undefined,
-    formatters,
+    formatters: chartFormatters(locale),
     onScrub,
   });
   return (
@@ -85,9 +90,9 @@ export function ConnectedPriceChart({ symbol, range, scrub, onScrub }: Connected
       asOfLabel={
         history.asOf === undefined
           ? undefined
-          : t("detail.chart.asOf", { time: formatMarketTime(history.asOf) })
+          : t("detail.chart.asOf", { time: formatMarketTime(history.asOf, { locale }) })
       }
-      readout={readoutOf(range, history.baseline, scrub)}
+      readout={readoutOf(range, history.baseline, scrub, locale)}
       onRetry={() => void history.refetch()}
       onKeyDown={chart.scrub.onKeyDown}
       onBlur={chart.scrub.onBlur}

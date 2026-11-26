@@ -2,7 +2,7 @@ import { radius, space } from "@mini/tokens";
 import { Pressable, StyleSheet, Text } from "react-native";
 import { useReduceMotion } from "../integrations/use-reduce-motion.ts";
 import { usePalette } from "../theme/palette.ts";
-import { textStyles } from "../theme/text-styles.ts";
+import { useTextStyles } from "../theme/text-styles.ts";
 
 export interface ButtonProps {
   label: string;
@@ -11,6 +11,7 @@ export interface ButtonProps {
 }
 
 export function Button({ label, onPress, testID }: ButtonProps) {
+  const textStyles = useTextStyles();
   const palette = usePalette();
   const reduceMotion = useReduceMotion();
   return (

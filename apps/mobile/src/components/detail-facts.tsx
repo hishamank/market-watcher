@@ -2,7 +2,7 @@ import { space } from "@mini/tokens";
 import type { ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { usePalette } from "../theme/palette.ts";
-import { textStyles } from "../theme/text-styles.ts";
+import { useTextStyles } from "../theme/text-styles.ts";
 import { ltr } from "./ltr.ts";
 
 export interface DetailFact {
@@ -12,6 +12,7 @@ export interface DetailFact {
 }
 
 function FactRow({ fact }: { fact: DetailFact }) {
+  const textStyles = useTextStyles();
   const palette = usePalette();
   return (
     <View style={[styles.row, { borderColor: palette.border }]}>

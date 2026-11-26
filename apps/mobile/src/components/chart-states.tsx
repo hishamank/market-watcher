@@ -4,7 +4,7 @@ import { radius, space } from "@mini/tokens";
 import { StyleSheet, Text, View } from "react-native";
 import { PLOT_HEIGHT } from "../integrations/line-chart.tsx";
 import { usePalette } from "../theme/palette.ts";
-import { textStyles } from "../theme/text-styles.ts";
+import { useTextStyles } from "../theme/text-styles.ts";
 import { Button } from "./button.tsx";
 import { ChangePill } from "./change-pill.tsx";
 import { ltr } from "./ltr.ts";
@@ -31,6 +31,7 @@ export function ChartSkeleton() {
 }
 
 export function ChartError({ onRetry }: { onRetry: () => void }) {
+  const textStyles = useTextStyles();
   const t = useT();
   const palette = usePalette();
   return (
@@ -43,6 +44,7 @@ export function ChartError({ onRetry }: { onRetry: () => void }) {
 }
 
 export function ChartAsOf({ label }: { label: string }) {
+  const textStyles = useTextStyles();
   const palette = usePalette();
   return (
     <View testID="chart-as-of" style={[styles.asOf, { backgroundColor: palette.staleTint }]}>
@@ -52,6 +54,7 @@ export function ChartAsOf({ label }: { label: string }) {
 }
 
 export function ChartReadout({ value }: { value: ChartReadoutValue }) {
+  const textStyles = useTextStyles();
   const palette = usePalette();
   const share = `${value.fraction * 100}%` as const;
   return (
