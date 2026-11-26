@@ -1,6 +1,6 @@
 import { useT, type StockStatisticsView } from "@mini/core";
 import { space } from "@mini/tokens";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { usePalette } from "../theme/palette.ts";
 import { useTextStyles } from "../theme/text-styles.ts";
 
@@ -49,19 +49,9 @@ export function StatisticsContent({ view }: { view: ReadyStatistics }) {
       <View style={styles.grid}>
         {view.facts.map((fact) => (
           <View key={fact.id} style={[styles.fact, { borderColor: palette.border }]}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityState={{ expanded: fact.expanded }}
-              onPress={fact.toggleHelp}
-              style={styles.label}
-            >
-              <Text style={[text.caption, { color: palette.textSecondary, flex: 1 }]}>
-                {fact.label}
-              </Text>
-              <Text accessible={false} style={{ color: palette.textSecondary }}>
-                ⓘ
-              </Text>
-            </Pressable>
+            <Text style={[text.caption, styles.label, { color: palette.textSecondary }]}>
+              {fact.label}
+            </Text>
             {fact.id === "yearRange" ? (
               <YearRange range={view.range} />
             ) : (
@@ -75,12 +65,6 @@ export function StatisticsContent({ view }: { view: ReadyStatistics }) {
           </View>
         ))}
       </View>
-      {view.help && (
-        <View style={[styles.help, { borderColor: palette.borderStrong }]}>
-          <Text style={[text.label, { color: palette.text }]}>{view.help.title}</Text>
-          <Text style={[text.body, { color: palette.textSecondary }]}>{view.help.text}</Text>
-        </View>
-      )}
       <Text testID="statistics-source" style={[text.caption, { color: palette.textMuted }]}>
         {view.attribution}
         {view.retrieved ? `\n${t("statistics.note")}\n${view.retrieved}` : ""}
@@ -97,7 +81,7 @@ const styles = StyleSheet.create({
     rowGap: space[12],
   },
   fact: { width: "47%", borderTopWidth: 1, paddingBottom: space[8] },
-  label: { minHeight: 44, flexDirection: "row", gap: space[4], alignItems: "center" },
+  label: { paddingVertical: space[12] },
   number: { writingDirection: "ltr", fontVariant: ["tabular-nums"] },
   endpoints: { flexDirection: "row", justifyContent: "space-between", gap: space[4] },
   track: { height: 4, borderRadius: 2, marginVertical: space[8] },
@@ -110,5 +94,4 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     transform: [{ translateX: -5 }],
   },
-  help: { borderStartWidth: 2, paddingStart: space[12], gap: space[4] },
 });

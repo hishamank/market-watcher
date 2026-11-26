@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import {
   formatCompactAmount,
   positionInRange,
@@ -21,7 +20,6 @@ export function useStockStatistics(symbol: string) {
   const quote = useQuote(symbol);
   const t = useT();
   const locale = useLocale();
-  const [helpId, setHelpId] = useState<string | null>(null);
   const retry = () => {
     void query.refetch();
   };
@@ -51,16 +49,11 @@ export function useStockStatistics(symbol: string) {
   const facts = labels.map((id) => ({
     id,
     label: t(`statistics.${id}`),
-    help: t(`statistics.${id}Help`),
     value: values[id],
-    expanded: helpId === id,
-    toggleHelp: () => setHelpId(helpId === id ? null : id),
   }));
-  const selected = facts.find((fact) => fact.expanded);
   return {
     status: "ready",
     facts,
-    help: selected ? { title: selected.label, text: selected.help } : null,
     range: stats.yearRange
       ? {
           low: formatPrice(stats.yearRange.low),
