@@ -1,4 +1,5 @@
 export const shellStrings = {
+  "theme.darkMode": "Dark mode",
   "header.title": "Markets",
   "feedMode.simulated": "Simulated",
   "feedMode.live": "Live",

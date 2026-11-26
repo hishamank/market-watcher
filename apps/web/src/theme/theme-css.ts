@@ -90,7 +90,7 @@ const resets = ["color", "spacing", "radius", "shadow", "text", "ease"].map(
 
 const darkSelectors = [
   "@media (prefers-color-scheme: dark) {",
-  "  :root {",
+  '  :root:not([data-theme="light"]) {',
   ...declarations(themeColors("dark")).map((line) => `  ${line}`),
   "  }",
   "}",
@@ -107,6 +107,11 @@ export function buildThemeCss(): string {
     "}",
     "",
     ...darkSelectors,
+    ':root[data-theme="dark"] {',
+    ...declarations(themeColors("dark")),
+    "  color-scheme: dark;",
+    "}",
+    ':root[data-theme="light"] { color-scheme: light; }',
     "",
     ":lang(ar) {",
     ...declarations(arabicTextStyles()),

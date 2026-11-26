@@ -2,6 +2,7 @@ import type { shellStrings } from "../en/shell.ts";
 import type { Translation } from "../en/index.ts";
 
 export const arShellStrings = {
+  "theme.darkMode": "الوضع الداكن",
   "header.title": "الأسواق",
   "feedMode.simulated": "محاكاة",
   "feedMode.live": "مباشر",

@@ -1,11 +1,12 @@
 "use client";
 
-import { useConnectionStatus, useMarketStatus } from "@mini/core";
+import { useColorScheme, useConnectionStatus, useMarketStatus, useT } from "@mini/core";
 import { usePathname } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import type { ShellMeta } from "../gateway/shell-meta.ts";
 import { HeaderSearch } from "../search/header-search.tsx";
 import { useListNavigation } from "../integrations/use-list-navigation.ts";
+import { ThemeSwitch } from "../components/theme-switch.tsx";
 import { AppHeader } from "./app-header.tsx";
 import { ChaosPanel } from "./chaos-panel.tsx";
 import { LanguageToggle } from "./language-toggle.tsx";
@@ -18,6 +19,8 @@ export interface AppShellProps {
 }
 
 export function AppShell({ meta, children }: AppShellProps) {
+  const t = useT();
+  const { scheme, toggle } = useColorScheme();
   const { status, retryNow } = useConnectionStatus();
   const marketStatus = useMarketStatus(meta.marketStatus);
   const { listHref } = useListNavigation();
@@ -43,6 +46,9 @@ export function AppShell({ meta, children }: AppShellProps) {
             <LanguageToggle />
             <HeaderSearch />
           </>
+        }
+        themeSwitch={
+          <ThemeSwitch dark={scheme === "dark"} label={t("theme.darkMode")} onToggle={toggle} />
         }
       />
       <ConnectionBanner status={banner.value} open={banner.open} onRetry={retryNow} />

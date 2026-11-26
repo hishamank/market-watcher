@@ -23,6 +23,7 @@ export function Providers({ gatewayUrl, locale, children }: ProvidersProps) {
         <CoreProvider
           gatewayUrl={gatewayUrl}
           storage={platform.storage}
+          colorScheme={platform.colorScheme}
           network={platform.network}
           lifecycle={platform.lifecycle}
           locale={locale}

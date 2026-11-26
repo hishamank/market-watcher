@@ -1,9 +1,12 @@
-import type { AppLifecycle, KeyValueStore } from "@mini/core";
+import type { AppLifecycle, ColorSchemeStore, KeyValueStore } from "@mini/core";
 import { createLocalStorageStore } from "./local-storage-store.ts";
 import { type ControllableNetworkStatus, createOnlineStatus } from "./online-status.ts";
 import { createPageVisibility } from "./page-visibility.ts";
 
+import { createColorSchemeStore } from "./color-scheme.ts";
+
 export interface WebPlatform {
+  readonly colorScheme: ColorSchemeStore;
   readonly storage: KeyValueStore;
   readonly network: ControllableNetworkStatus;
   readonly lifecycle: AppLifecycle;
@@ -11,6 +14,7 @@ export interface WebPlatform {
 
 export function createWebPlatform(): WebPlatform {
   return {
+    colorScheme: createColorSchemeStore(),
     storage: createLocalStorageStore(),
     network: createOnlineStatus(),
     lifecycle: createPageVisibility(),

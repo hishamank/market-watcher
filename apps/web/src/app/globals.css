@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "./theme.css";
 @import "./star-motion.css";
+@import "../theme/theme-switch.css";
 
 @custom-variant list-table {
   @media (width >= 80rem) {
