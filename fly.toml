@@ -10,7 +10,7 @@ PORT = "4000"
 FEED = "simulator"
 SIM_SEED = "demo-v1"
 TRUST_PROXY = "2"
-ALLOWED_ORIGINS = "https://hisham-stocks-gateway.fly.dev"
+ALLOWED_ORIGINS = "https://hisham-stocks-gateway.fly.dev,https://stocks-watchlist-puce.vercel.app"
 
 [http_service]
 internal_port = 4000
