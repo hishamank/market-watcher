@@ -9,3 +9,5 @@ export * from "./money/money.ts";
 export * from "./money/format.ts";
 export { DECIMAL_PATTERN, UNSIGNED_DECIMAL_PATTERN } from "./money/decimal.ts";
 export * from "./profile.ts";
+export * from "./statistics.ts";
+export * from "./money/statistics.ts";

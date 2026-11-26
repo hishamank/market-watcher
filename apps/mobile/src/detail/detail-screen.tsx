@@ -9,6 +9,7 @@ import { RangeTabs } from "../components/range-tabs.tsx";
 import { SkeletonBlock } from "../components/skeleton.tsx";
 import { useTrackStockOpened } from "../integrations/use-track-stock-opened.ts";
 import { selectionHaptic } from "../platform/haptics.ts";
+import { ConnectedStockStatistics } from "./connected-stock-statistics.tsx";
 import { ConnectedCompanyProfile } from "./connected-company-profile.tsx";
 import { ConnectedDetailFacts } from "./connected-detail-facts.tsx";
 import { ConnectedDetailHeader } from "./connected-detail-header.tsx";
@@ -36,6 +37,7 @@ function DetailContent({ stock }: { stock: Stock }) {
       />
       <RangeTabs range={range} onSelect={selectRange} />
       <ConnectedDetailFacts stock={stock} />
+      <ConnectedStockStatistics key={`statistics-${stock.symbol}`} symbol={stock.symbol} />
       <ConnectedCompanyProfile key={stock.symbol} symbol={stock.symbol} />
     </ScrollView>
   );

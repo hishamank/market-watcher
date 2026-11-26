@@ -38,6 +38,7 @@ const FROZEN_RUNTIME_EXPORTS = [
   "useStock",
   "useStockList",
   "useStockPages",
+  "useStockStatistics",
   "useStocks",
   "useT",
   "useTableColumns",

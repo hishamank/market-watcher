@@ -151,3 +151,9 @@ A held quote from an earlier trading phase, served with `lastKnown: true` after 
 **Locale**:
 The language the apps are shown in: English (`en-US`) or Arabic (`ar`). It sets the strings, the month names and the text direction, never the digits, which stay Latin. On web it lives in the `locale` cookie, and on mobile in device storage.
 _Avoid_: language setting, lang, i18n mode
+
+**Key statistics**: Supplemental valuation, dividend, trading-volume and 52-week-range data for a security, loaded independently of its quote and company overview.
+
+**TTM (trailing twelve months)**: The preceding twelve months of reported earnings used by trailing EPS and P/E.
+
+**Indicated dividend yield**: Yahoo's indicated annual dividend relative to the share price, delivered as a decimal ratio and displayed as a percentage. An absent value does not mean zero.

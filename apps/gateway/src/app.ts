@@ -11,6 +11,9 @@ import { socketRoute } from "./socket/route.ts";
 import { profileRoute } from "./profiles/route.ts";
 import type { ProfileSource } from "./profiles/source.ts";
 
+import { statisticsRoute } from "./statistics/route.ts";
+import type { StatisticsSource } from "./statistics/source.ts";
+
 export { parseRateLimitMax, parseTrustProxy } from "./rest/plugins.ts";
 
 export interface AppOptions {
@@ -24,6 +27,8 @@ export interface AppOptions {
   historyCacheMaxEntries?: number;
   historySourceTimeoutMs?: number;
   rateLimit?: RestRateLimitOptions;
+  statisticsSource?: StatisticsSource;
+  statisticsTimeoutMs?: number;
   profileSource?: ProfileSource;
   profileTimeoutMs?: number;
 }
@@ -68,6 +73,15 @@ export function buildApp({
     ...(options.profileSource ? { profileSource: options.profileSource } : {}),
     ...(options.profileTimeoutMs !== undefined
       ? { profileTimeoutMs: options.profileTimeoutMs }
+      : {}),
+  });
+  app.register(statisticsRoute, {
+    catalogue: options.feed.catalogue,
+    feedMode: options.feedMode,
+    now,
+    ...(options.statisticsSource ? { statisticsSource: options.statisticsSource } : {}),
+    ...(options.statisticsTimeoutMs !== undefined
+      ? { statisticsTimeoutMs: options.statisticsTimeoutMs }
       : {}),
   });
   app.register(websocket, { options: { maxPayload: MAX_MESSAGE_BYTES } });

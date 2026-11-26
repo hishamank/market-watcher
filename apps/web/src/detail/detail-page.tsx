@@ -7,6 +7,7 @@ import { DetailError } from "../components/detail-error.tsx";
 import { ChevronStartIcon } from "../components/icons.tsx";
 import { RangeTabs } from "../components/range-tabs.tsx";
 import { DetailSkeleton } from "../components/detail-skeleton.tsx";
+import { ConnectedStockStatistics } from "./connected-stock-statistics.tsx";
 import { ConnectedCompanyProfile } from "./connected-company-profile.tsx";
 import { ConnectedDetailHeader } from "./connected-detail-header.tsx";
 import { ConnectedPriceChart } from "./connected-price-chart.tsx";
@@ -73,6 +74,7 @@ export function DetailPage({ symbol }: { symbol: string }) {
           <section className="flex flex-col md:rounded-xl md:border md:border-border md:bg-surface md:p-24 md:shadow-1">
             <DetailCard symbol={symbol} />
           </section>
+          <ConnectedStockStatistics key={`statistics-${symbol}`} symbol={symbol} />
           <ConnectedCompanyProfile key={symbol} symbol={symbol} />
         </div>
       </div>

@@ -75,3 +75,5 @@ export { useColorScheme } from "./hooks/use-color-scheme.ts";
 export type { ColorScheme, ColorSchemeStore } from "./platform/color-scheme.ts";
 export { useCompanyProfile } from "./hooks/use-company-profile.ts";
 export type { CompanyProfileView } from "./hooks/use-company-profile.ts";
+
+export { useStockStatistics, type StockStatisticsView } from "./hooks/use-stock-statistics.ts";
