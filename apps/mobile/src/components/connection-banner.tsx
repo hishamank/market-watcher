@@ -1,10 +1,9 @@
 import { duration, space } from "@mini/tokens";
 import { StyleSheet, Text, View } from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
 import type { Palette } from "../theme/palette.ts";
 import { textStyles } from "../theme/text-styles.ts";
 import { Button } from "./button.tsx";
-
-import Animated, { FadeInDown } from "react-native-reanimated";
 
 interface ConnectionBannerProps {
   offline: boolean;
@@ -29,6 +28,7 @@ export function ConnectionBanner(props: ConnectionBannerProps) {
     >
       <Text
         accessibilityElementsHidden
+        importantForAccessibility="no"
         style={{ color: props.offline ? props.palette.textSecondary : props.palette.stale }}
       >
         {props.offline ? "⊘" : "↻"}

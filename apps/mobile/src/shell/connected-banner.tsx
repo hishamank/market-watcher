@@ -1,7 +1,6 @@
 import { useConnectionStatus, useT } from "@mini/core";
 import { ConnectionBanner } from "../components/connection-banner.tsx";
 import { usePalette } from "../theme/palette.ts";
-
 import { useReduceMotion } from "../integrations/use-reduce-motion.ts";
 
 export function ConnectedBanner() {

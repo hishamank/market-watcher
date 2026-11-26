@@ -10,9 +10,10 @@ export function useWatchlistStocks(symbols: readonly string[], isLoaded: boolean
   const client = useQueryClient();
   const [, refresh] = useReducer((value: number) => value + 1, 0);
   const list = useStockList();
+  const listWaiting = list.isPending && list.failureCount === 0;
   const cache = inspectStockCache(client);
   const listSymbols = new Set(list.data?.stocks.map((stock) => stock.symbol) ?? []);
-  const batches = isLoaded ? planWatchlistBatches(symbols, listSymbols, cache) : [];
+  const batches = isLoaded && !listWaiting ? planWatchlistBatches(symbols, listSymbols, cache) : [];
   const first = useStocks(batches[0] ?? []);
   const overflow = useQueries({
     queries: batches.slice(1).map((batch) => stocksBySymbolsQueryOptions(rest, batch)),
@@ -28,10 +29,17 @@ export function useWatchlistStocks(symbols: readonly string[], isLoaded: boolean
     return {
       symbol,
       stock: stocks.get(symbol),
-      loading: query?.isPending ?? false,
+      loading: query === undefined ? listWaiting : query.isPending || query.isFetching,
       retry: () => {
         if (query !== undefined) void query.refetch();
-        else void client.invalidateQueries({ queryKey: ["stocks", "symbols"] }).then(refresh);
+        else
+          void client
+            .invalidateQueries({
+              queryKey: ["stocks", "symbols"],
+              predicate: ({ queryKey }) =>
+                Array.isArray(queryKey[2]) && queryKey[2].includes(symbol),
+            })
+            .then(refresh);
       },
     };
   });

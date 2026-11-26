@@ -1,8 +1,10 @@
 import { MAX_STOCKS_QUERY_SYMBOLS, type Stock } from "@mini/contracts";
-import { stockQueryKeys } from "@mini/core";
+import { createRestClient, stockQueryKeys, stocksBySymbolsQueryOptions } from "@mini/core";
 import type { QueryClient } from "@tanstack/react-query";
+import { gatewayUrl } from "../config/gateway-url.ts";
 
-export const WATCHLIST_STOCK_FRESH_MS = 60_000;
+const staleTime = stocksBySymbolsQueryOptions(createRestClient({ gatewayUrl }), []).staleTime;
+export const WATCHLIST_STOCK_FRESH_MS = typeof staleTime === "number" ? staleTime : 60_000;
 
 export interface StockCacheCoverage {
   readonly bySymbol: Map<string, Stock>;

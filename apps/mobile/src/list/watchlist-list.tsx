@@ -5,7 +5,6 @@ import { EmptyState } from "../components/empty-state.tsx";
 import { ListSkeleton, SkeletonRow } from "../components/skeleton.tsx";
 import { WatchlistErrorRow } from "../components/watchlist-error-row.tsx";
 import { ConnectedStockRow } from "./connected-stock-row.tsx";
-
 import { useWatchlistStocks } from "./use-watchlist-stocks.ts";
 
 export function WatchlistList() {
