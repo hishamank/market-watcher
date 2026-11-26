@@ -33,7 +33,7 @@ export function ColumnMenu({ options, canReset, onToggle, onReset }: ColumnMenuP
         id={MENU_ID}
         popover="auto"
         data-testid="columns-menu"
-        className="inset-auto m-0 mt-8 w-[240px] rounded-lg border border-border bg-raised p-8 text-text shadow-2 [position-anchor:--table-columns] [position-area:block-end_span-inline-start] motion-safe:animate-dropdown-in motion-reduce:animate-fade-in"
+        className="inset-auto m-0 mt-8 max-h-[calc(100%-16px)] w-[240px] overflow-y-auto rounded-lg border border-border bg-raised p-8 text-text shadow-2 [position-anchor:--table-columns] [position-area:block-end_span-inline-start] motion-safe:animate-dropdown-in motion-reduce:animate-fade-in"
       >
         <fieldset>
           <legend className="px-8 pt-4 pb-8 text-caption font-medium text-text-secondary">
