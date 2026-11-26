@@ -23,6 +23,8 @@ export { useLiveHistory } from "./hooks/use-live-history.ts";
 export type { LiveHistoryResult } from "./hooks/use-live-history.ts";
 export { useWatchlist } from "./hooks/use-watchlist.ts";
 export type { WatchlistResult } from "./hooks/use-watchlist.ts";
+export { useTableColumns } from "./hooks/use-table-columns.ts";
+export type { TableColumn, TableColumnsResult } from "./hooks/use-table-columns.ts";
 
 export {
   historyQueryOptions,

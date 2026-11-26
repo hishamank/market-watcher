@@ -2,6 +2,7 @@
 
 import type { Stock } from "@mini/contracts";
 import { StockListHeader } from "../components/stock-list-header.tsx";
+import { tableScroll, tableWidth } from "../components/stock-row.tsx";
 import { useWindowRows } from "../integrations/use-window-rows.ts";
 import { ConnectedStockRow } from "./connected-stock-row.tsx";
 
@@ -18,11 +19,12 @@ export function VirtualStockList(props: VirtualStockListProps) {
     stocks.map((stock) => stock.symbol),
   );
   return (
-    <>
+    <div className={tableScroll}>
       <StockListHeader />
       <ul
         ref={listRef}
         data-testid={listTestId}
+        className={tableWidth}
         style={{ paddingBlockStart: paddingStart, paddingBlockEnd: paddingEnd }}
       >
         {rows.map((row) => {
@@ -40,6 +42,6 @@ export function VirtualStockList(props: VirtualStockListProps) {
           );
         })}
       </ul>
-    </>
+    </div>
   );
 }
