@@ -1,11 +1,12 @@
-import type { HistoryResponse, Quote, Range, Stock } from "@mini/contracts";
-import { isServer, queryOptions } from "@tanstack/react-query";
+import type { HistoryResponse, Quote, Range, Stock, StockPageResponse } from "@mini/contracts";
+import { infiniteQueryOptions, isServer, queryOptions } from "@tanstack/react-query";
 import type { QuoteStore } from "../realtime/quote-store.ts";
-import { type RestClient, RestClientError } from "./rest-client.ts";
+import { type AbortSignalLike, type RestClient, RestClientError } from "./rest-client.ts";
 
 const SECOND_MS = 1_000;
 const MINUTE_MS = 60 * SECOND_MS;
 const MAX_RETRIES = 3;
+const MAX_EMPTY_PAGES_SKIPPED = 2;
 
 export const STOCK_STALE_MS = MINUTE_MS;
 
@@ -21,6 +22,7 @@ export const HISTORY_STALE_MS: Readonly<Record<Range, number>> = {
 export const stockQueryKeys = {
   all: ["stocks"] as const,
   list: () => ["stocks", "list"] as const,
+  pages: () => ["stocks", "pages"] as const,
   symbols: (symbols: readonly string[]) =>
     ["stocks", "symbols", normaliseSymbols(symbols)] as const,
   detail: (symbol: string) => ["stocks", "detail", symbol] as const,
@@ -54,6 +56,33 @@ export function stockListQueryOptions(rest: RestClient, quoteStore?: QuoteStore)
       return seedFrom(data, quotesOf(data.stocks), quoteStore);
     },
     staleTime: STOCK_STALE_MS,
+    retry: shouldRetryRestError,
+  });
+}
+
+async function pageSkippingEmpty(
+  rest: RestClient,
+  cursor: string | undefined,
+  signal: AbortSignalLike,
+): Promise<StockPageResponse> {
+  let page = await rest.listStockPage(cursor, signal);
+  for (let skipped = 0; skipped < MAX_EMPTY_PAGES_SKIPPED; skipped += 1) {
+    if (page.stocks.length > 0 || page.nextCursor === null) break;
+    page = await rest.listStockPage(page.nextCursor, signal);
+  }
+  return page;
+}
+
+export function stockPagesQueryOptions(rest: RestClient, quoteStore?: QuoteStore) {
+  return infiniteQueryOptions({
+    queryKey: stockQueryKeys.pages(),
+    queryFn: async ({ pageParam, signal }) => {
+      const page = await pageSkippingEmpty(rest, pageParam, signal);
+      return seedFrom(page, quotesOf(page.stocks), quoteStore);
+    },
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    staleTime: Number.POSITIVE_INFINITY,
     retry: shouldRetryRestError,
   });
 }

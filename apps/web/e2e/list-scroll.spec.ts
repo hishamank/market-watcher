@@ -55,6 +55,7 @@ test("L3 only near-visible rows mount and scrolled-away symbols unsubscribe afte
 
   await scrollTo(page, "bottom");
   const leftAt = Date.now();
+  const firstPageEnd = await page.evaluate(() => window.scrollY);
   await expect(page.getByTestId(`stock-row-${lastSymbol}`)).toBeVisible();
   await expect(page.getByTestId(`stock-row-price-${lastSymbol}`)).toHaveText(/^\$\d/);
   expect(await page.getByTestId("stock-row-AAPL").count()).toBe(0);
@@ -65,7 +66,7 @@ test("L3 only near-visible rows mount and scrolled-away symbols unsubscribe afte
 
   await scrollTo(page, "top");
   await expect(page.getByTestId("stock-row-AAPL")).toBeVisible();
-  await scrollTo(page, "bottom");
+  await page.evaluate((y) => window.scrollTo(0, y), firstPageEnd);
   const bounceAt = Date.now();
   await expect(page.getByTestId(`stock-row-${lastSymbol}`)).toBeVisible();
   await page.waitForTimeout(500);
@@ -73,4 +74,27 @@ test("L3 only near-visible rows mount and scrolled-away symbols unsubscribe afte
   await expect(page.getByTestId("stock-row-AAPL")).toBeVisible();
   await page.waitForTimeout(3_000);
   expect(unsubscribesOf(frames, "AAPL", bounceAt)).toEqual([]);
+});
+
+test("L3 scrolling past the first page loads the next one with live prices", async ({
+  page,
+  request,
+}) => {
+  const firstPage = (await (await request.get(`${gatewayUrl}/stocks?limit=50`)).json()) as {
+    nextCursor: string;
+  };
+  const nextPage = (await (
+    await request.get(`${gatewayUrl}/stocks?limit=50&cursor=${firstPage.nextCursor}`)
+  ).json()) as { stocks: Array<{ symbol: string }> };
+  const nextSymbol = nextPage.stocks[0]?.symbol ?? "";
+  await page.setViewportSize({ width: 360, height: 740 });
+  await page.goto("/");
+  await expect(page.getByTestId("app-root")).toHaveAttribute("data-connection", "connected");
+  expect(await page.getByTestId(`stock-row-${nextSymbol}`).count()).toBe(0);
+
+  await scrollTo(page, "bottom");
+  await expect(page.getByTestId(`stock-row-${nextSymbol}`)).toBeAttached({ timeout: 10_000 });
+  await expect(page.getByTestId(`stock-row-price-${nextSymbol}`)).toHaveText(/^\$\d/);
+  const mounted = await rowIds(page);
+  expect(new Set(mounted).size).toBe(mounted.length);
 });

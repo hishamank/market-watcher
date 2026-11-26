@@ -1,17 +1,31 @@
 "use client";
 
-import { useStockList } from "@mini/core";
+import { useStockPages } from "@mini/core";
 import { ListError } from "../components/list-error.tsx";
+import { ListMoreError } from "../components/list-more-error.tsx";
 import { ListSkeleton } from "../components/list-skeleton.tsx";
 import { VirtualStockList } from "./virtual-stock-list.tsx";
 
+const LOADING_MORE_ROWS = 2;
+
 export function StockList({ morph = true }: { morph?: boolean }) {
-  const list = useStockList();
-  if (list.data !== undefined) {
-    return <VirtualStockList stocks={list.data.stocks} listTestId="stock-list" morph={morph} />;
+  const list = useStockPages();
+  if (list.stocks !== undefined) {
+    return (
+      <>
+        <VirtualStockList
+          stocks={list.stocks}
+          listTestId="stock-list"
+          morph={morph}
+          onEndReached={list.loadMore}
+        />
+        {list.isLoadingMore && <ListSkeleton testId="list-more-loading" rows={LOADING_MORE_ROWS} />}
+        {list.loadMoreFailed && <ListMoreError onRetry={list.retry} />}
+      </>
+    );
   }
   if (list.isError) {
-    return <ListError onRetry={() => void list.refetch()} />;
+    return <ListError onRetry={list.retry} />;
   }
   return <ListSkeleton testId="list-skeleton" />;
 }

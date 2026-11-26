@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type RefObject } from "react";
 const ROW_ESTIMATE_PX = 68;
 const OVERSCAN_ROWS = 5;
 const SERVER_RECT = { width: 1440, height: 900 };
+const END_REACHED_ROWS = 10;
 
 export interface WindowRow {
   readonly index: number;
@@ -32,7 +33,15 @@ function useListOffset(listRef: RefObject<HTMLUListElement | null>): number {
   return offset;
 }
 
-export function useWindowRows(keys: readonly string[]): WindowRows {
+function useEndReached(lastIndex: number, count: number, onEndReached?: () => void): void {
+  useEffect(() => {
+    if (onEndReached !== undefined && count > 0 && lastIndex >= count - END_REACHED_ROWS) {
+      onEndReached();
+    }
+  }, [lastIndex, count, onEndReached]);
+}
+
+export function useWindowRows(keys: readonly string[], onEndReached?: () => void): WindowRows {
   "use no memo";
   const listRef = useRef<HTMLUListElement>(null);
   const scrollMargin = useListOffset(listRef);
@@ -50,6 +59,7 @@ export function useWindowRows(keys: readonly string[]): WindowRows {
   const first = items[0];
   const last = items.at(-1);
   const total = virtualizer.getTotalSize();
+  useEndReached(last?.index ?? -1, keys.length, onEndReached);
   return {
     rows: items.map((item) => ({ index: item.index, key: String(item.key) })),
     paddingStart: first === undefined ? 0 : first.start - scrollMargin,

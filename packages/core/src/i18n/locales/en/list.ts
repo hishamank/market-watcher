@@ -5,6 +5,7 @@ export const listStrings = {
   "list.error.title": "Couldn't load stocks",
   "list.error.help": "Check your connection and try again.",
   "list.error.retry": "Retry",
+  "list.more.error": "Couldn't load more stocks",
   "list.count_one": "{{count}} stock",
   "list.count_other": "{{count}} stocks",
   "list.column.name": "Name",

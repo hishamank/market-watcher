@@ -4,12 +4,13 @@ const SKELETON_ROWS = 8;
 
 export interface ListSkeletonProps {
   testId: string;
+  rows?: number;
 }
 
-export function ListSkeleton({ testId }: ListSkeletonProps) {
+export function ListSkeleton({ testId, rows = SKELETON_ROWS }: ListSkeletonProps) {
   return (
     <ul data-testid={testId} aria-hidden="true">
-      {Array.from({ length: SKELETON_ROWS }, (_, index) => (
+      {Array.from({ length: rows }, (_, index) => (
         <li
           key={index}
           className="flex min-h-[68px] items-center gap-12 border-b border-border ps-16 pe-6 last:border-b-0"

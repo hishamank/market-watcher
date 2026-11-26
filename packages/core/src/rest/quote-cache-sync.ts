@@ -1,5 +1,15 @@
-import type { Quote, StockDetailResponse, StockListResponse } from "@mini/contracts";
-import { notifyManager, type QueryCache, type QueryKey } from "@tanstack/react-query";
+import type {
+  Quote,
+  StockDetailResponse,
+  StockListResponse,
+  StockPageResponse,
+} from "@mini/contracts";
+import {
+  type InfiniteData,
+  notifyManager,
+  type QueryCache,
+  type QueryKey,
+} from "@tanstack/react-query";
 import type { QuoteStore } from "../realtime/quote-store.ts";
 import { stockQueryKeys } from "./stock-queries.ts";
 
@@ -7,6 +17,11 @@ function quotesIn(queryKey: QueryKey, data: unknown): readonly Quote[] {
   if (data === undefined || queryKey[0] !== stockQueryKeys.all[0]) return [];
   if (queryKey[1] === "list" || queryKey[1] === "symbols") {
     return (data as StockListResponse).stocks.map((stock) => stock.quote);
+  }
+  if (queryKey[1] === "pages") {
+    return (data as InfiniteData<StockPageResponse>).pages.flatMap((page) =>
+      page.stocks.map((stock) => stock.quote),
+    );
   }
   if (queryKey[1] === "detail") return [(data as StockDetailResponse).stock.quote];
   return [];

@@ -9,6 +9,9 @@ import {
   StockDetailResponseSchema,
   type StockListResponse,
   StockListResponseSchema,
+  STOCK_PAGE_SIZE,
+  type StockPageResponse,
+  StockPageResponseSchema,
 } from "@mini/contracts";
 
 export interface AbortSignalLike {
@@ -51,6 +54,7 @@ export class RestClientError extends Error {
 
 export interface RestClient {
   listStocks(signal?: AbortSignalLike): Promise<StockListResponse>;
+  listStockPage(cursor: string | undefined, signal?: AbortSignalLike): Promise<StockPageResponse>;
   getStocks(symbols: readonly string[], signal?: AbortSignalLike): Promise<StockListResponse>;
   getStock(symbol: string, signal?: AbortSignalLike): Promise<StockDetailResponse>;
   getHistory(symbol: string, range: Range, signal?: AbortSignalLike): Promise<HistoryResponse>;
@@ -146,6 +150,12 @@ export function createRestClient(options: RestClientOptions): RestClient {
 
   return {
     listStocks: (signal) => request("/stocks", StockListResponseSchema, signal),
+    listStockPage: (cursor, signal) =>
+      request(
+        `/stocks?limit=${STOCK_PAGE_SIZE}${cursor === undefined ? "" : `&cursor=${segment(cursor)}`}`,
+        StockPageResponseSchema,
+        signal,
+      ),
     getStocks: (symbols, signal) =>
       request(`/stocks?symbols=${segment(symbols.join(","))}`, StockListResponseSchema, signal),
     getStock: (symbol, signal) =>

@@ -9,6 +9,7 @@ import {
   StockListQuerySchema,
   type StockListResponse,
   StockListResponseSchema,
+  type StockPageResponse,
   StockSymbolParamsSchema,
 } from "@mini/contracts";
 import type { FastifyInstance, FastifyRequest } from "fastify";
@@ -19,6 +20,7 @@ import { type ConnectionStats, healthResponse } from "./health.ts";
 import { createHistoryCache, type HistoryCache } from "./history-cache.ts";
 import { fetchQuotesMap } from "./quotes.ts";
 import { handleStockSearch } from "./search-catalogue.ts";
+import { stockPage } from "./stock-pages.ts";
 
 export interface RestRouteOptions {
   feed: Feed;
@@ -52,12 +54,14 @@ function resolveEntries(feed: Feed, symbols: readonly string[]): CatalogueEntry[
 async function handleStockList(
   request: FastifyRequest,
   ctx: RouteContext,
-): Promise<StockListResponse> {
+): Promise<StockListResponse | StockPageResponse> {
   const parsedQuery = StockListQuerySchema.safeParse(request.query);
   if (!parsedQuery.success) {
-    throw new RestError(400, "invalid_request", "Invalid symbols query parameter");
+    throw new RestError(400, "invalid_request", "Invalid stock list query parameters");
   }
-  const requested = parsedQuery.data.symbols ?? ctx.feed.catalogue.defaultList();
+  const { symbols, cursor, limit } = parsedQuery.data;
+  if (cursor !== undefined || limit !== undefined) return stockPage(ctx, cursor, limit);
+  const requested = symbols ?? ctx.feed.catalogue.defaultList();
   const entries = resolveEntries(ctx.feed, requested);
   const quotes = await fetchQuotesMap(
     ctx.feed,

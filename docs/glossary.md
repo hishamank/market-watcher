@@ -46,6 +46,10 @@ _Avoid_: ticker, instrument, asset
 Every symbol the current feed mode can price. It is the universe for search and for detail pages.
 _Avoid_: universe, asset list, symbol list
 
+**Default list**:
+The 50 well-known stocks and ETFs at the top of the All list. The rest of the catalogue follows them in symbol order.
+_Avoid_: featured, top 50, curated list
+
 **Quote**:
 What is currently known about one symbol's price: price, change and percent change against the previous close, the day range when known, and the time it was observed. Its timestamp places it in a trading phase. Opening and closing quotes carry the session open and close times respectively.
 _Avoid_: price (as a noun for the whole record), ticker data
