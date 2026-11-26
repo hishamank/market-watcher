@@ -58,9 +58,9 @@ Token names are semantic and shared by web and mobile. `packages/tokens` holds t
 
 | Token | Light | Dark | Use |
 | --- | --- | --- | --- |
-| `color.gain` | `#0B7049` | `#4ADE9A` | Gain text, arrow, ring |
+| `color.gain` | `#0B7049` | `#4ADE9A` | Gain text, arrow |
 | `color.gainTint` | `#E7F1ED` | `#1C2B25` | Gain pill background |
-| `color.loss` | `#BF3A22` | `#FF8A75` | Loss text, arrow, ring |
+| `color.loss` | `#BF3A22` | `#FF8A75` | Loss text, arrow |
 | `color.lossTint` | `#F9EBE9` | `#2E2221` | Loss pill background |
 | `color.flat` | `#51504C` | `#B5B3AD` | Flat change |
 
@@ -164,13 +164,13 @@ In React Native, `elevation.1` and `elevation.2` map to shadow properties, and t
 | `easing.standard` | cubic-bezier(0.2, 0, 0, 1) |
 | `easing.exit` | cubic-bezier(0.4, 0, 1, 1) |
 
-**Price flash.** When a price's displayed value changes, a tint in the tick's direction (`color.gainTint` if the new price is higher than the one before, `color.lossTint` if lower) appears behind the price digits and fades from 100% to 0% opacity over `duration.flash` with `easing.standard`. The digits keep `color.text`, so contrast holds at every frame. The digits that changed roll up 40% of their height into place in the same beat; the others stay still. A row flashes at most once a second: ticks inside that second update the digits with no flash (ADR 0047). Nothing flashes on first render. The price element gets `data-flash="up"` or `"down"` for the duration. On mobile the tint is an absolutely positioned view behind the price text.
+**Price flash.** When a price's displayed value changes, a tint in the tick's direction (`color.gainTint` if the new price is higher than the one before, `color.lossTint` if lower) appears behind the price digits and fades from 100% to 0% opacity over `duration.flash` with `easing.standard`. The digits keep `color.text`, so contrast holds at every frame. On web, the digits that changed roll up 30% of their height into place in the same beat; the others stay still. Mobile shows the tint only. A row flashes at most once a second: ticks inside that second update the digits with no flash (ADR 0047). Nothing flashes on first render. The price element gets `data-flash="up"` or `"down"` for the duration. On mobile the tint is an absolutely positioned view behind the price text.
 
 **Interaction.** Hover motion applies to a fine pointer only. Rows and search results fade their hover fill in over `duration.fast`. Buttons step up 1 px on hover, and sink 1 px and scale to 98.5% while pressed. The star scales to 90% while pressed. The selected segment of every segmented control is one indicator that slides to the new option; its size is measured, because options can differ in width in Arabic.
 
 | Animation | Default | Reduced motion |
 | --- | --- | --- |
-| Price flash | Tint fades out behind the price, 400 ms; changed digits roll up | No tint, no roll. `data-flash` is still set. |
+| Price flash | Tint fades out behind the price, 400 ms; changed digits roll up (web) | No tint, no roll. `data-flash` is still set. |
 | Hover fill (rows, results) | Fades in, 120 ms | Changes at once |
 | Button | Steps up 1 px on hover; sinks 1 px and scales to 98.5% on press, 120 ms | Colour only |
 | Connection banner | Expands and slides in, 200 ms; collapses on exit, 200 ms | Appears and disappears at once |
@@ -180,7 +180,7 @@ In React Native, `elevation.1` and `elevation.2` map to shadow properties, and t
 | Range change | New line fades in, 200 ms | Swaps at once |
 | Live point | Halo pulses, 2 s loop | Static halo |
 | Search dropdown (from 768 px) | Drops 6 px and fades in, 200 ms | Fades in, 120 ms |
-| List to detail (web) | Name and price move from the row into the detail header, 320 ms | Page changes at once |
+| List to detail (web) | Name and price move from the row into the detail header, 320 ms (only when opening from a row) | Page changes at once |
 | Haptics (mobile) | Light tap on star; selection tick on range change | Unchanged |
 | Skeleton | Pulses between 100% and 55% opacity, 1.2 s loop | Static fill |
 | Search sheet | Slides up, 320 ms | Fades in, 120 ms |

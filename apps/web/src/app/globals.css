@@ -64,7 +64,7 @@
   @keyframes digit-roll {
     from {
       opacity: 0.2;
-      translate: 0 40%;
+      translate: 0 30%;
     }
   }
 

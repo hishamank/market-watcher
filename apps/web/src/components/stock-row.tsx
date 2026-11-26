@@ -1,7 +1,7 @@
 import { directionOf, formatPrice, formatSignedPercent, type FlashDirection } from "@mini/core";
 import Link from "next/link";
 import { ChangePill } from "./change-pill.tsx";
-import { Morph } from "./morph.tsx";
+import { Morph, OPEN_STOCK } from "./morph.tsx";
 import { PriceCell } from "./price-cell.tsx";
 import { StarButton } from "./star-button.tsx";
 
@@ -39,6 +39,7 @@ export function StockRow(props: StockRowProps) {
     >
       <Link
         href={`/stocks/${symbol}`}
+        transitionTypes={[OPEN_STOCK]}
         className="-ms-8 flex min-w-0 flex-1 items-center gap-12 self-stretch rounded-md ps-8 focus-visible:outline-offset-[-2px] list-table:col-span-7 list-table:-mx-8 list-table:grid list-table:grid-cols-subgrid list-table:px-8 list-compact:col-span-4 list-compact:-mx-8 list-compact:grid list-compact:grid-cols-subgrid list-compact:px-8"
       >
         <span className="flex min-w-0 flex-1 flex-col items-start gap-[3px] list-table:contents list-compact:contents">

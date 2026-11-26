@@ -4,7 +4,7 @@ Amends the price flash in `docs/DESIGN.md` and feature L2.
 
 The flash used to ring the day-change pill in the day's colour on every tick. In a walk of the list at 1440 px, 8 to 18 prices were flashing in every 100 ms sample, so the ring read as a flickering border, not as news. It also lied: Apple down on the day but ticking up flashed red.
 
-Now the flash marks one thing: this price just moved, and which way. Take Apple at $265.10 ticking to $265.14. The flash is green because $265.14 is above $265.10, whatever the day did. It is a short tint behind the price digits, `color.gainTint` or `color.lossTint` fading from full to nothing over `duration.flash`, so the digits keep `color.text` on a known AA pair at every frame. The digits that changed roll up into place in the same beat.
+Now the flash marks one thing: this price just moved, and which way. Take Apple at $265.10 ticking to $265.14. The flash is green because $265.14 is above $265.10, whatever the day did. It is a short tint behind the price digits, `color.gainTint` or `color.lossTint` fading from full to nothing over `duration.flash`, so the digits keep `color.text` on a known AA pair at every frame. On web, the digits that changed roll up into place in the same beat; mobile shows the tint only.
 
 A row flashes only when its price string changes, and at most once a second. Ticks inside that second update the digits without a flash. That keeps a fast stock readable during a tick spike and means a still screen is calm.
 
