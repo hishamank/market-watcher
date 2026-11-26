@@ -8,6 +8,7 @@ export const arListStrings = {
   "list.error.title": "تعذّر تحميل الأسهم",
   "list.error.help": "تحقّق من اتصالك وحاول مرة أخرى.",
   "list.error.retry": "إعادة المحاولة",
+  "list.more.error": "تعذّر تحميل المزيد من الأسهم",
   "list.count_zero": "لا توجد أسهم",
   "list.count_one": "سهم واحد",
   "list.count_two": "سهمان",
