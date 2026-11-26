@@ -58,6 +58,10 @@ _Avoid_: initial price, seed
 A change to a quote delivered while a client is watching that symbol.
 _Avoid_: update, event, price change
 
+**Flash**:
+A brief tint behind a price whose value just changed, coloured by the direction of that tick (up or down from the price before), at most once a second per row.
+_Avoid_: blink, highlight, ring
+
 ## Charts
 
 **Range**:

@@ -6,7 +6,7 @@ Terms follow `docs/glossary.md`. Test IDs and state attributes follow `docs/feat
 
 ## Direction
 
-Graphite is a calm, layered interface for reading prices. Surfaces stack in three steps (background, surface, raised) and are separated by a 1 px border and a soft shadow, never by blur. Colour is rationed: neutral greys carry the layout, green and coral carry gain and loss, and amber is reserved for the star and the focus ring. Numbers are the content, so every price, change and time is set in tabular digits that never shift when they tick. Movement is small and purposeful: one ring flash per tick, and short transitions that all have a reduced-motion alternative. Light and dark are equal themes built from the same tokens. The layout is written in start and end terms from day one, so Arabic mirrors without rework.
+Graphite is a calm, layered interface for reading prices. Surfaces stack in three steps (background, surface, raised) and are separated by a 1 px border and a soft shadow, never by blur. Colour is rationed: neutral greys carry the layout, green and coral carry gain and loss, and amber is reserved for the star and the focus ring. Numbers are the content, so every price, change and time is set in tabular digits that never shift when they tick. Movement is small and purposeful: a tint behind a price that just moved, controls that answer the pointer, and short transitions that all have a reduced-motion alternative (ADR 0048). Light and dark are equal themes built from the same tokens. The layout is written in start and end terms from day one, so Arabic mirrors without rework.
 
 ## Rules that always hold
 
@@ -164,15 +164,24 @@ In React Native, `elevation.1` and `elevation.2` map to shadow properties, and t
 | `easing.standard` | cubic-bezier(0.2, 0, 0, 1) |
 | `easing.exit` | cubic-bezier(0.4, 0, 1, 1) |
 
-**Price flash.** On every tick, up or down, a 1.5 px ring in the direction colour appears around the day change and fades from 100% to 0% opacity over `duration.flash` with `easing.standard`. Only opacity animates, so the price text and its background never change and contrast holds mid-flash. A new tick restarts the fade. At 4 ticks a second the ring holds a steady glow between about 40% and 100% and never strobes. The element still gets `data-flash="up"` or `"down"` for the duration. On mobile the ring is an absolutely positioned view animated with the native driver.
+**Price flash.** When a price's displayed value changes, a tint in the tick's direction (`color.gainTint` if the new price is higher than the one before, `color.lossTint` if lower) appears behind the price digits and fades from 100% to 0% opacity over `duration.flash` with `easing.standard`. The digits keep `color.text`, so contrast holds at every frame. The digits that changed roll up 40% of their height into place in the same beat; the others stay still. A row flashes at most once a second: ticks inside that second update the digits with no flash (ADR 0047). Nothing flashes on first render. The price element gets `data-flash="up"` or `"down"` for the duration. On mobile the tint is an absolutely positioned view behind the price text.
+
+**Interaction.** Hover motion applies to a fine pointer only. Rows and search results fade their hover fill in over `duration.fast`. Buttons step up 1 px on hover, and sink 1 px and scale to 98.5% while pressed. The star scales to 90% while pressed. The selected segment of every segmented control is one indicator that slides to the new option; its size is measured, because options can differ in width in Arabic.
 
 | Animation | Default | Reduced motion |
 | --- | --- | --- |
-| Price flash | Ring fades out, 400 ms | No ring. `data-flash` is still set. |
-| Connection banner | Slides down and fades in, 200 ms | Appears at once |
-| Selected segment (view control, range tabs) | Slides to the new option, 200 ms | Jumps |
-| Star | Scales from 85% to 100%, 120 ms | Fills at once |
-| Range change | Line crossfades, 200 ms | Swaps at once |
+| Price flash | Tint fades out behind the price, 400 ms; changed digits roll up | No tint, no roll. `data-flash` is still set. |
+| Hover fill (rows, results) | Fades in, 120 ms | Changes at once |
+| Button | Steps up 1 px on hover; sinks 1 px and scales to 98.5% on press, 120 ms | Colour only |
+| Connection banner | Expands and slides in, 200 ms; collapses on exit, 200 ms | Appears and disappears at once |
+| Selected segment (view control, range tabs, chaos failure rate) | Indicator slides to the new option, 200 ms | Jumps |
+| Star | Scales from 85% to 100%, 120 ms; 90% while pressed | Fills at once |
+| Chart first draw | Line reveals from left to right, 450 ms | Appears at once |
+| Range change | New line fades in, 200 ms | Swaps at once |
+| Live point | Halo pulses, 2 s loop | Static halo |
+| Search dropdown (from 768 px) | Drops 6 px and fades in, 200 ms | Fades in, 120 ms |
+| List to detail (web) | Name and price move from the row into the detail header, 320 ms | Page changes at once |
+| Haptics (mobile) | Light tap on star; selection tick on range change | Unchanged |
 | Skeleton | Pulses between 100% and 55% opacity, 1.2 s loop | Static fill |
 | Search sheet | Slides up, 320 ms | Fades in, 120 ms |
 | Toast | Slides up and fades in, 200 ms | Fades in, 120 ms |
@@ -183,7 +192,7 @@ In React Native, `elevation.1` and `elevation.2` map to shadow properties, and t
 | Width | Layout |
 | --- | --- |
 | 360 px | One column. The list runs edge to edge on `color.surface`. Search opens as a full-screen sheet. Chaos controls open as a bottom sheet. |
-| 768 px | One centred column, at most 720 px wide. The list and the detail sit in cards (`radius.xl`, `elevation.1`). Search is a 380 px field in the header with a dropdown. |
+| 768 px | One centred column, at most 720 px wide. The list and the detail sit in cards (`radius.xl`, `elevation.1`). From 768 px to 1279 px the list is a compact table with a header row: name, symbol, price, day change (money and percent) and the star (ADR 0049). Search is a 380 px field in the header with a dropdown. |
 | 1440 px | `/` shows the list as a table, at most 1120 px wide, with columns for name, symbol, price, day change, day change %, previous close and last update. `/stocks/[symbol]` keeps the list visible in a 400 px pane at the start, with the detail card beside it. |
 
 The list and the detail stay separate routes at every width. The 1440 px detail layout is a proposal: the list pane is the same list component, with the open symbol marked by `aria-current`. Page padding is `space.16` at 360 px and `space.24` from 768 px.
@@ -208,7 +217,7 @@ Each component lists its anatomy, states, spacing, motion and test IDs.
 
 ### App header
 
-- **Anatomy.** At 360 px: page title "Markets" (`type.headingMd`), below it the feed mode badge and, when it applies, the Market closed label, and a search button at the end. On the detail route the title is replaced by a back button. From 768 px: one row with title, badge, Market closed label, and the search field at the end.
+- **Anatomy.** A 28 px brand mark (a rising line in `color.bg` on a `color.text` square with `radius.sm`, hidden from screen readers) leads the title, except on the 360 px detail route. At 360 px: page title "Markets" (`type.headingMd`), below it the feed mode badge and, when it applies, the Market closed label, and a search button at the end. On the detail route the title is replaced by a back button. From 768 px: one row with title, badge, Market closed label, and the search field at the end.
 - **Spacing.** Minimum height 64 px at 360 px and 72 px from 768 px. Inline padding `space.16` start, `space.6` end (the icon button supplies the rest).
 - **Feed mode badge.** A pill with a 7 px dot and the word "Simulated" or "Live", `type.caption` at weight 500, `color.textSecondary`. Simulated has a dashed `color.borderStrong` border and a hollow dot. Live has a solid border and a filled dot. It never changes while the page is open and is present in the server render.
 - **Market closed label.** A 16 px moon icon and "Market closed", `type.caption` at weight 500, `color.textSecondary`. Absent while the market is open.
@@ -222,7 +231,7 @@ Each component lists its anatomy, states, spacing, motion and test IDs.
   - Stale: `color.staleTint` background, reconnecting icon in `color.stale`, "Reconnecting…", "Prices may be out of date.", and a Retry button.
   - Offline: `color.fill` background, offline icon, "Offline", "Check your connection. Prices may be out of date.", no button, because nothing reconnects while offline.
 - **Spacing.** Minimum height 56 px, block padding 6 px, inline padding 14 px start and 6 px end, icon to text gap 10 px. Title is `type.label` at weight 600, help is `type.label` in `color.textSecondary`.
-- **Motion.** Slides down and fades in. Content below moves once and never jumps again while the banner stays.
+- **Motion.** Expands and slides in. On exit it collapses, so content below glides back instead of jumping. Content below never jumps while the banner stays.
 - **Test IDs.** `connection-banner`, `connection-retry`, `app-root[data-connection]`.
 
 ### Stock row
@@ -230,7 +239,7 @@ Each component lists its anatomy, states, spacing, motion and test IDs.
 - **Anatomy.** Name (`type.bodyStrong`, one line, truncated) over symbol (`type.caption`, `color.textMuted`). At the end: price (`numeric.price`) over the day change pill (`numeric.change`: arrow, signed money, signed percent in brackets). A star button closes the row. The name area and numbers are one link to the detail route.
 - **Spacing.** Minimum height 68 px. Inline padding `space.16` start, `space.6` end. 12 px between name and numbers. The pill has 2 px by 8 px padding, `radius.pill`, a 9 px arrow and a 5 px gap. Rows are separated by a 1 px `color.border` line.
 - **States.**
-  - Ticking up or down: the flash ring on the pill. `data-direction` on the price is `up`, `down` or `flat`.
+  - Ticking up or down: the flash tint behind the price (see Price flash). `data-direction` on the price is `up`, `down` or `flat`, the day's direction.
   - Flat: dash icon, "0.00 (0.00%)", `color.flat` on `color.fill`.
   - Stale: price in `color.textMuted`, pill in `color.textSecondary` on `color.fill` (muted text on fill fails AA in light), arrow and sign kept, no flash.
   - Last-known quote: 14 px clock in `color.stale` before the LTR price; digits remain `color.text`. Neutral change pill keeps arrow, sign and numbers. The clock has a native title and screen-reader text on web, and the sentence joins the mobile row accessibility label. No nested tap target. Desktop Last update includes date and time. Connection stale wins for digits and keeps the clock.
@@ -274,11 +283,12 @@ Each component lists its anatomy, states, spacing, motion and test IDs.
 - **Size.** Plot height 176 px at 360 px and 320 px from 768 px. A 36 px strip above the plot is always reserved for the scrub readout and the "as of" note, and a 24 px axis row sits below, so no state changes the height.
 - **Line and fill.** 2 px line with round joins in `chart.gainLine` or `chart.lossLine`, chosen by the selected range's direction. The area runs from 20% to 0% of the same colour.
 - **1D.** The x-axis spans the whole session as the gateway's history response reports it (09:30 to 16:00 ET in Live mode, one full UTC day in Simulated mode), and the line grows across it. A 1 px dashed `chart.previousClose` line marks the previous close, with a small "Previous close 230.28" label at the end.
-- **Live point.** An 8 px dot with a 20 px halo at 22% opacity. It equals the header price at every tick.
-- **Scrubbing.** A 1 px `chart.crosshair` line and a 10 px hollow dot. The readout shows time in ET, price, and change from the start of the range with arrow and sign. It sits in the strip above the plot, follows the crosshair and stops at the chart edges. The chart is focusable, and the arrow keys move the crosshair one bar.
+- **Live point.** An 8 px dot with a 20 px halo at 22% opacity that pulses outward every 2 s. It equals the header price at every tick.
+- **Future (1D).** The part of the session after the live point is shaded with `color.fill` at 35% opacity, so the empty half reads as time still to come.
+- **Scrubbing.** A 1 px `chart.crosshair` line and a 10 px hollow dot. The readout shows time in ET, price, and change from the start of the range with arrow and sign. It sits in the strip above the plot, follows the crosshair and stops at the chart edges. The crosshair never goes past the last bar: in the future part of 1D it rests on the live point. The chart is focusable, and the arrow keys move the crosshair one bar.
 - **Attribution.** The TradingView mark keeps the bottom left corner of the plot. Keep about 72 by 20 px clear there.
 - **States.** Loading: a skeleton at the exact final size (`radius.lg`) and an axis skeleton. Error: a dashed-border box with an alert icon, "Couldn't load this chart" and Retry, while the header keeps ticking. Older copy: the line in `color.textMuted`, no fill and no live point, with a note "As of 13:40 ET" on `color.staleTint` in the strip.
-- **Motion.** The line crossfades on a range change.
+- **Motion.** The first draw reveals the line from left to right. A range change fades the new line in.
 - **Test IDs.** `price-chart[data-state]`, `chart-last-price`, `chart-readout`, `chart-retry`.
 
 ### Detail header
@@ -286,7 +296,7 @@ Each component lists its anatomy, states, spacing, motion and test IDs.
 - **Anatomy.** Symbol chip (`type.caption` weight 500 on `color.fill`), name (`type.body`, `color.textSecondary`), price (`numeric.display`), then the range change pill (13/18, 3 px by 10 px padding) with its label. The star sits at the end of the first row.
 - **Labels.** 1D "Today", 1W "Past week", 1M "Past month", 3M "Past 3 months", 1Y "Past year", 5Y "Past 5 years".
 - **States.**
-  - Ticking: the flash ring on the pill.
+  - Ticking: the flash tint behind the price.
   - Scrubbing: the price and change show the scrubbed point, and the label shows its time in ET.
   - Chart loading: a skeleton pill of the final size.
   - Chart error on a range never loaded: a neutral pill with a dash, because the range change is unknown.
@@ -304,7 +314,7 @@ Each component lists its anatomy, states, spacing, motion and test IDs.
 ### Empty state, inline error, not found
 
 - **Anatomy.** Centred: a 56 px round icon on `color.fill`, a title (`type.headingMd`), one line of help (`type.label`, `color.textSecondary`, at most 280 px wide) and one action.
-- **Watchlist empty.** "Your watchlist is empty", "Tap the star next to any stock to add it here.", link "See all stocks". Test ID `watchlist-empty`.
+- **Watchlist empty.** "Your watchlist is empty", "Tap the star next to any stock to add it here.", link "See all stocks". Below it, under "Start with one of these" (`type.label`, `color.textSecondary`), the first three stocks of the catalogue as live stock rows with stars (ADR 0049). Test IDs `watchlist-empty`, `watchlist-suggestions`.
 - **List error.** "Couldn't load stocks", "Check your connection and try again.", solid Retry button. Test IDs `list-error`, `list-retry`.
 - **Not found.** "Stock not found", "There's no stock with the symbol {SYMBOL}.", solid link "Back to all stocks". Test ID `not-found`.
 
