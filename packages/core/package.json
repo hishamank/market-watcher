@@ -12,8 +12,8 @@
   },
   "dependencies": {
     "@mini/contracts": "workspace:*",
-    "i18next": "^27.2.9",
-    "intl-pluralrules": "^2.0.1"
+    "i18next": "27.2.9",
+    "intl-pluralrules": "2.0.1"
   },
   "devDependencies": {
     "@tanstack/react-query": "5.108.4",
