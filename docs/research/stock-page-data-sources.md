@@ -2,7 +2,7 @@
 
 Checked 2026-11-26. Research and proposals only; no provider configuration or product scope changed. Authenticated endpoints were documentation-inspected, not tested with account credentials. Public RSS endpoints were fetched directly from this workspace and parsed as XML.
 
-Owner decision on 2026-11-27: proceed with Yahoo profiles as a temporary demo adapter, with the approved gateway dependency. The original recommendation below records the research assessment; [ADR 0054](../adr/0054-yahoo-company-overviews-stay-separate-from-prices.md) records the accepted trade-off. Live AAPL and SPY profile requests subsequently succeeded through yahoo-finance2 4.0.6.
+Owner decision on 2026-11-27: proceed with Yahoo profiles as a temporary demo adapter, with the approved gateway dependency. The original recommendation below records the research assessment; [ADR 0055](../adr/0055-yahoo-company-overviews-stay-separate-from-prices.md) records the accepted trade-off. Live AAPL and SPY profile requests subsequently succeeded through yahoo-finance2 4.0.6.
 
 ## Original recommendation
 

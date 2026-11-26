@@ -10,4 +10,4 @@ The feeds inspected supplied neither original publisher names nor thumbnails. If
 
 The UI shows three stories initially and reveals the rest of the cached batch with Show more. Publication dates include the year and ET. Simulator mode makes no external feed calls and serves clearly labelled fictional headlines; those sample rows are not article links. Live rows open externally (a new tab on web). Empty, loading and retry states stay local to the section.
 
-This retains ADR 0054's demo provider decision. Feed availability and symbol relevance are controlled by Yahoo and may change. Parser reference: [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser). Provider context and RSS terms are recorded in [the source research](../research/stock-page-data-sources.md).
+This retains ADR 0055's demo provider decision. Feed availability and symbol relevance are controlled by Yahoo and may change. Parser reference: [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser). Provider context and RSS terms are recorded in [the source research](../research/stock-page-data-sources.md).
