@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+# Walk stack for the verify skill: up | doctor | down | env.
+# Usage: .claude/skills/verify/bin/stack up
+set -euo pipefail
+
+root="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
+state="$root/.verify/stack.env"
+gateway_port="${VERIFY_GATEWAY_PORT:-4000}"
+web_port="${VERIFY_WEB_PORT:-3000}"
+
+die() { echo "stack: $*" >&2; exit 1; }
+
+load_state() {
+  [[ -f "$state" ]] || die "no stack recorded at $state; run 'stack up' first"
+  source "$state"
+}
+
+port_pids() {
+  ss -ltnpH "sport = :$1" 2>/dev/null | grep -oE 'pid=[0-9]+' | cut -d= -f2 | sort -u
+}
+
+session_of() { ps -o sid= -p "$1" 2>/dev/null | tr -d ' '; }
+
+session_alive() { [[ -n "$(ps -o pid= -s "$1" 2>/dev/null)" ]]; }
+
+port_owned_by() {
+  local port="$1" sid="$2" pid
+  for pid in $(port_pids "$port"); do
+    [[ "$(session_of "$pid")" == "$sid" ]] && return 0
+  done
+  return 1
+}
+
+start_session() {
+  local log="$1" pidfile="$2"
+  shift 2
+  setsid bash -c 'echo $$ > "$0"; exec "$@"' "$pidfile" "$@" >"$log" 2>&1 < /dev/null &
+  for _ in $(seq 50); do
+    [[ -s "$pidfile" ]] && { cat "$pidfile"; return 0; }
+    sleep 0.1
+  done
+  die "process for $log never started"
+}
+
+check() {
+  local ok=0
+  session_alive "$GATEWAY_SID" && echo "ok   gateway session $GATEWAY_SID alive" \
+    || { echo "FAIL gateway session $GATEWAY_SID is gone"; ok=1; }
+  session_alive "$WEB_SID" && echo "ok   web session $WEB_SID alive" \
+    || { echo "FAIL web session $WEB_SID is gone"; ok=1; }
+  port_owned_by "$GATEWAY_PORT" "$GATEWAY_SID" && echo "ok   :$GATEWAY_PORT owned by our gateway" \
+    || { echo "FAIL :$GATEWAY_PORT is not served by our gateway session"; ok=1; }
+  port_owned_by "$WEB_PORT" "$WEB_SID" && echo "ok   :$WEB_PORT owned by our web" \
+    || { echo "FAIL :$WEB_PORT is not served by our web session"; ok=1; }
+  curl -sf --max-time 5 "$GATEWAY_URL/stocks" | grep -q '"feedMode":"simulated"' \
+    && echo "ok   gateway answers /stocks with feedMode simulated" \
+    || { echo "FAIL gateway /stocks is not simulated (or not answering)"; ok=1; }
+  curl -sf --max-time 5 "$GATEWAY_URL/health" | grep -q '"connections"' \
+    && echo "ok   gateway /health answers" \
+    || { echo "FAIL gateway /health does not answer"; ok=1; }
+  curl -sf --max-time 60 "$WEB_URL/" | grep -q 'data-feed-mode="simulated"' \
+    && echo "ok   web / renders data-feed-mode=simulated" \
+    || { echo "FAIL web / does not render data-feed-mode=simulated"; ok=1; }
+  return "$ok"
+}
+
+cmd_up() {
+  [[ -f "$state" ]] && die "a stack is already recorded in $state; run 'stack doctor' or 'stack down'"
+  for port in "$gateway_port" "$web_port"; do
+    [[ -z "$(port_pids "$port")" ]] && ! ss -ltnH "sport = :$port" | grep -q . \
+      || die "port $port is taken by a process this run did not start; never kill it, pick VERIFY_*_PORT"
+  done
+  [[ -d "$root/node_modules" ]] || (cd "$root" && pnpm install --frozen-lockfile)
+  local branch stamp run
+  branch="$(git -C "$root" branch --show-current | tr '/' '-')"
+  stamp="$(date +%Y%m%d-%H%M)"
+  run="${VERIFY_RUN_DIR:-$root/.verify/$stamp-${branch:-detached}}"
+  mkdir -p "$run"
+  local gateway_url="http://localhost:$gateway_port" web_url="http://localhost:$web_port"
+  cd "$root"
+  local gsid wsid
+  gsid="$(FEED=simulator SIM_SEED=42 PORT="$gateway_port" HOST=localhost \
+    ALLOWED_ORIGINS="$web_url" start_session "$run/gateway.log" "$run/gateway.sid" \
+    pnpm --filter ./apps/gateway dev)"
+  wsid="$(NEXT_PUBLIC_GATEWAY_URL="$gateway_url" PORT="$web_port" \
+    start_session "$run/web.log" "$run/web.sid" pnpm --filter ./apps/web dev)"
+  cat >"$state" <<EOF
+RUN_DIR=$run
+GATEWAY_SID=$gsid
+WEB_SID=$wsid
+GATEWAY_PORT=$gateway_port
+WEB_PORT=$web_port
+GATEWAY_URL=$gateway_url
+WEB_URL=$web_url
+EOF
+  source "$state"
+  echo "stack: gateway session $gsid, web session $wsid, evidence in $run"
+  for _ in $(seq 90); do
+    if check >/dev/null 2>&1; then
+      echo "stack: ready"
+      check
+      return 0
+    fi
+    session_alive "$GATEWAY_SID" && session_alive "$WEB_SID" || break
+    sleep 2
+  done
+  check || true
+  die "stack never became ready; read $run/gateway.log and $run/web.log, then 'stack down'"
+}
+
+cmd_doctor() {
+  load_state
+  echo "stack: run dir $RUN_DIR"
+  check && echo "stack: healthy" || die "doctor failed; do not drive this instance"
+}
+
+cmd_down() {
+  load_state
+  local sid
+  for sid in "$GATEWAY_SID" "$WEB_SID"; do
+    session_alive "$sid" && pkill -TERM -s "$sid" || true
+  done
+  for _ in $(seq 50); do
+    session_alive "$GATEWAY_SID" || session_alive "$WEB_SID" || break
+    sleep 0.2
+  done
+  for sid in "$GATEWAY_SID" "$WEB_SID"; do
+    session_alive "$sid" && pkill -KILL -s "$sid" || true
+  done
+  rm -f "$state"
+  for port in "$GATEWAY_PORT" "$WEB_PORT"; do
+    ss -ltnH "sport = :$port" | grep -q . && echo "stack: port $port still listening" || echo "stack: port $port released"
+  done
+  echo "stack: evidence kept in $RUN_DIR"
+}
+
+cmd_env() { load_state; cat "$state"; }
+
+case "${1:-}" in
+  up) cmd_up ;;
+  doctor) cmd_doctor ;;
+  down) cmd_down ;;
+  env) cmd_env ;;
+  *) die "usage: stack up | doctor | down | env" ;;
+esac

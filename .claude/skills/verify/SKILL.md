@@ -1,75 +1,112 @@
 ---
 name: verify
-description: Prove that a change works in the running app by driving the flows in docs/feature-map.md against the gateway in simulator mode, and report pass or fail per feature ID. Use before calling any ticket done, before opening or updating a PR, and when asked to verify, check or prove a feature.
+description: Prove that a change works end to end in the running app, and report PASS, FAIL or BLOCKED for each feature ID in docs/feature-map.md. It starts an isolated simulator stack, runs the E2E suite and the scripted browser journeys, walks what needs judgement, and covers the Expo app and Live mode. Use before calling any ticket done, before opening or updating a PR, and when asked to verify, check or prove a feature.
 ---
 
 # Verify
 
-A ticket is done only when verify passes for every feature ID it touched. The source of truth for what to check is [`docs/feature-map.md`](../../../docs/feature-map.md). This skill covers how to check it.
+A ticket is done only when verify passes for every feature ID it touched. [`docs/feature-map.md`](../../../docs/feature-map.md) says what must be true for each feature. [`features/`](features/README.md) says how to reach and drive the web features. This file is the run.
 
-Each feature in the map is checked one of two ways:
+Each feature is checked in one or more of three ways:
 
-- **E2E:** the Playwright suite, the mechanical proof.
-- **Walk:** you drive a real browser and judge what a user would see: layout, motion, focus, console.
+- **E2E:** the Playwright suite. It is the mechanical proof, against a production build.
+- **Journey:** `bin/journey <name>`, a scripted browser run against the walk stack. It saves screenshots, console output, socket frames and a side effect for every step.
+- **Walk:** your judgement in a real browser or on a phone: layout, motion, focus and feel. Start from the journey's screenshots, then drive by hand whatever the map asks you to judge.
 
-A feature marked both needs both.
+The map marks each feature E2E, Walk or both. A Walk feature with a journey gets the journey and your judgement.
+
+All commands run from the repo root, with `S=.claude/skills/verify`.
 
 ## 1. Pick the features
 
 - Every feature ID listed on the ticket or PR.
-- Every feature whose route, component, hook or gateway path your diff touches, even if the ticket did not list it. Search the feature map for the test IDs and routes in your diff.
+- Every feature whose route, component, hook or gateway path your diff touches, even if the ticket did not list it. Search the feature map and `features/` for the test IDs and routes in your diff.
 - Always the smoke set: **G1, G3 (step 1), L1, L2, D1.**
 
 Write the list down before launching. It is your completion criterion: every ID on it ends as PASS, FAIL or BLOCKED, with evidence.
 
 ## 2. Launch
 
-Two isolated stacks, so verification never fights a developer's running servers:
+There are two isolated web stacks, so verification never fights a developer's running servers:
 
 | Use | Gateway | Web | Started by |
 | --- | --- | --- | --- |
-| Walk | `http://localhost:4000` | `http://localhost:3000` | you, below |
+| Journeys and Walk | `http://localhost:4000` | `http://localhost:3000` | `$S/bin/stack up` |
 | E2E | `http://localhost:4100` | `http://localhost:3100` | Playwright's own `webServer` config. Set `E2E_GATEWAY_PORT` and `E2E_WEB_PORT` to run beside another worktree's suite |
 
-Start the walk stack from the repo root, each in its own background shell under `setsid`, so each server and its children share one session:
-
 ```bash
-FEED=simulator SIM_SEED=42 PORT=4000 setsid pnpm --filter ./apps/gateway dev
-NEXT_PUBLIC_GATEWAY_URL=http://localhost:4000 PORT=3000 setsid pnpm --filter ./apps/web dev
+S=.claude/skills/verify
+$S/bin/stack up
 ```
 
-Keep each session ID: the `SID` column of `ps -eo pid,sid,args | grep 'pnpm --filter'`. `setsid` may fork, so `$!` is not always the session ID.
+`bin/stack up` does the following:
 
-The stack is ready when both checks in step 3 pass. If a port is already taken by a process you did not start, stop and report it. Never kill it.
+- It refuses to start if port 4000 or 3000 is already listening. Never kill that process: it is someone else's server or another worktree's stack. To run beside it, pick other ports, for example `VERIFY_GATEWAY_PORT=4200 VERIFY_WEB_PORT=3200 $S/bin/stack up`. `ALLOWED_ORIGINS` follows the web port.
+- It runs `pnpm install --frozen-lockfile` if `node_modules` is missing. Journeys also need Playwright's Chromium. On a fresh machine, run `pnpm --filter ./apps/web exec playwright install chromium` once.
+- It starts `FEED=simulator SIM_SEED=42 pnpm --filter ./apps/gateway dev` and `pnpm --filter ./apps/web dev`, each in its own `setsid` session. Both session IDs go into `.verify/stack.env`.
+- It creates the run folder `.verify/<YYYYMMDD-HHMM>-<branch>/`, with each `/` in the branch replaced by `-`, and writes `gateway.log` and `web.log` there.
+- It polls the doctor until every check passes, then prints `stack: ready`. From a cold start this takes 5 to 30 s. If it is not ready after about 3 minutes, it exits non-zero and names the logs. Then run step 7.
+
+The simulator has no database and no seed step. Prices come from `SIM_SEED=42` and the clock, and the catalogue is `apps/gateway/data/catalogue.json`. `stack up` refuses while `.verify/stack.env` exists: one stack per checkout.
+
+Other targets have their own launch:
+
+- **Expo app (M1 to M5):** [`mobile.md`](mobile.md).
+- **Live mode rows (G1, G2, C1) and G5:** [`live-mode.md`](live-mode.md).
 
 If a command here fails because a script was renamed, the root `package.json` and the workspace `package.json` files are the source of truth. Use what they define, then fix this skill in the same PR.
 
 ## 3. Doctor
 
-Read-only checks. Run them first, and again whenever anything looks off:
-
 ```bash
-curl -sf http://localhost:4000/stocks | grep -q '"feedMode":"simulated"' && echo gateway-ok
-curl -sf http://localhost:3000/ | grep -q 'data-feed-mode="simulated"' && echo web-ok
+$S/bin/stack doctor
 ```
 
-Both must print. A gateway answering with `"feedMode":"live"` means the wrong environment, so stop.
+This is read-only. Run it first, after any FAIL, and whenever anything looks off. Every line must start with `ok`:
+
+- The gateway and web sessions in `stack.env` are alive.
+- Ports 4000 and 3000 are owned by processes in those sessions, so you are driving your own stack.
+- `GET /stocks` answers `"feedMode":"simulated"`. A `live` answer means the wrong environment, so stop.
+- `GET /health` answers.
+- `GET /` renders `data-feed-mode="simulated"` in the server HTML.
+
+`$S/bin/stack env` prints the URLs, session IDs and run folder.
 
 ## 4. Drive
 
-### E2E features
+### E2E
 
 ```bash
-pnpm --filter ./apps/web e2e -- --grep "<feature IDs separated by |>"
+pnpm --filter ./apps/web e2e --project chromium --grep "<IDs separated by |>"
+pnpm --filter ./apps/web e2e --project gateway-down --no-deps --grep "L4|D1"
 ```
 
-Each Playwright test title starts with its feature ID (for example `L2 live ticks`), so `--grep "G1|L1|D2"` runs exactly those. Paste the summary lines into the report. A flaky pass (fails, then passes on retry) counts as FAIL, with a note.
+Each Playwright test title starts with its feature ID (for example `L2 live ticks`). The `gateway-down` project holds the tests that stop the gateway (L4, and D1's error state). Write the flags straight after `e2e`. A `--` before them reaches Playwright literally, the filter is ignored, and all 55 tests run. Without `--project`, the `gateway-down` project's dependency pulls in every chromium test. The suite builds and starts its own stack, which takes about 2 minutes. Paste the summary lines into the report. A flaky pass (fails, then passes on retry) counts as FAIL, with a note.
 
-### Walk features
+### Journeys
 
-Use the browser tool your harness provides: the T3 preview tools when they are loaded, otherwise a throwaway Playwright script in your scratchpad directory, never in the repo. Use stable handles only: `data-testid`, ARIA roles and the state attributes in the feature map's Conventions. Never use coordinates, tab order or copy text.
+```bash
+$S/bin/journey watchlist      # W1–W7, D8, S3: stars from row, detail and search, order, persistence, cross-tab, corrupt storage
+$S/bin/journey stock-list     # L1, L2, L3, L5: server HTML, ticks and flash, virtualisation at 360 px, view toggle
+$S/bin/journey stock-detail   # D1–D4, D7: open from a row, search and the list pane, live point, scrubbing, ranges, 404, back at 768 and 360
+$S/bin/journey connection     # G1, C1, G3 drop and offline, G2 force closed, H1 /health
+```
 
-For each feature, follow its steps in the map and observe its expected result exactly. Always:
+Run them one at a time: `connection` flips gateway-wide chaos switches. Each journey runs the doctor first and refuses an unhealthy stack. It then prints `[<ID>] <action>` followed by `[<ID>] PASS <what was observed>` or `[<ID>] FAIL <error>`, and exits non-zero on any FAIL. A FAIL does not stop the run.
+
+The recipe for each feature, its entry points and its gotchas are in [`features/`](features/README.md). To cover a feature no journey drives yet, copy the closest journey in `journeys/` and use these helpers from `journeys/lib.mjs`:
+
+- `startJourney(feature, { width, height })` opens a fresh context. The default is 1440 × 900.
+- `step(id, action, fn)` runs and logs a step. `fn` returns what it observed.
+- `openConnected(path)` waits for `app-root[data-connection="connected"]`.
+- `shot(name)`, `save(name, data)` and `finish()` record evidence.
+- `allowConsole(regex, reason)` lets a step expect a console message, as D7 does for its 404. Every allowed message is still logged with its reason.
+
+### Walk
+
+Drive the stack from step 2 with the browser tool your harness provides: the T3 preview tools when they are loaded, otherwise a throwaway Playwright script in your scratchpad directory, never in the repo. Use stable handles only: `data-testid`, ARIA state (`aria-pressed`, `aria-selected`, `aria-checked`) and the `app-root` state attributes from the feature map's Conventions. Never use coordinates, tab order or copy text, except labels that the map itself gives as the expected result.
+
+For each Walk feature, follow its steps in the map and observe the expected result exactly. Always:
 
 - Check the browser console after each flow. Any hydration warning or error is a FAIL for that feature.
 - Check at 360 × 740 and at 1440 × 900 when the feature has layout.
@@ -80,7 +117,7 @@ Recipes for states that are hard to reach:
 | State | How |
 | --- | --- |
 | Stale after silence | chaos **Freeze feed**, then wait 11 s |
-| Stale on close | chaos **Drop connection**, or stop the gateway process you started |
+| Stale on close | chaos **Drop connection**. For the gateway-stopped case (G3 step 4), follow the manual walk in [`features/connection.md`](features/connection.md) |
 | Offline | chaos **Go offline**, or the browser's offline emulation |
 | Reduced motion | the browser's reduced-motion emulation |
 | Cross-tab | two pages in the same browser context |
@@ -88,16 +125,24 @@ Recipes for states that are hard to reach:
 | Slow or failing history | chaos **History latency** and **History failures** at 100% |
 | Market closed | chaos **Force market closed** (reverts after 60 s) |
 
-Proof standard: drive the path a user takes. Do not call hooks, stores or test-only endpoints to fake a state. The chaos controls are a product feature, so using them is the real path.
+Chaos switches other than drop and offline are gateway-wide and last 60 s. Turn each one back off before the next journey.
+
+Proof standard: drive the path a user takes. Never call hooks, stores or test-only endpoints to fake a state. The chaos controls are a product feature, so using them is the real path. Check the side effect as well as the screen. A FAIL stays a FAIL: never weaken a step to make it pass.
 
 ## 5. Evidence
 
-Write everything to `.verify/<YYYYMMDD-HHMM>-<branch>/` at the repo root (git-ignored), with each `/` in the branch name replaced by `-` (`t/1-scaffold` becomes `t-1-scaffold`):
+Everything goes to the run folder `.verify/<YYYYMMDD-HHMM>-<branch>/` at the repo root, which is git-ignored:
 
-- `report.md`: the report below.
-- One screenshot per Walk feature, named by feature ID (`G3-stale.png`), taken after the expected state appears.
+- `report.md`: the report from step 6.
 - `e2e.txt`: the Playwright output.
-- `console.txt`: console messages collected during the walk.
+- One folder per journey, holding:
+  - `steps.log`: action and result per feature ID.
+  - `<ID>-<state>.png`, plus `<ID>-failure.png` when a step failed.
+  - `console.txt`: unexpected messages first, then allowed ones with their reasons.
+  - `frames.json`: gateway socket frames.
+  - The side effect: `storage.json`, `L1-server.html` or `health.json`.
+- One screenshot per Walk feature, named by feature ID (`G4-focus.png`), taken after the expected state appears, and `console.txt` from the walk.
+- `gateway.log` and `web.log` from the stack.
 
 ## 6. Report
 
@@ -106,148 +151,27 @@ End every run with this table, in your reply and in the PR description:
 ```markdown
 | Feature | Check | Result | Evidence |
 | --- | --- | --- | --- |
-| G1 | E2E | PASS | e2e.txt: "G1 feed mode badge" passed |
-| G3 | E2E + Walk | FAIL | stale banner never appeared after Freeze feed (G3-freeze.png) |
-| D4 | Walk | BLOCKED | chart not rendered yet: ticket #12 lands it |
+| G1 | E2E + Journey | PASS | e2e.txt: "G1 feed mode badge" passed; connection/steps.log [G1] PASS |
+| G3 | E2E + Journey + Walk | FAIL | stale banner never appeared after Freeze feed (G3-freeze.png) |
+| M3 | Walk | BLOCKED | needs the owner's phone |
 ```
 
 - **PASS:** the expected result was observed, with evidence.
-- **FAIL:** observed something else. Say what you saw.
-- **BLOCKED:** cannot be checked yet, because the feature or a dependency does not exist. Name the blocker.
+- **FAIL:** something else was observed. Say what you saw.
+- **BLOCKED:** it cannot be checked yet, because the feature, a dependency or a prerequisite is missing. Name the blocker.
 
 The ticket is done only when every feature it touched is PASS. A FAIL means fix and re-run. A ticket with a remaining FAIL opens as a draft PR with the table.
 
 ## 7. Cleanup
 
-Stop only the processes you started, by the session IDs from step 2. `pnpm`, Turborepo and `next dev` leave child processes behind, so stop the whole session, then confirm both ports are free:
-
 ```bash
-pkill -TERM -s <gateway session ID>
-pkill -TERM -s <web session ID>
-ss -ltn | grep -E ':(3000|4000)\b' || echo ports-released
+$S/bin/stack down
 ```
 
-Never kill by name or port. Leave `.verify/` in place: the evidence must survive cleanup.
+This stops only the two sessions in `stack.env`: it sends `pkill -TERM -s <sid>`, then `-KILL` after 10 s. It deletes `stack.env`, confirms both ports are released, and prints the run folder. Run it after every failed launch or drive iteration too. If `stack.env` is gone but a port is still busy, find the process's session with `ps -o sid= -p <pid>`. Stop it only if that session ID matches `gateway.sid` or `web.sid` in your run folder. Never kill by name or port. The run folder stays: the evidence must survive cleanup.
 
-## Live mode
+## Limits
 
-Live mode needs the owner's Alpaca paper-trading keys, so an agent cannot run it. An agent reports the Live mode rows of G1, G2 and C1 as BLOCKED with "needs the owner's keys", and the gateway's Alpaca tests (`apps/gateway/src/feeds/alpaca/`) stand in until the owner runs it.
-
-The owner's manual run, from the repo root:
-
-1. Export `FEED=alpaca`, `ALPACA_KEY_ID` and `ALPACA_SECRET_KEY` in the shell. The gateway reads only its environment and does not load `.env` by itself. Leave `ALPACA_TRADING_URL`, `ALPACA_DATA_URL` and `ALPACA_STREAM_URL` unset to use paper trading, the market data API and the IEX stream.
-2. Check the fail-fast path first: `FEED=alpaca ALPACA_KEY_ID= ALPACA_SECRET_KEY= pnpm --filter ./apps/gateway start` must exit with status 1 and print "FEED=alpaca needs ALPACA_KEY_ID and ALPACA_SECRET_KEY". A wrong secret must exit with "Alpaca rejected ALPACA_KEY_ID and ALPACA_SECRET_KEY". Neither may start the simulator.
-3. Start the gateway with the keys (`PORT=4000 setsid pnpm --filter ./apps/gateway start`) and the web app as in step 2 of the launch.
-4. Doctor: `curl -sf http://localhost:4000/stocks | grep -q '"feedMode":"live"' && echo live-ok`.
-5. Open `/`. Expect:
-   - **G1:** the badge reads "Live", and `data-feed-mode="live"` is in the server-rendered HTML.
-   - **G2:** outside 09:30 to 16:00 New York time on a trading day, including pre-market and after-hours, "Market closed" shows, `data-market-status="closed"`, and prices hold the last close without ticking. During the session the label is gone and streamed prices tick.
-     If Alpaca is unreachable at the close, held quotes are marked last-known after a failed refresh. Watchers get a tick and new subscribers get the marked snapshot; only symbols with no held copy get `unavailable`. Recovery supplies the unmarked close (#58, ADR 0045).
-   - **C1:** `/?debug=1` shows no chaos panel.
-6. Open a stock and switch through every range. Each chart draws, and 1D covers the regular session only.
-
-### To measure on the first keyed run
-
-The docs do not settle these, so the adapter uses a documented default and the run records the real value in ADR 0021:
-
-- **Batch size:** `SNAPSHOT_BATCH_SIZE` in `apps/gateway/src/feeds/alpaca/config.ts` is 100 symbols per snapshot call. Call `/v2/stocks/snapshots` with 100, 500 and 1,000 symbols and note the largest that succeeds.
-- **Batch cost:** read `X-RateLimit-Remaining` before and after one 100-symbol snapshot call. A drop of 1 confirms one request per batch, as ADR 0021 assumes.
-- **Stream cap:** subscribe a 31st trade symbol and confirm error 405, "symbol limit exceeded".
-- **Bad keys:** note whether the data API answers 401 or 403. The adapter treats both as rejected keys.
-- **Calendar times:** confirm `/v2/calendar` gives `open` and `close` in New York time, so the session close equals `next_close` from `/v2/clock`.
-- **Hourly bars:** check whether `1Hour` bars start on the hour (09:00, 10:00) or at the open (09:30). The adapter keeps every intraday bar that overlaps the session, so an hourly bar starting at 09:00 also carries pre-market trades from 09:00 to 09:30.
-- **Daily bars:** after hours, confirm the snapshot's `dailyBar.c` equals the 16:00 close and excludes extended-hours trades. Before the open, check whether `dailyBar` is still the previous session.
-
-## Expo app
-
-The mobile app runs in Expo Go on a real phone. No agent tool here can tap a phone, so the owner walks mobile features by hand, following the steps below, and reports in the same table. An agent with a local Android emulator can walk the same rows itself, as described under **Android emulator**. Every control and value the steps name has a `testID` from [`docs/feature-map.md`](../../../docs/feature-map.md), ready for a device driver such as Maestro if one is ever added (it is not a dependency today).
-
-### Launch
-
-The phone and the computer must be on the same Wi-Fi network. Find the computer's LAN IP first: `ipconfig getifaddr en0` on macOS, `hostname -I | awk '{print $1}'` on Linux.
-
-Start the walk gateway on all interfaces, from the repo root, in its own terminal. Use the `pnpm --filter` form: `pnpm dev` runs through Turborepo, which does not pass `HOST` through.
-
-```bash
-HOST=0.0.0.0 ALLOWED_ORIGINS=http://localhost:3000,http://<LAN IP>:4000 \
-  FEED=simulator SIM_SEED=42 PORT=4000 pnpm --filter ./apps/gateway dev
-```
-
-- `HOST=0.0.0.0` lets the phone reach the gateway.
-- `ALLOWED_ORIGINS` must list `http://<LAN IP>:4000`. React Native's WebSocket sends an `Origin` header made from the socket URL, on both iOS and Android, and the gateway refuses origins it does not know. Without it, prices load over REST but never tick. Setting the variable replaces the default list, so keep `http://localhost:3000` in it for the web walk.
-
-Start Expo in a second terminal, with the gateway's LAN address baked into the bundle. It prints a QR code.
-
-```bash
-EXPO_PUBLIC_GATEWAY_URL=http://<LAN IP>:4000 pnpm --filter ./apps/mobile start
-```
-
-`EXPO_PUBLIC_GATEWAY_URL` is read when Metro bundles, so after changing it, restart with `pnpm --filter ./apps/mobile start --clear`. A value set only on the command line does not survive the restart: repeat it, as in `EXPO_PUBLIC_GATEWAY_URL=http://<LAN IP>:4000 pnpm --filter ./apps/mobile start --clear`. Without it the app uses `http://localhost:4000`, which only works in a simulator on the same machine.
-
-An agent starting these itself (to check the bundle, not to walk) uses the `setsid` pattern from step 2, adds `CI=1` to `expo start`, and uses a spare `--port` if 8081 is taken.
-
-### Android emulator
-
-An agent with the Android SDK can walk the rows on an emulator instead of a phone. The emulator reaches the host at `10.0.2.2`, so use that in place of the LAN IP: start the gateway with `HOST=0.0.0.0 ALLOWED_ORIGINS=http://localhost:3000,http://10.0.2.2:4000`, and Expo with `EXPO_PUBLIC_GATEWAY_URL=http://10.0.2.2:4000 CI=1`.
-
-- **Open the app:** `adb shell am start -W -a android.intent.action.VIEW -p host.exp.exponent -d exp://10.0.2.2:<Metro port>`. `-p` matters when another app on the device also handles `exp://` links. `expo start --android` installs Expo Go the first time; after that, start Metro without `--android`.
-- **Reload:** `CI=1` turns off Metro's file watching, so after a code change restart Metro, then `adb shell am force-stop host.exp.exponent` and open the app again.
-- **Drive it:** `adb shell input tap <x> <y>` for taps. For scrubbing, hold a finger with `adb shell input motionevent DOWN <x> <y>`, move it with `MOVE`, and lift it with `UP`. Screens are in physical pixels.
-- **Screenshots:** `adb exec-out screencap -p > shot.png`, taken once the finger has been still for 2 s. A screenshot taken mid-gesture slows a software-rendered emulator enough to make scrubbing look late.
-- **Reduced motion:** `adb shell settings put global animator_duration_scale 0`, and the same for `transition_animation_scale` and `window_animation_scale`, then reopen Expo Go. Put all three back to `1` afterwards, even if the walk fails.
-- **History chaos:** the mobile app has no chaos panel. Send `{"type":"chaos","action":"history_failure_rate","rate":100}` over a socket to `ws://localhost:4000/ws?v=1` with an allowed `Origin`, or use the web panel at `/?debug=1` against the same gateway. It reverts after 60 s.
-
-### Doctor
-
-Read-only checks, in this order. Each one rules out a layer before the next:
-
-1. On the computer: `curl -sf http://<LAN IP>:4000/stocks | grep -q '"feedMode":"simulated"' && echo gateway-lan-ok`. If this fails, the gateway is not bound to the LAN: check `HOST=0.0.0.0`.
-2. On the computer, the socket handshake with the phone's origin must answer `101`. A `403` means `ALLOWED_ORIGINS` is missing the LAN origin.
-
-   ```bash
-   curl -s -o /dev/null --max-time 2 -w "%{http_code}\n" -H "Origin: http://<LAN IP>:4000" \
-     -H "Connection: Upgrade" -H "Upgrade: websocket" -H "Sec-WebSocket-Version: 13" \
-     -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" "http://<LAN IP>:4000/ws?v=1"
-   ```
-
-3. On the computer: `curl -s http://localhost:8081/status` prints `packager-status:running`. If Expo was started with `--port`, use that port instead of 8081.
-4. **On the phone's browser**, open `http://<LAN IP>:4000/stocks`. It must show JSON containing `"feedMode":"simulated"`. If the computer passes steps 1 and 2 and the phone fails here, the problem is the network, not the app: a different Wi-Fi, a guest network that isolates clients, or the computer's firewall blocking Node.
-
-### Open in Expo Go
-
-Install Expo Go from the App Store or Play Store; it must be the build for SDK 58. Scan the QR code (the Camera app on iOS, Expo Go itself on Android). The first load bundles for a few seconds. A red error screen is a FAIL for every feature: copy its text into the report.
-
-### Walk
-
-Follow each feature's steps in the feature map and observe the expected result. For each one, take a phone screenshot after the expected state appears and save it in the run's `.verify/` folder, named by feature ID (`M2-ticks.png`). Note anything Expo Go's console or the Metro terminal prints in red.
-
-| Feature | What to do and see |
-| --- | --- |
-| M1 | The app opens on **Markets**, with Markets and Watchlist tabs at the bottom. Tap a row: a detail screen opens with the ticker as its title, the company name and a price that ticks. Back returns to the list where it was. Switch to Watchlist and back. |
-| M2 | Rows show name, ticker, price and a day-change pill with an arrow, a sign and a percent. Within a few seconds prices change, and a thin ring flashes round the pill in the row's day colour. Scroll to the bottom: the last rows have a price at once and start ticking. Star MSFT, then NVDA: each star fills amber at once. The Watchlist tab lists NVDA first, then MSFT, both ticking. Unstar NVDA there: its row goes at once. Close Expo Go from the app switcher and reopen: MSFT is still starred. Unstar it: the Watchlist tab shows "Your watchlist is empty", and "See all stocks" returns to Markets. |
-| M2, motion and failure | With a stock starred, stop the gateway (`Ctrl+C`), then close and reopen Expo Go. Markets shows skeleton rows that pulse gently for about 7 s while requests retry (three retries, 1 s, 2 s and 4 s apart), then "Couldn't load stocks" with Retry. The Watchlist tab keeps the starred ticker, with the same error and Retry, never a blank screen. Start the gateway again and tap Retry on Markets, then on each Watchlist row: the rows load and tick. Star a stock: the star grows slightly as it fills. |
-| M2, reduced motion | Turn on Reduce Motion (iOS: Settings > Accessibility > Motion; Android: Settings > Accessibility > Remove animations). Then close and reopen Expo Go: the flash ring reads the setting at launch. Prices still change, but no ring flashes round the pill. Star a stock: it fills at once, with no scale. Repeat the gateway stop from the row above: for those 7 s the skeleton rows are a static grey fill, with no pulse. Turn the setting off and reopen Expo Go afterwards. |
-| M3 | Tap AAPL. The header shows the ticker chip, the name, a ticking price and a change pill labelled "Today"; below the tabs, Today, Previous close and Last update in ET. The 1D chart spans the whole session with a dashed previous-close line, and its end dot moves with the header price. Tap 1W, 1M, 3M, 1Y and 5Y: each redraws, and the label changes ("Past week" … "Past 5 years"). Press on the chart and drag: a vertical line follows your finger, a readout above the chart shows the time in ET, the price and the change from the start of the range, and the header shows the same point. Lift: the readout goes and the header is live again. Tap the star: it fills and the Markets row agrees. |
-| M3, failure | With the gateway's history failures at 100% (the web chaos panel at `/?debug=1`, or a `history_failure_rate` chaos message on the socket), open a stock not yet viewed: a skeleton, then "Couldn't load this chart" with Retry while the header keeps ticking and shows a dash. Set failures to 0 and tap Retry: the chart draws. For the older copy, view a stock's 1D, wait more than 2 minutes, set failures to 100%, close and reopen Expo Go on that stock: a grey line with no end dot and an "As of" note. |
-| M3, reduced motion | With Remove animations on, reopen Expo Go and repeat the M3 row: the ranges, scrubbing, the live point and the star all work as without it. |
-| M4 | BLOCKED until N08 (lifecycle). Recipe for then: press home, wait 15 s, return; the socket must have closed and reopened with fresh prices. Under 10 s, it must not reconnect. |
-| M5 | BLOCKED until N08 (connection states). Recipe for then: stop the gateway for stale, and airplane mode for offline. Airplane mode also cuts Metro, but the loaded app keeps running. |
-
-If prices show but never change, the socket is being refused: re-run doctor step 2.
-
-### Stop
-
-Press `Ctrl+C` in both terminals. An agent stops only the sessions it started, as in step 7.
-
-### N08 lifecycle and connection walk
-
-- **M4 quick switch:** on a ticking detail chart, record `/health` connections and reconnects. Press Home, return in under 10 s, and confirm neither reconnects nor the chart resets.
-- **M4 long background:** press Home for at least 12 s. Confirm `/health` connections drops by one. Reopen Expo Go; fresh prices and a refetched visible history must fill the interval without a gap. Record health before, during and after.
-- **M5 stale:** stop only your gateway process. Markets, Watchlist and detail show `connection-banner`, muted prices and `connection-retry`. Tap Retry, restart the gateway and confirm recovery without reloading.
-- **M5 offline:** disable emulator Wi-Fi and data with `adb shell svc wifi disable` and `adb shell svc data disable`. Expect Offline, muted prices and no Retry. Gateway connections must drop to 0 within about 60 s, as a half-open socket can linger; enable both radios and confirm recovery. Connecting and connected have no banner (DESIGN.md).
-- **M2 batch coverage:** star a catalogue symbol outside Markets via its detail route, then visit Watchlist. Confirm its name and ticking price. Remove another star; fresh cached symbols must not fetch again. Failed symbol batches show a retry on each unresolved row; loaded rows stay usable.
-- Always restore Wi-Fi and data, stop the emulator with `adb emu kill`, and stop only the Expo and gateway process groups you started. Save screenshots and health samples alongside the report. If the host cannot complete a step, report "not verified, host overloaded" rather than PASS.
-
-## G5: last-known quotes
-
-G5 is Live-only and proved by automated tests, not a simulator walk: the simulator always stamps quotes now. Run contracts schema tests, Alpaca last-known gateway seam tests, web rendered view tests and mobile props-mapping tests. Check their failure with the feature removed. Also run the full web E2E suite and mobile typecheck, tests, Expo dependency check and Android export. Report these separately from any device walk; no keyed run is required for G5.
+- The stack runs `next dev`, so React StrictMode mounts twice. Every full page load logs one "WebSocket is closed before the connection is established" warning. Journeys allow that message at most once per page load, and more fails the run as a reconnect loop. The production E2E suite asserts that the console is clean.
+- `apps/gateway` runs `tsx watch`, so editing gateway source mid-run restarts it and every page goes stale.
+- The helpers are Linux-only: they use `setsid`, `ss -ltnp` and `pkill -s`.

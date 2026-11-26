@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Run one scripted journey against the recorded walk stack.
+# Usage: .claude/skills/verify/bin/journey <watchlist|stock-list|stock-detail|connection>
+set -euo pipefail
+
+skill="$(cd "$(dirname "$0")/.." && pwd)"
+name="${1:-}"
+[[ -n "$name" && -f "$skill/journeys/$name.mjs" ]] || {
+  echo "journey: usage: journey <$(ls "$skill/journeys" | grep -v '^lib' | sed 's/\.mjs$//' | paste -sd'|')>" >&2
+  exit 2
+}
+"$skill/bin/stack" doctor >/dev/null || { echo "journey: doctor failed; run 'stack doctor' and fix it first" >&2; exit 1; }
+exec node "$skill/journeys/$name.mjs"
