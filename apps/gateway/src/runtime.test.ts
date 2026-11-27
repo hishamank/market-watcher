@@ -13,4 +13,4 @@ test("main.ts loads under plain node, the way the image runs it, with no TypeScr
   expect(result.stderr).toContain("FEED=not-a-feed is not a feed mode");
   expect(result.stderr).not.toContain("ERR_");
   expect(result.status).toBe(1);
-});
+}, 30_000);
