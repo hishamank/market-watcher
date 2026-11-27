@@ -37,6 +37,7 @@ const FROZEN_RUNTIME_EXPORTS = [
   "useMarketStatus",
   "useQuote",
   "useQuoteAvailability",
+  "useQuoteWarning",
   "useSearch",
   "useStock",
   "useStockEarnings",

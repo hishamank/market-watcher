@@ -2,6 +2,10 @@ import type { detailStrings } from "../en/detail.ts";
 import type { Translation } from "../en/index.ts";
 
 export const arDetailStrings = {
+  "quote.recovering.label": "جارٍ تحديث السعر",
+  "quote.recovering.help": "بانتظار سعر حديث لهذا الرمز.",
+  "quote.unavailable.label": "السعر الحالي غير متاح",
+  "quote.unavailable.help": "قد يكون الاتصال سليماً، لكن هذا الرمز لم يوفّر سعراً حديثاً.",
   "quote.lastKnown.label": "السعر حتى ⁦{{time}}⁩",
   "quote.lastKnown.help": "بانتظار آخر سعر.",
   "quote.dayRange.none": "—",

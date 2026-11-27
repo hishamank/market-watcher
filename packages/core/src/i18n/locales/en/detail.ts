@@ -1,4 +1,9 @@
 export const detailStrings = {
+  "quote.recovering.label": "Refreshing price",
+  "quote.recovering.help": "Waiting for this symbol to provide a current quote.",
+  "quote.unavailable.label": "Current price unavailable",
+  "quote.unavailable.help":
+    "The connection may be healthy, but this symbol has not provided a current quote.",
   "quote.lastKnown.label": "Price as of {{time}}",
   "quote.lastKnown.help": "Waiting for the latest price.",
   "quote.dayRange.none": "—",

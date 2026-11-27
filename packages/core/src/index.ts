@@ -12,6 +12,7 @@ export type {
   HttpResponse,
 } from "./rest/rest-client.ts";
 
+export { useQuoteWarning } from "./hooks/use-quote-warning.ts";
 export { useQuoteAvailability } from "./hooks/use-quote-availability.ts";
 export type { QuoteAvailability } from "./realtime/quote-store.ts";
 export { useQuote } from "./hooks/use-quote.ts";
