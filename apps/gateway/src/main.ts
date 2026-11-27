@@ -5,6 +5,8 @@ import {
   type Feed,
   loadAlpacaFeed,
 } from "./feeds/index.ts";
+import { parseRevision } from "./revision.ts";
+import { createShutdown } from "./shutdown.ts";
 import { parseAllowedOrigins } from "./socket/admission.ts";
 import { ChaosScopeError, parseChaosScope } from "./socket/chaos-scope.ts";
 
@@ -33,6 +35,7 @@ function readChaosScope(): ReturnType<typeof parseChaosScope> {
 }
 
 const chaosScope = readChaosScope();
+const revision = parseRevision(process.env["GATEWAY_REVISION"]);
 const selected = await selectFeed(process.env["FEED"] ?? "simulator").catch((err: unknown) => {
   console.error(err instanceof AlpacaStartupError ? err.message : err);
   process.exit(1);
@@ -46,11 +49,18 @@ const app = buildApp({
   feedMode: selected.live ? "live" : "simulated",
   allowedOrigins: parseAllowedOrigins(process.env["ALLOWED_ORIGINS"]),
   chaosScope,
+  revision,
   trustProxy: parseTrustProxy(process.env["TRUST_PROXY"]),
   ...(rateLimit !== undefined ? { rateLimit } : {}),
 });
 app.addHook("onClose", async () => feed.close());
 
+const shutdown = createShutdown({ app });
+for (const signal of ["SIGTERM", "SIGINT"] as const) {
+  process.on(signal, () => void shutdown(signal));
+}
+
 await app.listen({ port, host });
 console.log(`gateway listening on http://${host}:${port}`);
+console.log(`gateway revision: ${revision}`);
 if (!selected.live) console.log(`chaos scope: ${chaosScope}`);

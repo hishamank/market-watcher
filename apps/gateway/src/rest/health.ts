@@ -9,11 +9,13 @@ export interface ConnectionStats {
 export function healthResponse(
   connections: ConnectionStats,
   cache: HistoryCacheStats,
+  revision?: string,
 ): HealthResponse {
   const lookups = cache.hits + cache.misses;
   return HealthResponseSchema.parse({
     connections: connections.connections,
     upstreamSymbols: connections.upstreamSymbols,
     historyCacheHitRate: lookups === 0 ? 0 : cache.hits / lookups,
+    ...(revision !== undefined ? { revision } : {}),
   });
 }
