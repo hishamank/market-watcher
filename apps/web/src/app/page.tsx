@@ -1,3 +1,4 @@
+import { pageMetadata, readMetadataLocale } from "../metadata/page-metadata.ts";
 import { createRestClient, stockListQueryOptions, stockPagesQueryOptions } from "@mini/core";
 import type { QueryClient } from "@tanstack/react-query";
 import { gatewayUrl } from "../gateway/shell-meta.ts";
@@ -11,6 +12,11 @@ function prefetchViews(client: QueryClient) {
     client.prefetchQuery(stockListQueryOptions(rest)),
     client.prefetchInfiniteQuery(stockPagesQueryOptions(rest)),
   ]);
+}
+
+export async function generateMetadata() {
+  const { t } = await readMetadataLocale();
+  return pageMetadata(t("header.title"), t("seo.homeDescription"), "/");
 }
 
 export default function HomePage() {

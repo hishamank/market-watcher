@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { allowIndexing, siteUrl } from "../metadata/site.ts";
+import { readMetadataLocale } from "../metadata/page-metadata.ts";
 import { Alexandria } from "next/font/google";
 import { cookies } from "next/headers";
 import { connection } from "next/server";
@@ -17,7 +19,15 @@ const alexandria = Alexandria({
   display: "swap",
 });
 
-export const metadata: Metadata = { title: "Markets" };
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await readMetadataLocale();
+  return {
+    metadataBase: siteUrl,
+    title: t("header.title"),
+    description: t("seo.homeDescription"),
+    robots: { index: allowIndexing, follow: true },
+  };
+}
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   await connection();

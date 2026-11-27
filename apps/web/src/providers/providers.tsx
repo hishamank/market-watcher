@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { CoreProvider, type Locale } from "@mini/core";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
@@ -15,6 +16,7 @@ export interface ProvidersProps {
 }
 
 export function Providers({ gatewayUrl, locale, children }: ProvidersProps) {
+  const router = useRouter();
   const [queryClient] = useState(createQueryClient);
   const [platform] = useState(createWebPlatform);
   return (
@@ -27,7 +29,10 @@ export function Providers({ gatewayUrl, locale, children }: ProvidersProps) {
           network={platform.network}
           lifecycle={platform.lifecycle}
           locale={locale}
-          switchLocale={switchDocumentLocale}
+          switchLocale={(next, apply) => {
+            switchDocumentLocale(next, apply);
+            router.refresh();
+          }}
         >
           {children}
         </CoreProvider>
