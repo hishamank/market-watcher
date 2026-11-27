@@ -106,7 +106,7 @@ Full REST/WS endpoint tables, the subscribe-and-reply sequence diagram, suppleme
 | Shared core vs app presentation            | Core holds shared financial/connection/query policy (`index.test.ts`); web-only desktop column preferences live in `apps/web/src/columns`.                                              | [0002](docs/adr/0002-logic-free-components-and-platform-agnostic-core.md), [0041](docs/adr/0041-the-frozen-core-api.md), [0095](docs/adr/0095-web-owns-table-column-choices.md)                                                                                                                                   |
 | Alpaca 30-stream + 180/60 shared budget    | Fits free-tier limits via one 180 req/min budget (60/min history sub-cap), hub-enforced phases and post-close history finalization.                                                     | [0021](docs/adr/0021-alpaca-adapter-streams-30-and-polls-the-rest.md), [0044](docs/adr/0044-hub-enforces-quote-phase-from-timestamps.md), [0082](docs/adr/0082-finalize-history-after-market-close.md), [0093](docs/adr/0093-history-gets-a-share-of-the-alpaca-budget.md)                                        |
 
-Extended decision summaries live in [`docs/architecture.md`](docs/architecture.md#decisions-and-trade-offs-reference) and all 87 ADRs are indexed in [`docs/adrs.md`](docs/adrs.md).
+Extended decision summaries live in [`docs/architecture.md`](docs/architecture.md#decisions-and-trade-offs-reference) and all 89 ADRs are indexed in [`docs/adrs.md`](docs/adrs.md).
 
 ## Verification and measured results
 

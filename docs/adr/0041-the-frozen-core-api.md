@@ -56,5 +56,6 @@ Several later features recorded their own core exports directly in their ADRs, a
 - **Per-symbol quote availability ([ADR 0083](0083-order-quote-metadata-and-track-symbol-availability.md)):** `useQuoteAvailability`, `QuoteAvailability`, and `useQuoteWarning`.
 - **Realtime debug diagnostics ([ADR 0081](0081-separate-readiness-from-symbol-diagnostics.md)):** additive `ConnectionHealth.diagnostics` field on `useConnectionHealth()` (no new barrel export).
 - **Web-owned table columns ([ADR 0095](0095-web-owns-table-column-choices.md)):** `useTableColumns`, `TableColumn`, and `TableColumnsResult` moved out of `packages/core` into `apps/web/src/columns`.
+- **Watchlist sorting ([ADR 0098](0098-the-watchlist-sorts-on-click-from-a-snapshot.md)):** `useSortedStocks`, `nextStockSort`, `firstStockSortDirection`, `STOCK_SORT_FIELDS`, `StockSort`, `StockSortField` and `StockSortDirection`. `MessageKey` gains `list.sort.label`, `list.sort.button`, `list.sort.ascending` and `list.sort.descending`.
 
 The authoritative current export surface is [`packages/core/src/index.ts`](../../packages/core/src/index.ts), pinned at runtime by [`packages/core/src/index.test.ts`](../../packages/core/src/index.test.ts).

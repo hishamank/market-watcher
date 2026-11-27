@@ -28,4 +28,8 @@ export const arListStrings = {
   "list.columns.button": "الأعمدة",
   "list.columns.title": "إظهار الأعمدة",
   "list.columns.reset": "استعادة الافتراضي",
+  "list.sort.label": "ترتيب قائمة المتابعة",
+  "list.sort.button": "الترتيب حسب {{column}}",
+  "list.sort.ascending": "{{column}}، مرتّب تصاعديًا",
+  "list.sort.descending": "{{column}}، مرتّب تنازليًا",
 } satisfies Translation<typeof listStrings>;

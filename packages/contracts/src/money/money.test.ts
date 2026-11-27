@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { changeBetween, fromUnits, percentChange, subtract, toUnits, widenRange } from "./money.ts";
+import {
+  changeBetween,
+  compareDecimal,
+  fromUnits,
+  percentChange,
+  subtract,
+  toUnits,
+  widenRange,
+} from "./money.ts";
 
 describe("units of 1/10,000 dollar", () => {
   it("parses decimal strings into exact units", () => {
@@ -113,5 +121,14 @@ describe("day range", () => {
   it("keeps a range that already holds the price", () => {
     const range = { low: "186.10", high: "191.25" };
     expect(widenRange(range, "187.42")).toBe(range);
+  });
+});
+
+describe("comparing decimals", () => {
+  it("orders by value at any precision, not by text", () => {
+    expect(compareDecimal("9.99", "10.00")).toBe(-1);
+    expect(compareDecimal("0.9990", "0.999")).toBe(0);
+    expect(compareDecimal("-2.50", "-0.0100")).toBe(-1);
+    expect(compareDecimal("187.42", "187.4199")).toBe(1);
   });
 });

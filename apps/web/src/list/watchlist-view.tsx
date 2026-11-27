@@ -1,6 +1,6 @@
 "use client";
 
-import { useT, useWatchlist, useWatchlistStocks } from "@mini/core";
+import { useSortedStocks, useT, useWatchlist, useWatchlistStocks } from "@mini/core";
 import Link from "next/link";
 import type { MouseEvent } from "react";
 import { buttonClassName } from "../components/button.tsx";
@@ -10,6 +10,7 @@ import { useStarTransition } from "../integrations/star-motion.ts";
 import { ListError } from "../components/list-error.tsx";
 import { ListSkeleton } from "../components/list-skeleton.tsx";
 import type { ListView } from "../components/view-toggle.tsx";
+import { useSortParam } from "./use-sort-param.ts";
 import { VirtualStockList } from "./virtual-stock-list.tsx";
 import { WatchlistSuggestions } from "./watchlist-suggestions.tsx";
 
@@ -22,6 +23,8 @@ export function WatchlistView({ onShowAll }: WatchlistViewProps) {
   const { symbols, toggle } = useWatchlist();
   const reflowStar = useStarTransition(symbols, toggle);
   const state = useWatchlistStocks();
+  const { sort, selectSort } = useSortParam();
+  const stocks = useSortedStocks(state.status === "ready" ? state.stocks : [], sort);
   if (state.status === "loading") {
     return <ListSkeleton testId="watchlist-skeleton" />;
   }
@@ -53,10 +56,11 @@ export function WatchlistView({ onShowAll }: WatchlistViewProps) {
   }
   return (
     <VirtualStockList
-      stocks={state.stocks}
+      stocks={stocks}
       listTestId="watchlist"
       rowTestId={(symbol) => `watchlist-row-${symbol}`}
-      reflowStar={state.stocks.length === 1 ? reflowStar : undefined}
+      reflowStar={stocks.length === 1 ? reflowStar : undefined}
+      sort={{ current: sort, onSelect: selectSort }}
     />
   );
 }

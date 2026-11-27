@@ -73,3 +73,12 @@ export function rangeHolds(range: PriceRange, price: string): boolean {
 export function joinRanges(first: PriceRange, second: PriceRange): PriceRange {
   return widenRange(widenRange(first, second.low), second.high);
 }
+
+export function compareDecimal(first: string, second: string): number {
+  const left = parseExact(first);
+  const right = parseExact(second);
+  const scale = Math.max(left.scale, right.scale);
+  const difference = rescale(left, scale) - rescale(right, scale);
+  if (difference === 0n) return 0;
+  return difference < 0n ? -1 : 1;
+}
