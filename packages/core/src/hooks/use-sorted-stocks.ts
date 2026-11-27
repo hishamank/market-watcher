@@ -12,7 +12,7 @@ import {
 import { useLocale } from "./use-t.ts";
 
 export function useSortedStocks(
-  stocks: readonly Stock[],
+  stocks: readonly Stock[] | undefined,
   sort: StockSort | undefined,
 ): readonly Stock[] {
   const { quoteStore } = useCore();
@@ -20,8 +20,8 @@ export function useSortedStocks(
   const [snapshot, setSnapshot] = useState<SortSnapshot | undefined>(undefined);
   const key = sort === undefined ? undefined : `${sort.field}:${sort.direction}:${locale}`;
   const held = holdSortOrder(snapshot, key, stocks, () =>
-    sort === undefined
-      ? stocks
+    sort === undefined || stocks === undefined
+      ? (stocks ?? [])
       : sortStocks(
           stocks,
           sort,

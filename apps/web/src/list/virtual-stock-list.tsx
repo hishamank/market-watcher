@@ -1,9 +1,12 @@
 "use client";
 
 import type { Stock } from "@mini/contracts";
-import type { StockSort } from "@mini/core";
 import type { CSSProperties } from "react";
-import { StockListHeader, type HeaderSort } from "../components/stock-list-header.tsx";
+import {
+  StockListHeader,
+  type FadingSort,
+  type HeaderSort,
+} from "../components/stock-list-header.tsx";
 import { tableScroll, tableWidth } from "../components/stock-row.tsx";
 import { starRowName } from "../integrations/star-motion.ts";
 import { useWindowRows } from "../integrations/use-window-rows.ts";
@@ -17,7 +20,7 @@ export interface VirtualStockListProps {
   reflowStar?: ((symbol: string) => void) | undefined;
   onEndReached?: () => void;
   sort?: HeaderSort | undefined;
-  fadingSort?: StockSort | undefined;
+  fading?: FadingSort | undefined;
 }
 
 export function VirtualStockList(props: VirtualStockListProps) {
@@ -29,7 +32,7 @@ export function VirtualStockList(props: VirtualStockListProps) {
     reflowStar,
     onEndReached,
     sort,
-    fadingSort,
+    fading,
   } = props;
   const { rows, paddingStart, paddingEnd, listRef, measureRow } = useWindowRows(
     stocks.map((stock) => stock.symbol),
@@ -37,7 +40,7 @@ export function VirtualStockList(props: VirtualStockListProps) {
   );
   return (
     <div className={tableScroll}>
-      <StockListHeader sort={sort} fading={fadingSort} />
+      <StockListHeader sort={sort} fading={fading} />
       <ul
         ref={listRef}
         data-testid={listTestId}

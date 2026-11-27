@@ -79,13 +79,22 @@ describe("watchlist sorting", () => {
       expect(removed.snapshot?.order).toEqual(["NVDA", "MSFT"]);
     });
 
-    it("keeps the held order through a render with no stocks, such as a loading state", () => {
+    it("keeps the held order while the list is unknown, such as a loading state", () => {
       const first = holdSortOrder(undefined, "price", stocks, () => byPrice(stocks));
-      const loading = holdSortOrder(first.snapshot, "price", [], () => []);
+      const loading = holdSortOrder(first.snapshot, "price", undefined, () => []);
       expect(loading.snapshot).toBe(first.snapshot);
       const ticked = [{ ...msft, quote: makeQuote("MSFT", "900.00", 2000) }, aapl, nvda];
       const ready = holdSortOrder(loading.snapshot, "price", ticked, () => byPrice(ticked));
       expect(symbols(ready.stocks)).toEqual(["NVDA", "AAPL", "MSFT"]);
+    });
+
+    it("forgets the held order when the watchlist is really empty", () => {
+      const first = holdSortOrder(undefined, "price", stocks, () => byPrice(stocks));
+      const empty = holdSortOrder(first.snapshot, "price", [], () => []);
+      expect(empty.snapshot?.order).toEqual([]);
+      const risen = [msft, { ...aapl, quote: makeQuote("AAPL", "999.00", 2000) }, nvda];
+      const back = holdSortOrder(empty.snapshot, "price", risen, () => byPrice(risen));
+      expect(symbols(back.stocks)).toEqual(["AAPL", "NVDA", "MSFT"]);
     });
 
     it("sorts afresh when a removed symbol comes back or the sort is turned off and on", () => {

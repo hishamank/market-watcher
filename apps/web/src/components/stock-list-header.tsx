@@ -8,6 +8,11 @@ import {
 import { DirectionIcon } from "./icons.tsx";
 import { pinnedName, tableColumns, tableWidth } from "./stock-row.tsx";
 
+export interface FadingSort {
+  readonly sort: StockSort;
+  readonly onEnd: () => void;
+}
+
 export interface HeaderSort {
   readonly current: StockSort | undefined;
   readonly onSelect: (field: StockSortField) => void;
@@ -17,7 +22,7 @@ interface HeaderCellProps {
   readonly column: StockSortField;
   readonly className: string;
   readonly sort: HeaderSort | undefined;
-  readonly fading: StockSort | undefined;
+  readonly fading: FadingSort | undefined;
 }
 
 const START_ALIGNED: readonly StockSortField[] = ["name", "symbol"];
@@ -28,12 +33,14 @@ function SortArrow(props: {
   column: StockSortField;
   direction: StockSortDirection;
   visibility: string;
+  onAnimationEnd?: () => void;
 }) {
   const side = START_ALIGNED.includes(props.column) ? "end-[-14px]" : "start-[-14px]";
   return (
     <span
       aria-hidden="true"
       className={`absolute top-1/2 flex -translate-y-1/2 ${side} ${props.visibility}`}
+      onAnimationEnd={props.onAnimationEnd}
     >
       <DirectionIcon direction={arrowIcon[props.direction]} />
     </span>
@@ -47,15 +54,16 @@ function FadingLabel({
 }: {
   column: StockSortField;
   label: string;
-  fading: StockSort;
+  fading: FadingSort;
 }) {
   return (
     <span className="relative inline-flex items-center">
       {label}
       <SortArrow
         column={column}
-        direction={fading.direction}
+        direction={fading.sort.direction}
         visibility="opacity-0 motion-safe:animate-fade-out"
+        onAnimationEnd={fading.onEnd}
       />
     </span>
   );
@@ -67,7 +75,7 @@ function HeaderCell({ column, className, sort, fading }: HeaderCellProps) {
   if (sort === undefined) {
     return (
       <span className={className}>
-        {fading?.field === column ? (
+        {fading?.sort.field === column ? (
           <FadingLabel column={column} label={label} fading={fading} />
         ) : (
           label
@@ -103,7 +111,7 @@ function HeaderCell({ column, className, sort, fading }: HeaderCellProps) {
 
 export interface StockListHeaderProps {
   readonly sort?: HeaderSort | undefined;
-  readonly fading?: StockSort | undefined;
+  readonly fading?: FadingSort | undefined;
 }
 
 export function StockListHeader({ sort, fading }: StockListHeaderProps) {

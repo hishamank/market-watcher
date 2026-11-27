@@ -4,6 +4,7 @@ import type { StockSort } from "@mini/core";
 import { useState, type MouseEvent } from "react";
 import { useTableColumns } from "../columns/use-table-columns.ts";
 import { ViewToggle, type ListView } from "../components/view-toggle.tsx";
+import { useMediaQuery } from "../integrations/use-media-query.ts";
 import { ConnectedColumnMenu } from "./connected-column-menu.tsx";
 import { StockList } from "./stock-list.tsx";
 import { customColumnStyle } from "./table-layout.ts";
@@ -19,6 +20,7 @@ interface LeavingSort {
 export function ListPage() {
   const { view, selectView } = useViewParam();
   const { sort } = useSortParam();
+  const wide = useMediaQuery("(width >= 48rem)");
   const [leaving, setLeaving] = useState<LeavingSort | undefined>(undefined);
   const { chosen } = useTableColumns();
   if (leaving !== undefined && view === "all" && !leaving.shown) {
@@ -27,7 +29,7 @@ export function ListPage() {
   if (leaving !== undefined && view === "watchlist" && leaving.shown) setLeaving(undefined);
   const switchView = (next: ListView, event: MouseEvent) => {
     selectView(next, event);
-    const fading = view === "watchlist" && next === "all" ? sort : undefined;
+    const fading = wide && view === "watchlist" && next === "all" ? sort : undefined;
     if (event.defaultPrevented) {
       setLeaving(fading === undefined ? undefined : { sort: fading, shown: false });
     }
@@ -45,9 +47,15 @@ export function ListPage() {
           className="border-t border-border bg-surface md:overflow-hidden md:rounded-xl md:border md:shadow-1"
         >
           {view === "watchlist" ? (
-            <WatchlistView onShowAll={switchView} />
+            <WatchlistView onShowAll={selectView} />
           ) : (
-            <StockList fadingSort={leaving?.sort} />
+            <StockList
+              fading={
+                leaving === undefined
+                  ? undefined
+                  : { sort: leaving.sort, onEnd: () => setLeaving(undefined) }
+              }
+            />
           )}
         </section>
       </div>

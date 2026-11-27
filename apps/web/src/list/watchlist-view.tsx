@@ -1,6 +1,13 @@
 "use client";
 
-import { useSortedStocks, useT, useWatchlist, useWatchlistStocks } from "@mini/core";
+import type { Stock } from "@mini/contracts";
+import {
+  useSortedStocks,
+  useT,
+  useWatchlist,
+  useWatchlistStocks,
+  type WatchlistStocksResult,
+} from "@mini/core";
 import Link from "next/link";
 import type { MouseEvent } from "react";
 import { buttonClassName } from "../components/button.tsx";
@@ -19,6 +26,11 @@ export interface WatchlistViewProps {
   onShowAll: (view: ListView, event: MouseEvent) => void;
 }
 
+function listedStocks(state: WatchlistStocksResult): readonly Stock[] | undefined {
+  if (state.status === "ready") return state.stocks;
+  return state.status === "empty" ? [] : undefined;
+}
+
 export function WatchlistView({ onShowAll }: WatchlistViewProps) {
   const t = useT();
   const { symbols, toggle } = useWatchlist();
@@ -26,10 +38,7 @@ export function WatchlistView({ onShowAll }: WatchlistViewProps) {
   const state = useWatchlistStocks();
   const { sort, selectSort } = useSortParam();
   const sortable = useMediaQuery("(width >= 48rem)");
-  const stocks = useSortedStocks(
-    state.status === "ready" ? state.stocks : [],
-    sortable ? sort : undefined,
-  );
+  const stocks = useSortedStocks(listedStocks(state), sortable ? sort : undefined);
   if (state.status === "loading") {
     return <ListSkeleton testId="watchlist-skeleton" />;
   }

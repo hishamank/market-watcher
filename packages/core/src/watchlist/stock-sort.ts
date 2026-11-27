@@ -93,11 +93,11 @@ function keepOrder(
 export function holdSortOrder(
   snapshot: SortSnapshot | undefined,
   key: string | undefined,
-  stocks: readonly Stock[],
+  stocks: readonly Stock[] | undefined,
   sortNow: () => readonly Stock[],
 ): HeldOrder {
+  if (stocks === undefined) return { stocks: [], snapshot };
   if (key === undefined) return { stocks, snapshot: undefined };
-  if (stocks.length === 0) return { stocks, snapshot };
   const kept = snapshot?.key === key ? keepOrder(snapshot.order, stocks) : undefined;
   if (kept !== undefined && snapshot !== undefined) {
     const unchanged = kept.length === snapshot.order.length;
