@@ -1,0 +1,49 @@
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-locale-turn] {
+    --turn: 1;
+    --turn-half: var(--duration-slow);
+    --turn-depth: 234vw;
+    --turn-far: 0.82;
+    --turn-shade: 0.7;
+  }
+
+  :root[data-locale-turn="ltr"] {
+    --turn: -1;
+  }
+
+  :root[data-locale-turn]::view-transition {
+    background-color: var(--color-fill);
+  }
+
+  :root[data-locale-turn]::view-transition-old(root) {
+    animation: locale-turn-out var(--turn-half) cubic-bezier(0.5, 0, 1, 1) both;
+  }
+
+  :root[data-locale-turn]::view-transition-new(root) {
+    animation: locale-turn-in var(--turn-half) cubic-bezier(0, 0, 0.5, 1) var(--turn-half) both;
+  }
+}
+
+@keyframes locale-turn-out {
+  from {
+    transform: perspective(var(--turn-depth)) scale(1) rotateY(0deg);
+    filter: brightness(1);
+  }
+  to {
+    transform: perspective(var(--turn-depth)) scale(var(--turn-far))
+      rotateY(calc(var(--turn) * -90deg));
+    filter: brightness(var(--turn-shade));
+  }
+}
+
+@keyframes locale-turn-in {
+  from {
+    transform: perspective(var(--turn-depth)) scale(var(--turn-far))
+      rotateY(calc(var(--turn) * 90deg));
+    filter: brightness(var(--turn-shade));
+  }
+  to {
+    transform: perspective(var(--turn-depth)) scale(1) rotateY(0deg);
+    filter: brightness(1);
+  }
+}
