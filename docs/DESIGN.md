@@ -181,7 +181,7 @@ In React Native, `elevation.1` and `elevation.2` map to shadow properties, and t
 | Live point | Halo pulses, 2 s loop | Static halo |
 | Search dropdown (from 768 px) | Drops 6 px and fades in, 200 ms | Fades in, 120 ms |
 | List to detail (web) | Name and price move from the row into the detail header, 320 ms (only when opening from a row) | Page changes at once |
-| Empty watchlist to list (web) | Starred suggestion moves into the watchlist's first slot; the empty state's star fills, then the empty state shrinks and fades, 320 ms. Unstarring the last row reverses it, and the star pops (ADR 0061) | Swaps at once |
+| Empty watchlist to list (web) | Starred suggestion moves into the watchlist's first slot; the empty state's star fills, then the empty state shrinks and fades, 320 ms. Unstarring the last row reverses it, and the star pops (ADR 0062) | Swaps at once |
 | Star to Watchlist control (web) | A star copy flies along a curve into the Watchlist option, which bumps to 106%, 400 ms + 320 ms. Only when that option is on screen and not current | Nothing flies |
 | Empty watchlist to list (mobile) | The new content fades in, 200 ms; the empty state's star pops on return. Not on the first render after load | Swaps at once |
 | Haptics (mobile) | Light tap on star; selection tick on range change | Unchanged |
@@ -196,8 +196,8 @@ In React Native, `elevation.1` and `elevation.2` map to shadow properties, and t
 | --- | --- |
 | 360 px | One column. The list runs edge to edge on `color.surface`. Search opens as a full-screen sheet. Chaos controls open as a bottom sheet. |
 | 768 px | One centred column, at most 720 px wide. The list and the detail sit in cards (`radius.xl`, `elevation.1`). From 768 px to 1279 px the list is a compact table with a header row: name, symbol, price, day change (money and percent) and the star (ADR 0049). Search is a 380 px field in the header with a dropdown. |
-| Any table width | From 768 px, a **Columns** button at the end of the view toggle row opens a menu of checkboxes, one per column. Name and Price are always shown. A saved choice replaces the layout for every width, and when the chosen columns are wider than the list, the list scrolls sideways with Name pinned at the start (ADR 0063). |
-| 1440 px | From 1280 px, `/` shows the list as a table, at most 1120 px wide, with columns for name, symbol, price, day change, day change %, previous close and last update. From 1440 px it is at most 1344 px wide and adds day high and day low after previous close, with a dash when the quote has no day range (ADR 0062). `/stocks/[symbol]` keeps the list visible in a 400 px pane at the start, with the detail card beside it. |
+| Any table width | From 768 px, a **Columns** button at the end of the view toggle row opens a menu of checkboxes, one per column. Name and Price are always shown. A saved choice replaces the layout for every width, and when the chosen columns are wider than the list, the list scrolls sideways with Name pinned at the start (ADR 0064). |
+| 1440 px | From 1280 px, `/` shows the list as a table, at most 1120 px wide, with columns for name, symbol, price, day change, day change %, previous close and last update. From 1440 px it is at most 1344 px wide and adds day high and day low after previous close, with a dash when the quote has no day range (ADR 0063). `/stocks/[symbol]` keeps the list visible in a 400 px pane at the start, with the detail card beside it. |
 
 The list and the detail stay separate routes at every width. From 768 px a back link stays visible above the detail card, including beside the desktop pane. It returns to `/` or `/?view=watchlist`. Row and search links carry `?view=watchlist` into detail URLs; range changes and pane navigation retain it. Missing or unknown view values default to all. The phone header back button uses the same destination. The 1440 px detail layout is a proposal: the list pane is the same list component, with the open symbol marked by `aria-current`. Page padding is `space.16` at 360 px and `space.24` from 768 px.
 
@@ -261,7 +261,7 @@ Each component lists its anatomy, states, spacing, motion and test IDs.
 - **Anatomy.** A 44 px button with a 20 px star icon, `aria-pressed`, label "Star {name}".
 - **States.** Off: outline in `color.textMuted`. On: filled in `color.accentFill`. Loading, before the watchlist is known: outline in `color.border`, not interactive, same size so nothing shifts when it resolves. Focused: focus outline.
 - **Hover and focus.** Colour answers hover with no square fill. A plain mouse click has no outline; keyboard focus keeps the standard visible focus ring. Other icon buttons keep their hover fill.
-- **Motion.** Only the button the user stars pops from 85% through 125%, settles through 95% to 100%, and emits a thin expanding ring and six tiny outward dots in `color.accentFill`, over `duration.flash` (400 ms) with `easing.standard`. Effects use only transform and opacity, sit inside the 44 px target and ignore pointer events; nothing shifts. Unstarring has no burst. Starring also shows where the star went: see Empty watchlist to list and Star to Watchlist control in the Motion table (ADR 0061). Already-starred buttons stay still on hydration, mount, virtual-list re-entry and cross-view updates. Reduced motion fills immediately with no pop, ring, dots or press animation.
+- **Motion.** Only the button the user stars pops from 85% through 125%, settles through 95% to 100%, and emits a thin expanding ring and six tiny outward dots in `color.accentFill`, over `duration.flash` (400 ms) with `easing.standard`. Effects use only transform and opacity, sit inside the 44 px target and ignore pointer events; nothing shifts. Unstarring has no burst. Starring also shows where the star went: see Empty watchlist to list and Star to Watchlist control in the Motion table (ADR 0062). Already-starred buttons stay still on hydration, mount, virtual-list re-entry and cross-view updates. Reduced motion fills immediately with no pop, ring, dots or press animation.
 - **Test IDs.** `star-{SYMBOL}`, `detail-star`, `search-result-star-{SYMBOL}`.
 
 ### All and Watchlist control
@@ -310,7 +310,7 @@ Each component lists its anatomy, states, spacing, motion and test IDs.
   - Last-known quote: always-visible `detail-price-as-of` note below the change, with the ChartAsOf staleTint pill, stale clock, text label and textSecondary help. Last update includes date and time. No animation or “Last close” caption; chart fallback remains visible independently.
   - Market closed (separate pending ticket): a line under the change with the moon icon, "Market closed" and "Last close {time} ET", where the time is the session close the gateway reports.
   - Stale: price and pill in `color.textMuted`.
-- **Below the tabs.** Facts from the quote: "Previous close", "Day high", "Day low" (a dash when the quote has no day range) and "Last update" (time in ET) (ADR 0062).
+- **Below the tabs.** Facts from the quote: "Previous close", "Day high", "Day low" (a dash when the quote has no day range) and "Last update" (time in ET) (ADR 0063).
 - **Test IDs.** `detail-header`, `detail-name`, `detail-price`, `detail-change`, `detail-change-label`, `detail-star`.
 
 ### Skeletons
