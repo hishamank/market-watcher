@@ -81,7 +81,7 @@ export function ConnectedPriceChart({ symbol, range, scrub, onScrub }: Connected
       updating={history.updating}
       direction={direction}
       drawn={chart.drawn}
-      label={t("detail.chart.label", { range: t(`detail.range.${range}`) })}
+      label={t("detail.chart.label", { range: t(`detail.range.${shownRange}`) })}
       previousCloseLabel={
         previousClose === undefined
           ? undefined
