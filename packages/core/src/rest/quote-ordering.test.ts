@@ -1,3 +1,4 @@
+import type { Quote } from "@mini/contracts";
 import { QueryClient } from "@tanstack/react-query";
 import { describe, expect, it } from "vitest";
 import { createQuoteStore } from "../realtime/quote-store.ts";
@@ -78,6 +79,43 @@ it.each([999, 1001])(
       await settle();
       expect(store.getQuote("AAPL")?.timestamp).toBe(Math.max(1000, timestamp));
       expect(store.getQuote("AAPL")?.lastKnown).toBe(true);
+    } finally {
+      detach();
+      client.clear();
+    }
+  },
+);
+
+it.each([
+  { trigger: "subscription", timestamp: 1000, lastKnown: true },
+  { trigger: "subscription", timestamp: 1001, lastKnown: true },
+  { trigger: "subscription", timestamp: 1000, lastKnown: undefined },
+  { trigger: "tick", timestamp: 1002, lastKnown: true },
+])(
+  "keeps REST corrections after $trigger at $timestamp",
+  async ({ trigger, timestamp, lastKnown }) => {
+    const store = createQuoteStore();
+    store.upsert(makeQuote("AAPL", "100.00", 1000));
+    const response = Promise.withResolvers<unknown>();
+    const rest = createRestClient({
+      gatewayUrl: "http://gateway.test",
+      fetch: async () => ({ ok: true, status: 200, json: () => response.promise }),
+    });
+    const client = new QueryClient();
+    const detach = syncQuotesFromQueryCache(client.getQueryCache(), store);
+    const corrected: Quote = {
+      ...makeQuote("AAPL", "101.00", timestamp),
+      lastKnown: lastKnown ? true : undefined,
+      dayRange: { low: "95.00", high: "105.00" },
+    };
+    try {
+      const pending = client.fetchQuery(stockQueryOptions(rest, "AAPL", store));
+      if (trigger === "subscription") store.setAvailability("AAPL", "recovering");
+      else store.receiveQuotes([makeQuote("AAPL", "100.50", 1001)]);
+      response.resolve(stockDetailBody(corrected));
+      await pending;
+      await settle();
+      expect(store.getQuote("AAPL")).toEqual(corrected);
     } finally {
       detach();
       client.clear();
