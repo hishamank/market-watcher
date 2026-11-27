@@ -1,4 +1,4 @@
-FROM node:26.12.0-bookworm-slim
+FROM node:26.12.0-bookworm-slim@sha256:742a0fe7320e09e0321222b68165e6ac731d30470e7ea7f98f9bfc3a6e1034fe AS dependencies
 
 RUN npm install --global pnpm@10.30.2
 WORKDIR /app
@@ -6,14 +6,28 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/gateway/package.json apps/gateway/package.json
 COPY packages/contracts/package.json packages/contracts/package.json
-RUN pnpm install --frozen-lockfile --filter @mini/gateway...
+RUN pnpm install --frozen-lockfile --prod --filter @mini/gateway...
 
+FROM node:26.12.0-bookworm-slim@sha256:742a0fe7320e09e0321222b68165e6ac731d30470e7ea7f98f9bfc3a6e1034fe
+
+RUN apt-get update \
+  && apt-get upgrade --yes \
+  && rm -rf /var/lib/apt/lists/* /usr/local/lib/node_modules /usr/local/bin/npm /usr/local/bin/npx \
+    /usr/local/bin/corepack /opt/yarn* /usr/local/bin/yarn /usr/local/bin/yarnpkg
+WORKDIR /app
+
+COPY --from=dependencies /app/node_modules node_modules
+COPY --from=dependencies /app/apps/gateway/node_modules apps/gateway/node_modules
+COPY --from=dependencies /app/packages/contracts/node_modules packages/contracts/node_modules
+COPY package.json ./
+COPY apps/gateway/package.json apps/gateway/package.json
 COPY apps/gateway/src apps/gateway/src
 COPY apps/gateway/data apps/gateway/data
+COPY packages/contracts/package.json packages/contracts/package.json
 COPY packages/contracts/src packages/contracts/src
 
 ARG GATEWAY_REVISION=unknown
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=4000 CHAOS_SCOPE=connection GATEWAY_REVISION=$GATEWAY_REVISION
 USER node
 EXPOSE 4000
-CMD ["./apps/gateway/node_modules/.bin/tsx", "apps/gateway/src/main.ts"]
+CMD ["node", "apps/gateway/src/main.ts"]
