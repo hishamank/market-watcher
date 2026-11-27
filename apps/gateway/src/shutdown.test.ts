@@ -1,4 +1,4 @@
-import { type ChildProcess, spawn } from "node:child_process";
+import { type ChildProcess, spawn, spawnSync } from "node:child_process";
 import { once } from "node:events";
 import { fileURLToPath } from "node:url";
 import { afterEach, expect, test, vi } from "vitest";
@@ -17,7 +17,7 @@ afterEach(() => {
 });
 
 async function startProcess(): Promise<{ port: string; output: () => string }> {
-  child = spawn(process.execPath, ["--import", "tsx", "src/main.ts"], {
+  child = spawn(process.execPath, ["src/main.ts"], {
     cwd: gatewayRoot,
     env: { PATH: process.env["PATH"], HOST: "127.0.0.1", PORT: "0", GATEWAY_REVISION: REVISION },
     stdio: ["ignore", "pipe", "pipe"],
@@ -84,3 +84,21 @@ test("a close that hangs exits 1 at the deadline", async () => {
   vi.useRealTimers();
   await realClose();
 });
+
+test("a close that never settles keeps the process alive until the deadline, then exits 1", () => {
+  const script = `
+    import { createShutdown } from "./src/shutdown.ts";
+    const app = { websocketServer: { clients: [] }, close: () => new Promise(() => {}) };
+    void createShutdown({ app, deadlineMs: 300 })("SIGTERM");
+  `;
+  const started = Date.now();
+  const result = spawnSync(process.execPath, ["--input-type=module", "--eval", script], {
+    cwd: gatewayRoot,
+    env: { PATH: process.env["PATH"] },
+    encoding: "utf8",
+    timeout: 20_000,
+  });
+  expect(result.status).toBe(1);
+  expect(Date.now() - started).toBeGreaterThanOrEqual(300);
+  expect(result.stdout).toContain("gateway did not close within 300 ms");
+}, 30_000);

@@ -16,4 +16,4 @@ ARG GATEWAY_REVISION=unknown
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=4000 CHAOS_SCOPE=connection GATEWAY_REVISION=$GATEWAY_REVISION
 USER node
 EXPOSE 4000
-CMD ["./apps/gateway/node_modules/.bin/tsx", "apps/gateway/src/main.ts"]
+CMD ["node", "apps/gateway/src/main.ts"]

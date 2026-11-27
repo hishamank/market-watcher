@@ -27,7 +27,6 @@ export function createShutdown({
       log(`gateway did not close within ${deadlineMs} ms, exiting`);
       exit(1);
     }, deadlineMs);
-    deadline.unref();
     for (const socket of app.websocketServer.clients) {
       closeWithDeadline(socket, CLOSE_GOING_AWAY, "Gateway shutting down");
     }
