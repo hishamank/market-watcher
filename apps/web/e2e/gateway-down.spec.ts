@@ -44,6 +44,8 @@ test("D1 a stock that never loads shows an error with retry instead of a lasting
   const restarted: { pid?: number | undefined } = {};
   try {
     await page.goto("/stocks/AAPL");
+    await expect(page).toHaveTitle("AAPL | Markets");
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex, follow");
     await expect(page.getByTestId("detail-error")).toBeVisible({ timeout: 30_000 });
     await expect(page.getByTestId("detail-header")).toHaveCount(0);
 

@@ -1,9 +1,6 @@
-import {
-  createRestClient,
-  historyQueryOptions,
-  RestClientError,
-  stockQueryOptions,
-} from "@mini/core";
+import { pageMetadata, readMetadataLocale } from "../../../metadata/page-metadata.ts";
+import { readStock } from "../../../metadata/stock.ts";
+import { createRestClient, historyQueryOptions, RestClientError } from "@mini/core";
 import type { QueryClient } from "@tanstack/react-query";
 import { notFound } from "next/navigation";
 import { DetailPage } from "../../../detail/detail-page.tsx";
@@ -19,7 +16,7 @@ async function prefetchDetail(
   range: string | string[] | undefined,
 ) {
   const [stock] = await Promise.allSettled([
-    client.fetchQuery(stockQueryOptions(rest, symbol)),
+    readStock(symbol),
     client.prefetchQuery(historyQueryOptions(rest, symbol, parseRange(range))),
   ]);
   if (
@@ -31,9 +28,34 @@ async function prefetchDetail(
   }
 }
 
+export async function generateMetadata({ params }: PageProps<"/stocks/[symbol]">) {
+  const { symbol } = await params;
+  const upper = symbol.toUpperCase();
+  const { t } = await readMetadataLocale();
+  try {
+    const { stock } = await readStock(upper);
+    const values = { symbol: stock.symbol, name: stock.name };
+    return pageMetadata(
+      t("seo.stockTitle", values),
+      t("seo.stockDescription", values),
+      `/stocks/${encodeURIComponent(stock.symbol)}`,
+    );
+  } catch (error) {
+    if (error instanceof RestClientError && error.code === "not_found") notFound();
+    return {
+      ...(await pageMetadata(
+        t("seo.fallbackTitle", { symbol: upper }),
+        t("seo.homeDescription"),
+        `/stocks/${encodeURIComponent(upper)}`,
+      )),
+      robots: { index: false, follow: true },
+    };
+  }
+}
+
 export default async function StockPage({ params, searchParams }: PageProps<"/stocks/[symbol]">) {
   const [{ symbol }, { range }] = await Promise.all([params, searchParams]);
-  const upper = decodeURIComponent(symbol).toUpperCase();
+  const upper = symbol.toUpperCase();
   return (
     <PrefetchBoundary prefetch={(client) => prefetchDetail(client, upper, range)}>
       <DetailPage symbol={upper} />
