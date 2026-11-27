@@ -1,5 +1,7 @@
 "use client";
 
+import type { FeedMode } from "@mini/contracts";
+
 import { type QueryCache, type QueryClient, useQueryClient } from "@tanstack/react-query";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import {
@@ -18,6 +20,8 @@ import {
   createConnectionHealth,
   type ConnectionHealthRecorder,
 } from "./realtime/connection-health.ts";
+import { watchCachedFeed } from "./realtime/feed-cache.ts";
+import { createFeedSession, type FeedSession } from "./realtime/feed-session.ts";
 import { createQuoteStore, type QuoteStore } from "./realtime/quote-store.ts";
 import { createSocketClient } from "./realtime/socket-client.ts";
 import type { SocketClient } from "./realtime/socket-types.ts";
@@ -34,6 +38,7 @@ import { createWatchlistStore, type WatchlistStore } from "./watchlist/watchlist
 
 export interface CoreProviderProps {
   gatewayUrl: string;
+  initialFeedMode?: FeedMode | null;
   storage: KeyValueStore;
   network: NetworkStatus;
   lifecycle: AppLifecycle;
@@ -47,6 +52,7 @@ export interface CoreProviderProps {
 }
 
 export interface CoreContextValue {
+  feedSession: FeedSession;
   gatewayUrl: string;
   storage: KeyValueStore;
   network: NetworkStatus;
@@ -73,11 +79,18 @@ export function createCoreServices(
   platform: Omit<CoreProviderProps, "children">,
   queryClient?: QueryClient,
 ): CoreContextValue {
+  const feedSession = createFeedSession(platform.initialFeedMode);
+  const restOptions = {
+    gatewayUrl: platform.gatewayUrl,
+    fetch: platform.fetch,
+    session: feedSession,
+  };
   const quoteStore = createQuoteStore();
   const health = createConnectionHealth();
   const socketClient = createSocketClient({
     url: buildSocketUrl(platform.gatewayUrl),
     quoteStore,
+    session: feedSession,
     health,
     network: platform.network,
     lifecycle: platform.lifecycle,
@@ -87,6 +100,7 @@ export function createCoreServices(
   const i18n = createI18n(platform.locale);
   const analytics = platform.analytics ?? createNoopAnalytics();
   return {
+    feedSession,
     gatewayUrl: platform.gatewayUrl,
     storage: platform.storage,
     network: platform.network,
@@ -95,18 +109,12 @@ export function createCoreServices(
     queryCache: queryClient?.getQueryCache(),
     socketClient,
     health,
-    restClient: createRestClient({ gatewayUrl: platform.gatewayUrl, fetch: platform.fetch }),
-    fetchEarnings: createEarningsFetcher({
-      gatewayUrl: platform.gatewayUrl,
-      fetch: platform.fetch,
-    }),
-    fetchNews: createNewsFetcher({ gatewayUrl: platform.gatewayUrl, fetch: platform.fetch }),
-    fetchStatistics: createStatisticsFetcher({
-      gatewayUrl: platform.gatewayUrl,
-      fetch: platform.fetch,
-    }),
-    fetchProfile: createProfileFetcher({ gatewayUrl: platform.gatewayUrl, fetch: platform.fetch }),
-    searchStocks: createSearchFetcher({ gatewayUrl: platform.gatewayUrl, fetch: platform.fetch }),
+    restClient: createRestClient(restOptions),
+    fetchEarnings: createEarningsFetcher(restOptions),
+    fetchNews: createNewsFetcher(restOptions),
+    fetchStatistics: createStatisticsFetcher(restOptions),
+    fetchProfile: createProfileFetcher(restOptions),
+    searchStocks: createSearchFetcher(restOptions),
     watchlistStore: createWatchlistStore(platform.storage),
     i18n,
     switchLocale: platform.switchLocale ?? ((_next, apply) => apply()),
@@ -123,17 +131,27 @@ export function CoreProvider({ children, ...platform }: CoreProviderProps) {
   const [value] = useState<CoreContextValue>(() => createCoreServices(platform, queryClient));
 
   useEffect(() => {
+    const stopFeedCache = watchCachedFeed(queryClient.getQueryCache(), value.feedSession);
+    const stopFeed = value.feedSession.subscribe(() => {
+      void queryClient.cancelQueries();
+    });
     const unsubscribe = attachConnectionAnalytics(value.socketClient, value.analytics);
     value.socketClient.start();
     return () => {
       unsubscribe();
+      stopFeedCache();
+      stopFeed();
       value.socketClient.stop();
     };
-  }, [value]);
+  }, [value, queryClient]);
 
   useEffect(() => {
     if (value.queryCache === undefined) return undefined;
-    return syncQuotesFromQueryCache(value.queryCache, value.quoteStore);
+    return syncQuotesFromQueryCache(
+      value.queryCache,
+      value.quoteStore,
+      () => !value.feedSession.isBlocked(),
+    );
   }, [value]);
 
   useEffect(() => refetchHistoryOnReconnect(value.socketClient, queryClient), [value, queryClient]);

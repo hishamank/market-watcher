@@ -23,7 +23,7 @@ export interface FrameHandlerContext {
   gate: RecoveryGate;
   health: ConnectionHealthRecorder | undefined;
   onValidFrame(): void;
-  onWelcome(info: WelcomeInfo): void;
+  onWelcome(info: WelcomeInfo): boolean | void;
   onMarketStatus(marketStatus: MarketStatus): void;
   onChaosState(message: ChaosStateMessage): void;
   onSnapshotsSettled(): void;
@@ -34,22 +34,31 @@ function handleParsedMessage(message: ServerMessage, ctx: FrameHandlerContext): 
   switch (message.type) {
     case "welcome":
       ctx.health?.welcome(message.serverTime);
-      ctx.onWelcome({
-        heartbeatIntervalMs: message.heartbeatIntervalMs,
-        feedMode: message.feedMode,
-        marketStatus: message.marketStatus,
-      });
+      if (
+        ctx.onWelcome({
+          heartbeatIntervalMs: message.heartbeatIntervalMs,
+          feedMode: message.feedMode,
+          marketStatus: message.marketStatus,
+        }) === false
+      )
+        return;
       ctx.subscriptions.resubscribeAll();
       ctx.onSnapshotsSettled();
       return;
     case "snapshot":
       ctx.quoteStore.upsertMany(message.quotes);
-      ctx.gate.settle(ctx.subscriptions.settleSnapshot(message.requestId));
+      ctx.gate.settle(
+        ctx.subscriptions.settleSnapshot(message.requestId, (symbols) => {
+          const confirmed = message.quotes.filter((quote) => symbols.includes(quote.symbol));
+          ctx.quoteStore.receiveQuotes(confirmed);
+          for (const quote of confirmed) ctx.quoteStore.setAvailability(quote.symbol, "available");
+        }),
+      );
       ctx.onSnapshotsSettled();
       return;
     case "quotes":
       ctx.health?.quotes(message.quotes);
-      ctx.quoteStore.upsertMany(message.quotes);
+      ctx.quoteStore.receiveQuotes(message.quotes);
       return;
     case "heartbeat":
       ctx.health?.heartbeat(message.serverTime, message.skippedFrames);

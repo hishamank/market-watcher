@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { FeedSessionBoundary } from "./feed-session-boundary.tsx";
 import { CoreProvider, type Locale } from "@mini/core";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
@@ -11,13 +12,16 @@ import { OfflineControlContext } from "../platform/offline-context.tsx";
 import { createWebPlatform } from "../platform/web-platform.ts";
 import { createQueryClient } from "../query/query-client.ts";
 
+import type { FeedMode } from "@mini/contracts";
+
 export interface ProvidersProps {
   gatewayUrl: string;
+  initialFeedMode: FeedMode | null;
   locale: Locale;
   children: ReactNode;
 }
 
-export function Providers({ gatewayUrl, locale, children }: ProvidersProps) {
+export function Providers({ gatewayUrl, initialFeedMode, locale, children }: ProvidersProps) {
   const router = useRouter();
   const [queryClient] = useState(createQueryClient);
   const [platform] = useState(createWebPlatform);
@@ -28,6 +32,7 @@ export function Providers({ gatewayUrl, locale, children }: ProvidersProps) {
         <OfflineControlContext value={platform.network}>
           <CoreProvider
             gatewayUrl={gatewayUrl}
+            initialFeedMode={initialFeedMode}
             storage={platform.storage}
             colorScheme={platform.colorScheme}
             network={platform.network}
@@ -38,7 +43,7 @@ export function Providers({ gatewayUrl, locale, children }: ProvidersProps) {
               router.refresh();
             }}
           >
-            {children}
+            <FeedSessionBoundary>{children}</FeedSessionBoundary>
           </CoreProvider>
         </OfflineControlContext>
       </QueryClientProvider>

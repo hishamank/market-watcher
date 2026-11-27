@@ -1,4 +1,5 @@
-import { dehydrate, HydrationBoundary, type QueryClient } from "@tanstack/react-query";
+import { dehydrate, type QueryClient } from "@tanstack/react-query";
+import { FeedHydrationBoundary } from "./feed-hydration-boundary.tsx";
 import type { ReactNode } from "react";
 import { getServerQueryClient } from "./server-query-client.ts";
 
@@ -10,5 +11,5 @@ export interface PrefetchBoundaryProps {
 export async function PrefetchBoundary({ prefetch, children }: PrefetchBoundaryProps) {
   const client = getServerQueryClient();
   await prefetch?.(client);
-  return <HydrationBoundary state={dehydrate(client)}>{children}</HydrationBoundary>;
+  return <FeedHydrationBoundary state={dehydrate(client)}>{children}</FeedHydrationBoundary>;
 }

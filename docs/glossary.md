@@ -20,6 +20,10 @@ _Avoid_: throttling, debouncing, batching
 Where all prices in a running system come from: Simulated or Live. It is fixed for the life of the gateway, and the two are never mixed.
 _Avoid_: data source, environment
 
+**Feed session**:
+The period in which an app uses one consistent feed mode. If the gateway changes between Simulated and Live, the app hides market data and requires a reload or restart before displaying the new source.
+_Avoid_: connection status, market session
+
 **Market status**:
 Whether a session is currently open according to the market calendar: open or closed.
 _Avoid_: trading status, market state
@@ -165,3 +169,7 @@ _Avoid_: theme mode, night mode
 **Company news**: A ticker-focused batch of headlines and article links obtained by the gateway, independently of prices. A destination site identifies the linked host when the feed does not supply the original publisher.
 
 **Earnings**: Fiscal-quarter earnings per share (EPS), their analyst estimates and upcoming reporting dates. GAAP and non-GAAP identify the accounting basis supplied by the provider; fiscal quarter labels may differ from calendar quarters.
+
+**Quote availability**:
+Whether a symbol has a confirmed live subscription, is recovering its subscription, or is unavailable. It is independent of transport health and the provider last-known warning.
+_Avoid_: connection status, market status

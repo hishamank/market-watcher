@@ -41,8 +41,12 @@ export function normaliseSymbols(symbols: readonly string[]): string[] {
   return [...new Set(symbols)].sort();
 }
 
-function seedFrom<T>(data: T, quotes: readonly Quote[], quoteStore?: QuoteStore): T {
-  quoteStore?.upsertMany(quotes);
+function seedFrom<T>(
+  data: T,
+  quotes: readonly Quote[],
+  apply?: (quotes: readonly Quote[]) => void,
+): T {
+  apply?.(quotes);
   return data;
 }
 
@@ -52,8 +56,9 @@ export function stockListQueryOptions(rest: RestClient, quoteStore?: QuoteStore)
   return queryOptions({
     queryKey: stockQueryKeys.list(),
     queryFn: async ({ signal }) => {
+      const apply = quoteStore?.beginRestRead();
       const data = await rest.listStocks(signal);
-      return seedFrom(data, quotesOf(data.stocks), quoteStore);
+      return seedFrom(data, quotesOf(data.stocks), apply);
     },
     staleTime: STOCK_STALE_MS,
     retry: shouldRetryRestError,
@@ -77,8 +82,9 @@ export function stockPagesQueryOptions(rest: RestClient, quoteStore?: QuoteStore
   return infiniteQueryOptions({
     queryKey: stockQueryKeys.pages(),
     queryFn: async ({ pageParam, signal }) => {
+      const apply = quoteStore?.beginRestRead();
       const page = await pageSkippingEmpty(rest, pageParam, signal);
-      return seedFrom(page, quotesOf(page.stocks), quoteStore);
+      return seedFrom(page, quotesOf(page.stocks), apply);
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
@@ -96,8 +102,9 @@ export function stocksBySymbolsQueryOptions(
   return queryOptions({
     queryKey: stockQueryKeys.symbols(requested),
     queryFn: async ({ signal }) => {
+      const apply = quoteStore?.beginRestRead();
       const data = await rest.getStocks(requested, signal);
-      return seedFrom(data, quotesOf(data.stocks), quoteStore);
+      return seedFrom(data, quotesOf(data.stocks), apply);
     },
     enabled: requested.length > 0,
     staleTime: STOCK_STALE_MS,
@@ -109,8 +116,9 @@ export function stockQueryOptions(rest: RestClient, symbol: string, quoteStore?:
   return queryOptions({
     queryKey: stockQueryKeys.detail(symbol),
     queryFn: async ({ signal }) => {
+      const apply = quoteStore?.beginRestRead();
       const data = await rest.getStock(symbol, signal);
-      return seedFrom(data, [data.stock.quote], quoteStore);
+      return seedFrom(data, [data.stock.quote], apply);
     },
     staleTime: STOCK_STALE_MS,
     retry: shouldRetryRestError,

@@ -9,7 +9,15 @@ type ReadyStatistics = Extract<StockStatisticsView, { status: "ready" }>;
 function YearRange({ range }: { range: ReadyStatistics["range"] }) {
   const palette = usePalette();
   const text = useTextStyles();
-  if (!range) return <Text style={{ color: palette.text }}>—</Text>;
+  if (!range)
+    return (
+      <Text
+        testID="statistics-yearRange"
+        style={[text.headingMd, styles.number, { color: palette.text }]}
+      >
+        —
+      </Text>
+    );
   return (
     <View>
       <View style={{ direction: "ltr" }}>

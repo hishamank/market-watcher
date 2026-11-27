@@ -12,6 +12,8 @@ export type {
   HttpResponse,
 } from "./rest/rest-client.ts";
 
+export { useQuoteAvailability } from "./hooks/use-quote-availability.ts";
+export type { QuoteAvailability } from "./realtime/quote-store.ts";
 export { useQuote } from "./hooks/use-quote.ts";
 export { useConnectionStatus } from "./hooks/use-connection-status.ts";
 export type { ConnectionStatusResult } from "./hooks/use-connection-status.ts";
@@ -84,3 +86,5 @@ export { useStockNews, type StockNewsView } from "./hooks/use-stock-news.ts";
 export { useStockEarnings, type StockEarningsView } from "./hooks/use-stock-earnings.ts";
 
 export { createI18n } from "./i18n/create-i18n.ts";
+
+export { useFeedSession } from "./hooks/use-feed-session.ts";
