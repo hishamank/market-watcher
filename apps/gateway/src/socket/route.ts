@@ -22,6 +22,7 @@ export interface SocketOptions {
   now: () => number;
   hub: Hub;
   chaosScope?: ChaosScope;
+  maxConnections?: number;
 }
 
 function rejectVersion(socket: WebSocket): void {
@@ -56,7 +57,7 @@ export async function socketRoute(app: FastifyInstance, options: SocketOptions):
           ...(options.chaosScope !== undefined ? { scope: options.chaosScope } : {}),
         })
       : null;
-  const admission = createAdmission(options.allowedOrigins, options.now);
+  const admission = createAdmission(options.allowedOrigins, options.now, options.maxConnections);
   const stopLiveness = startLiveness(app.websocketServer, PING_INTERVAL_MS);
   app.addHook("onClose", async () => {
     chaos?.close();

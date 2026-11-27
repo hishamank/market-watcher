@@ -1,6 +1,6 @@
 # Fastify gateway with explicit limits
 
-Amended by [ADR 0076](./0076-bound-socket-control-work-and-close-abusive-connections.md): a connection that keeps exceeding the message limit is closed with 1008, and its address waits 30 seconds before it can connect again.
+Amended by [ADR 0076](./0076-bound-socket-control-work-and-close-abusive-connections.md): a connection that keeps exceeding the message limit is closed with 1008, and its address waits 30 seconds before it can connect again. Amended by [ADR 0092](./0092-a-total-connection-cap-and-ipv6-budgets-by-prefix.md): the gateway holds at most 2,000 sockets, and IPv6 clients are budgeted by /64.
 
 Amended by [ADR 0042](./0042-native-sockets-send-an-origin.md): React Native's WebSocket does send an `Origin`, so `ALLOWED_ORIGINS` must list the gateway's own origin for phones.
 
