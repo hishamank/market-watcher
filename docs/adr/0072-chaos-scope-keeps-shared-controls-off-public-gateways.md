@@ -2,7 +2,7 @@
 
 Amends ADRs 0030 and 0040.
 
-ADR 0030 let any connection in simulator mode turn on the four controls that affect everyone (`tick_spike`, `history_latency`, `history_failure_rate`, `force_closed`), and said the 60-second revert meant "a hosted demo cannot be left broken". A security review at `07a9bf3` showed otherwise on a local copy of the hosted configuration. A client with no `Origin` header sent `force_closed` and `history_failure_rate: 100`; another visitor saw the market close and history return 503; and sending the control again restarted its 60 seconds, so one message a minute kept the demo broken. The Origin allowlist does not help, because it is not authentication (ADR 0028).
+ADR 0030 let any connection in simulator mode turn on the four controls that affect everyone (`tick_spike`, `history_latency`, `history_failure_rate`, `force_closed`), and said the 60-second revert meant "a hosted demo cannot be left broken". A security review at `a4a1b7a` showed otherwise on a local copy of the hosted configuration. A client with no `Origin` header sent `force_closed` and `history_failure_rate: 100`; another visitor saw the market close and history return 503; and sending the control again restarted its 60 seconds, so one message a minute kept the demo broken. The Origin allowlist does not help, because it is not authentication (ADR 0028).
 
 The gateway now has a chaos scope, set by `CHAOS_SCOPE`:
 

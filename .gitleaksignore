@@ -1,10 +1,9 @@
-# Findings confirmed as non-secrets in the security review of 07a9bf3.
+# Findings confirmed as non-secrets in the security review of a4a1b7a.
 # Each line is one gitleaks fingerprint (commit:file:rule:line), so nothing else is excluded.
 
 # Sec-WebSocket-Key in a curl handshake example. The value is the sample nonce printed in RFC 6455.
-cce59d21ac617d2a53de597dd34bb478de676d70:.claude/skills/verify/mobile.md:generic-api-key:52
-73af9d715550270a15f6d6b32300b5b500f0675e:.claude/skills/verify/SKILL.md:generic-api-key:170
-c36370057dc751fd426f4d00a103527a00c7f3fa:.claude/skills/verify/SKILL.md:generic-api-key:170
+2bb44ba5ad927654a07e032e04f3049558893c4d:.claude/skills/verify/mobile.md:generic-api-key:52
+01fadec34816c8294ddde021dbc304427cb4a8bc:.claude/skills/verify/SKILL.md:generic-api-key:170
 
 # next_page_token in a hand-written Alpaca fixture. It decodes to "AAPL|M|2025-06-24T13:35:00Z", a pagination cursor.
-a9d602408d93f9904ef9aed2c3b62a7261c1b998:apps/gateway/src/feeds/alpaca/fixtures/bars-5min-page-1.json:generic-api-key:36
+c994852152c2c0dc703992aafc06681027d687cd:apps/gateway/src/feeds/alpaca/fixtures/bars-5min-page-1.json:generic-api-key:36

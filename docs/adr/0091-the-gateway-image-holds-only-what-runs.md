@@ -2,7 +2,7 @@
 
 Amends ADR 0035.
 
-The first `Dockerfile.gateway` was one stage: it installed pnpm globally, installed every dependency of the gateway and contracts including development ones, and started the gateway through `tsx`. A security review at `07a9bf3` scanned that image: 41 high or critical findings in operating-system packages, 31 in Node packages and 15 in the Go-built TypeScript compiler. Every Node finding was in pnpm or the npm that ships with the base image, none in code the gateway loads.
+The first `Dockerfile.gateway` was one stage: it installed pnpm globally, installed every dependency of the gateway and contracts including development ones, and started the gateway through `tsx`. A security review at `a4a1b7a` scanned that image: 41 high or critical findings in operating-system packages, 31 in Node packages and 15 in the Go-built TypeScript compiler. Every Node finding was in pnpm or the npm that ships with the base image, none in code the gateway loads.
 
 The image is now built in two stages from a base pinned by digest:
 

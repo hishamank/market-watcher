@@ -2,7 +2,7 @@
 
 Amends ADR 0028.
 
-ADR 0028 limits one address to 10 sockets and 120 REST requests a minute. A security review at `07a9bf3` noted two gaps: the gateway had no total cap, and both limits keyed on the full address, so a client with an IPv6 /64, the normal allocation for one home or phone, could use a different address for every connection.
+ADR 0028 limits one address to 10 sockets and 120 REST requests a minute. A security review at `a4a1b7a` noted two gaps: the gateway had no total cap, and both limits keyed on the full address, so a client with an IPv6 /64, the normal allocation for one home or phone, could use a different address for every connection.
 
 **Budgets by /64.** The socket limit, the abuse cooldown (ADR 0076) and the REST limit now key on the first 64 bits of an IPv6 address. IPv4 and IPv4-mapped addresses key on the address, as before. People who share one /64, an office or a campus, share 10 sockets and 120 requests a minute, exactly as people behind one IPv4 NAT address already do. One tab uses one socket.
 

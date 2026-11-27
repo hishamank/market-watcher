@@ -1,6 +1,6 @@
 # Quote fallback benchmark
 
-Measured 2026-11-27 against baseline `96f6d0d9d8f76aad12fe58633afb28b76cb01b44`.
+Measured 2026-11-27 against baseline `cc4212a76fbe2cfdaad0b7391b745e55242d9534`.
 
 ## Method and limits
 

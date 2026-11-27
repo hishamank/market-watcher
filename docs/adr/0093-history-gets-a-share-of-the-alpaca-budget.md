@@ -2,7 +2,7 @@
 
 Amends ADR 0021.
 
-Every Alpaca data request shares one budget of 180 a minute (ADR 0021). Quote polling and public history both draw on it. A security review at `07a9bf3` pointed out what that allows in Live mode: history is requested by anyone, costs at least two data calls for an uncached symbol and range, and one address may make 120 REST requests a minute, so one client walking the catalogue could spend the whole budget and stop quote polling for every user.
+Every Alpaca data request shares one budget of 180 a minute (ADR 0021). Quote polling and public history both draw on it. A security review at `a4a1b7a` pointed out what that allows in Live mode: history is requested by anyone, costs at least two data calls for an uncached symbol and range, and one address may make 120 REST requests a minute, so one client walking the catalogue could spend the whole budget and stop quote polling for every user.
 
 History requests are now admitted against two counts: the shared 180, and a history share of 60 a minute. Quote polling, snapshots and resyncs can still use all 180. When history reaches its share, the adapter refuses the call before it is sent, and the history cache answers as it does for any source failure: a held copy with its age if it has one, otherwise 503 for that chart only (ADR 0011). The share is a third of the budget because 50 visible symbols polled every 5 seconds cost 12 batch calls a minute, which leaves room on both sides.
 

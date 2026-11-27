@@ -1,6 +1,6 @@
 # Web security headers and a nonce-based Content Security Policy
 
-The web app sent no security headers of its own. A security review at `07a9bf3` read the hosted page's response: `strict-transport-security` from Vercel and `x-powered-by: Next.js`, and nothing else. It found no XSS sink, so this is defence in depth against markup injected by a later mistake: an inline script or a script tag without the request's nonce does not run, the page cannot be framed, and `fetch`, XHR and WebSocket connections go only to the app and the gateway.
+The web app sent no security headers of its own. A security review at `a4a1b7a` read the hosted page's response: `strict-transport-security` from Vercel and `x-powered-by: Next.js`, and nothing else. It found no XSS sink, so this is defence in depth against markup injected by a later mistake: an inline script or a script tag without the request's nonce does not run, the page cannot be framed, and `fetch`, XHR and WebSocket connections go only to the app and the gateway.
 
 **Headers on every response** (`next.config.ts`): `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, a `Permissions-Policy` that turns off camera, microphone, geolocation and payment, and no `X-Powered-By`.
 

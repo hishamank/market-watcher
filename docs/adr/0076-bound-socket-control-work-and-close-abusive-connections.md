@@ -2,7 +2,7 @@
 
 Amends ADRs 0028 and 0066.
 
-Conflation bounds what the gateway sends (ADR 0008). Nothing bounded what a connection could make the gateway hold or do. ADR 0066 said so: valid unsubscribes are always queued, with "no bound on the number of queued unsubscribe messages". A security review at `07a9bf3` found three gaps on a local copy of the gateway:
+Conflation bounds what the gateway sends (ADR 0008). Nothing bounded what a connection could make the gateway hold or do. ADR 0066 said so: valid unsubscribes are always queued, with "no bound on the number of queued unsubscribe messages". A security review at `a4a1b7a` found three gaps on a local copy of the gateway:
 
 - **Queued work:** while a subscribe waits for upstream data or a writable socket, every later subscribe and unsubscribe queues behind it, each holding up to 16 KB.
 - **Waiters:** each over-limit subscribe on a blocked socket adds a waiter for its refusal.

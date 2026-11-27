@@ -1,6 +1,6 @@
 # The gateway closes on signals and reports its revision
 
-The gateway had cleanup hooks (the hub, the history cache, the feed) that only ran when a test called `app.close()`. A security review at `07a9bf3` found that `SIGTERM` and `SIGINT` killed the process outright: clients saw close code 1006, and nothing reported which commit a deployed gateway ran.
+The gateway had cleanup hooks (the hub, the history cache, the feed) that only ran when a test called `app.close()`. A security review at `a4a1b7a` found that `SIGTERM` and `SIGINT` killed the process outright: clients saw close code 1006, and nothing reported which commit a deployed gateway ran.
 
 **Shutdown.** On `SIGTERM` or `SIGINT` the gateway closes every open socket with code 1001 (going away), then calls `app.close()`, which runs the existing hooks, and exits 0. A second signal joins the close already running. If the close has not finished after 5 seconds, the gateway exits 1. `fly.toml` sends `SIGTERM` and waits 10 seconds before killing, so the deadline always fires first. Clients already reconnect with backoff on any close, so no client change is needed. The deadline timer keeps the process alive, so a close that never settles ends in exit 1 and never in a quiet exit 0. The image starts the gateway with `node` directly, which strips types itself on Node 26, and not through the `tsx` launcher: that launcher relays signals to a child process and force-kills it when two signals arrive close together, which would cut the close short.
 
