@@ -20,7 +20,7 @@ The issue asked for a check in Expo Go before relying on the sheet. It ran on iO
 - With the full detent as the initial one, the sheet covered the screen below the status bar and dimmed what was behind it.
 - Pushing the route twice and going back once left no sheet open.
 
-Android was not checked, so the fallback the issue allows (a pushed screen with the connection banner) was not needed.
+The sheet worked, so the fallback the issue allows (a pushed screen with the connection banner) was not needed. Android was not checked.
 
 > **Design note:** "On mobile the chaos controls hide behind a switch in Settings, because a phone has no query string. The panel is a native half-height sheet that doesn't dim the screen, so you can drop the connection or spike the ticks and watch the prices react behind it. I left out Go offline: airplane mode is the real thing."
 
