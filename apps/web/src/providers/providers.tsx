@@ -34,6 +34,7 @@ export function Providers({ gatewayUrl, initialFeedMode, locale, children }: Pro
             gatewayUrl={gatewayUrl}
             initialFeedMode={initialFeedMode}
             storage={platform.storage}
+            analytics={platform.analytics}
             colorScheme={platform.colorScheme}
             network={platform.network}
             lifecycle={platform.lifecycle}

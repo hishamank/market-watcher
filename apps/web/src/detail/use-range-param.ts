@@ -1,5 +1,5 @@
 import type { Range } from "@mini/contracts";
-import { useTrack } from "@mini/core";
+import { useTrack } from "@mini/analytics";
 import { useSearchParams } from "next/navigation";
 import { parseRange } from "./parse-range.ts";
 

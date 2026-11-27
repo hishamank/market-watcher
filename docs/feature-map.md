@@ -84,6 +84,16 @@ Terms follow [`glossary.md`](./glossary.md). Decisions are in [`adr/`](./adr), a
 - **Expected:** follows the system until toggled; clicking, Space or Enter switches the page and chart between light and dark. The choice survives navigation and reload and syncs across tabs. Invalid or blocked storage keeps the control usable. Saved themes apply before hydration.
 - **Walk:** at 360 and 1440 px, inspect list and detail in both themes, hover the sun/moon to reveal its orbit, and toggle to see the eclipse. Focus is visible from the keyboard, reduced motion is immediate, and the header and search remain usable without overflow. Check the canvas axes, series and previous-close line follow the theme while prices keep ticking.
 
+### G10. Analytics events (O, Walk)
+
+- **Where:** the browser console on web, and the Metro log on mobile, in development builds only (ADR 0101). The verify stack runs `next dev`; production builds, including the E2E suite, log nothing.
+- **Steps:** open `/` and read the console. Open a stock from search, change the range, star it, switch to Watchlist, toggle a column at 1280 px, switch the theme and the language, then open `/stocks/ZZZZ`.
+- **Expected:**
+  - Each action logs one `console.info` line, `[analytics] <name>`, followed by its properties and `platform`, `locale` and `feedMode`. The lines are `session_started` on load, then `connection_status_changed` (`connecting` to `connected`), `search_performed`, `search_result_selected`, `stock_opened`, `range_changed`, `watchlist_toggled`, `list_view_changed`, `columns_changed`, `theme_changed` and `language_changed`.
+  - Each event is logged once, including under React StrictMode in development. Choosing the range or view already shown logs nothing.
+  - The unknown symbol logs no `stock_opened`.
+  - No line contains the search text, a URL or a headline.
+
 ## Stock list (`/`)
 
 ### L1. First paint from the server (R, E2E)

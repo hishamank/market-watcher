@@ -27,7 +27,7 @@
               {
                 "name": "react",
                 "importNames": ["useEffect", "default"],
-                "message": "useEffect lives only in core and in integrations/. Import hooks by name, not through a default React import."
+                "message": "useEffect lives only in core, analytics and integrations/. Import hooks by name, not through a default React import."
               }
             ]
           }
@@ -37,7 +37,7 @@
           {
             "object": "React",
             "property": "useEffect",
-            "message": "useEffect lives only in core and in integrations/."
+            "message": "useEffect lives only in core, analytics and integrations/."
           }
         ]
       }
@@ -50,7 +50,7 @@
       }
     },
     {
-      "files": ["packages/core/**"],
+      "files": ["packages/core/**", "packages/analytics/**"],
       "rules": {
         "eslint/no-restricted-imports": [
           "error",

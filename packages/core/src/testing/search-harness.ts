@@ -1,6 +1,6 @@
 import type { SearchMatch } from "@mini/contracts";
 import { QueryClient, QueryObserver } from "@tanstack/react-query";
-import type { AnalyticsEvent } from "../analytics/analytics.ts";
+import type { AnalyticsEvent } from "@mini/analytics";
 import { createCoreServices } from "../core-provider.tsx";
 import type { AbortSignalLike, HttpFetch, HttpResponse } from "../rest/rest-client.ts";
 import { createFakeGateway } from "./fake-gateway.ts";
@@ -60,32 +60,41 @@ export function createHookRuntime(fetch: HttpFetch) {
   );
 
   let state = "";
-  let prevDeps: readonly unknown[] | undefined;
-  let cleanup: (() => void) | undefined;
+  let effectIndex = 0;
+  const effects: { deps: readonly unknown[] | undefined; cleanup: (() => void) | undefined }[] = [];
   let observer: QueryObserver<unknown, unknown, unknown, unknown, readonly unknown[]> | undefined;
   let unsubscribe: (() => void) | undefined;
 
   return {
     services,
     events,
-    useStateImpl: (): [string, (next: unknown) => void] => [
-      state,
-      (next: unknown) => {
-        state = typeof next === "function" ? (next as (prev: string) => string)(state) : `${next}`;
-      },
-    ],
+    useStateImpl: (): [string, (next: unknown) => void] => {
+      effectIndex = 0;
+      return [
+        state,
+        (next: unknown) => {
+          state =
+            typeof next === "function" ? (next as (prev: string) => string)(state) : `${next}`;
+        },
+      ];
+    },
     useEffectImpl: (effect: () => void | (() => void), deps?: readonly unknown[]) => {
+      const slot = effects[effectIndex];
+      effectIndex += 1;
+      const prevDeps = slot?.deps;
       const changed =
+        slot === undefined ||
         prevDeps === undefined ||
         deps === undefined ||
         deps.length !== prevDeps.length ||
-        deps.some((item, index) => !Object.is(item, prevDeps?.[index]));
-      if (changed) {
-        cleanup?.();
-        prevDeps = deps;
-        const nextCleanup = effect();
-        cleanup = typeof nextCleanup === "function" ? nextCleanup : undefined;
-      }
+        deps.some((item, index) => !Object.is(item, prevDeps[index]));
+      if (!changed) return;
+      slot?.cleanup?.();
+      const nextCleanup = effect();
+      effects[effectIndex - 1] = {
+        deps,
+        cleanup: typeof nextCleanup === "function" ? nextCleanup : undefined,
+      };
     },
     useQueryImpl: (options: Parameters<QueryClient["defaultQueryOptions"]>[0]) => {
       const defaulted = queryClient.defaultQueryOptions(options);
@@ -99,7 +108,7 @@ export function createHookRuntime(fetch: HttpFetch) {
       return observer.getOptimisticResult(defaulted);
     },
     unmount: () => {
-      cleanup?.();
+      for (const slot of effects) slot.cleanup?.();
       unsubscribe?.();
       observer?.destroy();
       services.socketClient.stop();

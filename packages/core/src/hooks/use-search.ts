@@ -48,13 +48,17 @@ export function useSearch(query: string): SearchResult {
   const activeQuery = trimmed.length === 0 ? "" : debouncedQuery;
 
   const { data, error, isPending, isError, isFetching, refetch } = useQuery(
-    searchQueryOptions(searchStocks, activeQuery, (resolvedQuery, resultCount) => {
-      track({ name: "search_performed", queryLength: resolvedQuery.length, resultCount });
-    }),
+    searchQueryOptions(searchStocks, activeQuery),
   );
 
   const status = deriveStatus(trimmed, activeQuery, isPending, isError, isFetching);
   const results = status === "success" ? (data?.results ?? NO_RESULTS) : NO_RESULTS;
+  const resultCount = status === "success" ? results.length : -1;
+
+  useEffect(() => {
+    if (resultCount < 0) return;
+    track({ name: "search_performed", queryLength: activeQuery.length, resultCount });
+  }, [activeQuery, resultCount, track]);
   const activeFetching = activeQuery.length > 0 && isFetching;
   const activeError = status === "error" ? error : null;
 

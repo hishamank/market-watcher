@@ -1,5 +1,6 @@
 "use client";
 
+import { useTrackOnce } from "@mini/analytics";
 import { useStock, useT } from "@mini/core";
 import Link from "next/link";
 import { useState } from "react";
@@ -17,7 +18,6 @@ import { ConnectedDetailFacts } from "./connected-detail-facts.tsx";
 import { useListNavigation } from "../integrations/use-list-navigation.ts";
 import { ListPane } from "./list-pane.tsx";
 import { scrubFor, type ScrubSelection } from "./scrub-selection.ts";
-import { useTrackStockOpened } from "../integrations/use-track-stock-opened.ts";
 import { useRangeParam } from "./use-range-param.ts";
 
 function DetailCard({ symbol }: { symbol: string }) {
@@ -26,6 +26,7 @@ function DetailCard({ symbol }: { symbol: string }) {
   const [selection, setSelection] = useState<ScrubSelection>();
   const scrub = scrubFor(selection, range);
   const stock = query.data?.stock;
+  useTrackOnce(stock === undefined ? null : { name: "stock_opened", symbol }, symbol);
   if (stock === undefined) {
     return query.status === "error" ? (
       <DetailError onRetry={() => void query.refetch()} />
@@ -58,7 +59,6 @@ function DetailCard({ symbol }: { symbol: string }) {
 
 export function DetailPage({ symbol }: { symbol: string }) {
   const t = useT();
-  useTrackStockOpened(symbol);
   const { listHref } = useListNavigation();
   return (
     <main className="flex flex-1 flex-col pb-24 md:p-24">

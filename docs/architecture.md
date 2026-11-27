@@ -10,7 +10,8 @@ This document expands on the overview in [`README.md`](../README.md). Terms foll
 | [`apps/web`](../apps/web) | Next.js App Router app. Views take props only; connected components read core hooks and pass props to views. Owns web-specific presentation state (such as `apps/web/src/columns` per [ADR 0095](adr/0095-web-owns-table-column-choices.md)), Lightweight Charts in `integrations/`, and security headers/nonce-based CSP ([ADR 0094](adr/0094-web-security-headers-and-a-nonce-based-content-security-policy.md)). |
 | [`apps/mobile`](../apps/mobile) | Expo Router app targeting Expo Go. Consumes the same `packages/core` hooks and `packages/tokens` with native views and platform adapters. |
 | [`packages/contracts`](../packages/contracts) | Zod schemas for every WebSocket and REST payload, inferred TypeScript wire types, and the fixed-point BigInt money module. Sole source of wire types. |
-| [`packages/core`](../packages/core) | Shared platform-agnostic client logic: WebSocket state machine, feed-session guard, keyed quote & availability stores, TanStack Query wrappers, hooks, formatters, i18n and analytics. Zero DOM, Next.js or React Native imports. |
+| [`packages/core`](../packages/core) | Shared platform-agnostic client logic: WebSocket state machine, feed-session guard, keyed quote & availability stores, TanStack Query wrappers, hooks, formatters and i18n. Zero DOM, Next.js or React Native imports. |
+| [`packages/analytics`](../packages/analytics) | Product event catalogue, `AnalyticsAdapter`, the console adapter, `useTrack` and `useTrackOnce`. Core injects the adapter and adds locale and feed mode to every event ([ADR 0101](adr/0101-analytics-is-its-own-package-with-a-console-sink.md)). |
 | [`packages/tokens`](../packages/tokens) | Shared Graphite design values (light/dark palettes, spacing, typography, radii, motion). |
 
 Architectural invariants enforced across workspaces:

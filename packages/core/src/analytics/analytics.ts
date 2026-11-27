@@ -1,51 +1,65 @@
-import type { Range } from "@mini/contracts";
-import type { ConnectionStatus, SocketClient } from "../realtime/socket-types.ts";
+import type { AnalyticsAdapter, Track } from "@mini/analytics";
+import type { QueryCache, QueryKey } from "@tanstack/react-query";
+import type { FeedSession } from "../realtime/feed-session.ts";
+import type { SocketClient } from "../realtime/socket-types.ts";
+import { RestClientError } from "../rest/rest-client.ts";
 
-export type AnalyticsEvent =
-  | { readonly name: "stock_opened"; readonly symbol: string }
-  | { readonly name: "range_changed"; readonly symbol: string; readonly range: Range }
-  | { readonly name: "watchlist_toggled"; readonly symbol: string; readonly starred: boolean }
-  | {
-      readonly name: "search_performed";
-      readonly queryLength: number;
-      readonly resultCount: number;
-    }
-  | {
-      readonly name: "connection_status_changed";
-      readonly from: ConnectionStatus;
-      readonly to: ConnectionStatus;
-    };
-
-export interface AnalyticsAdapter {
-  track(event: AnalyticsEvent): void;
-}
-
-export function createNoopAnalytics(): AnalyticsAdapter {
-  return {
-    track() {},
-  };
-}
-
-const defaultAnalytics = createNoopAnalytics();
-
-export function track(event: AnalyticsEvent, adapter: AnalyticsAdapter = defaultAnalytics): void {
-  adapter.track(event);
+export function createTrack(
+  adapter: AnalyticsAdapter,
+  locale: () => string,
+  feedSession: FeedSession,
+): Track {
+  return (event) => adapter.track(event, { locale: locale(), feedMode: feedSession.mode() });
 }
 
 export function attachConnectionAnalytics(
   socketClient: Pick<SocketClient, "getStatus" | "subscribeStatus">,
-  adapter: AnalyticsAdapter,
+  track: Track,
 ): () => void {
   let previousStatus = socketClient.getStatus();
+  let enteredAt = Date.now();
   return socketClient.subscribeStatus(() => {
     const nextStatus = socketClient.getStatus();
-    if (nextStatus !== previousStatus) {
-      adapter.track({
-        name: "connection_status_changed",
-        from: previousStatus,
-        to: nextStatus,
-      });
-      previousStatus = nextStatus;
-    }
+    if (nextStatus === previousStatus) return;
+    const now = Date.now();
+    track({
+      name: "connection_status_changed",
+      from: previousStatus,
+      to: nextStatus,
+      msInPrevious: now - enteredAt,
+    });
+    previousStatus = nextStatus;
+    enteredAt = now;
   });
+}
+
+function resourceOf(queryKey: QueryKey): string {
+  const [scope, kind] = queryKey;
+  if (scope === "stocks" && typeof kind === "string") return kind;
+  return String(scope).replace(/^(stock|company)-/, "");
+}
+
+export function attachRequestAnalytics(queryCache: QueryCache, track: Track): () => void {
+  return queryCache.subscribe((event) => {
+    if (event.type !== "updated" || event.action.type !== "error") return;
+    const { error } = event.action;
+    if (!(error instanceof RestClientError)) return;
+    track({ name: "request_failed", resource: resourceOf(event.query.queryKey), code: error.code });
+  });
+}
+
+const startedSessions = new WeakSet<object>();
+
+export function attachSessionAnalytics(
+  owner: object,
+  socketClient: Pick<SocketClient, "getStatus" | "subscribeStatus">,
+  track: Track,
+): () => void {
+  const startOnConnect = () => {
+    if (startedSessions.has(owner) || socketClient.getStatus() !== "connected") return;
+    startedSessions.add(owner);
+    track({ name: "session_started" });
+  };
+  startOnConnect();
+  return socketClient.subscribeStatus(startOnConnect);
 }

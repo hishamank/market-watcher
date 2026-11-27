@@ -9,6 +9,7 @@ import { useMediaQuery } from "../integrations/use-media-query.ts";
 import { useModalDialog } from "../integrations/use-modal-dialog.ts";
 import { useScrollActiveOption } from "../integrations/use-scroll-active-option.ts";
 import { SearchView } from "./search-view.tsx";
+import { useResultChoice } from "./use-result-choice.ts";
 
 interface KeyHandlerContext {
   results: readonly SearchMatch[];
@@ -128,6 +129,7 @@ export function HeaderSearch() {
   const panel = useSearchPanelState();
   const search = useSearch(panel.query);
   const watchlist = useWatchlist();
+  const choose = useResultChoice(search, panel.selectResult);
   const modalSheet = panel.sheetOpen && !isDesktop;
   const optionId = (symbol: string) => `${baseId}-option-${symbol}`;
   const validIndex =
@@ -178,7 +180,7 @@ export function HeaderSearch() {
           onClose: modalSheet ? panel.closeSheet : panel.closeAll,
           onMove: (delta) => panel.moveActive(delta, search.results.length),
           onChoose: (symbol) => {
-            panel.selectResult();
+            choose(symbol);
             router.push(stockHref(symbol));
           },
         })
@@ -186,7 +188,7 @@ export function HeaderSearch() {
       onContainerBlur={(event) => panel.blurDropdown(event, modalSheet)}
       onOpenSheet={panel.openSheet}
       onCloseSheet={panel.closeSheet}
-      onSelect={panel.selectResult}
+      onSelect={choose}
       onToggleStar={watchlist.toggle}
       onRetry={search.retry}
     />

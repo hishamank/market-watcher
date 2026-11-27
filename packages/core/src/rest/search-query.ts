@@ -21,20 +21,10 @@ export function searchQueryKey(query: string) {
   return ["stocks", "search", query.toLowerCase()] as const;
 }
 
-export function searchQueryOptions(
-  searchStocks: SearchFetcher,
-  query: string,
-  onSuccess?: (query: string, resultCount: number) => void,
-) {
+export function searchQueryOptions(searchStocks: SearchFetcher, query: string) {
   return queryOptions({
     queryKey: searchQueryKey(query),
-    queryFn: async ({ signal }) => {
-      const response = await searchStocks(query, signal);
-      if (!signal.aborted) {
-        onSuccess?.(query, response.results.length);
-      }
-      return response;
-    },
+    queryFn: ({ signal }) => searchStocks(query, signal),
     enabled: query.length > 0,
     staleTime: SEARCH_STALE_MS,
     retry: false,

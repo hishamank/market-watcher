@@ -14,6 +14,7 @@ export function Providers({ children }: { children: ReactNode }) {
       <CoreProvider
         gatewayUrl={gatewayUrl}
         storage={platform.storage}
+        analytics={platform.analytics}
         network={platform.network}
         lifecycle={platform.lifecycle}
         switchLocale={switchNativeLocale}

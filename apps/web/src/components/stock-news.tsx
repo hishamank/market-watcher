@@ -2,7 +2,12 @@ import { useT, type StockNewsView } from "@mini/core";
 import { Skeleton } from "./skeleton.tsx";
 import { NewsContent } from "./news-content.tsx";
 
-export function StockNews({ view }: { view: StockNewsView }) {
+export interface StockNewsProps {
+  view: StockNewsView;
+  onOpen: (position: number) => void;
+}
+
+export function StockNews({ view, onOpen }: StockNewsProps) {
   const t = useT();
   if (view.status === "empty") return null;
   return (
@@ -16,7 +21,7 @@ export function StockNews({ view }: { view: StockNewsView }) {
         {t("news.title")}
       </h2>
       {view.status === "ready" ? (
-        <NewsContent view={view} />
+        <NewsContent view={view} onOpen={onOpen} />
       ) : view.status === "loading" ? (
         <div role="status" className="mt-20 space-y-20">
           <span className="sr-only">{t("news.loading")}</span>

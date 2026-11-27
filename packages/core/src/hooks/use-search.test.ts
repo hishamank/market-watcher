@@ -86,6 +86,31 @@ describe("useSearch", () => {
     runtime.unmount();
   });
 
+  it("counts a repeated search answered from the cache", async () => {
+    const { calls, fetch } = createDeferredSearchFetch();
+    const runtime = mountRuntime(fetch);
+
+    useSearch("ap");
+    vi.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
+    useSearch("ap");
+    calls[0]?.resolve([{ symbol: "AAPL", name: "Apple Inc." }]);
+    await flushQuery();
+    useSearch("ap");
+
+    useSearch("");
+    vi.advanceTimersByTime(0);
+    useSearch("ap");
+    vi.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
+    expect(useSearch("ap").status).toBe("success");
+
+    expect(calls).toHaveLength(1);
+    expect(runtime.events).toEqual([
+      { name: "search_performed", queryLength: 2, resultCount: 1 },
+      { name: "search_performed", queryLength: 2, resultCount: 1 },
+    ]);
+    runtime.unmount();
+  });
+
   it("cancels superseded requests with AbortSignal and ignores out-of-order responses", async () => {
     const { calls, fetch } = createDeferredSearchFetch();
     const runtime = mountRuntime(fetch);

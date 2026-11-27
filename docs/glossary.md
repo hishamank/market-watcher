@@ -173,3 +173,13 @@ _Avoid_: theme mode, night mode
 **Quote availability**:
 Whether a symbol has a confirmed live subscription, is recovering its subscription, or is unavailable. It is independent of transport health and the provider last-known warning.
 _Avoid_: connection status, market status
+
+## Analytics
+
+**Analytics event**:
+A named, typed record of something a person did or saw, such as `stock_opened`, sent to the analytics adapter with the locale and feed mode. It never carries search text, URLs, headlines or identifiers.
+_Avoid_: tracking call, metric, log line
+
+**Analytics adapter**:
+Where analytics events go. The console adapter prints them in development for now; a provider adapter such as PostHog can take its place without changing any call site.
+_Avoid_: tracker, provider

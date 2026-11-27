@@ -1,3 +1,4 @@
+import { useTrack } from "@mini/analytics";
 import { useSearchParams } from "next/navigation";
 import type { MouseEvent } from "react";
 import type { ListView } from "../components/view-toggle.tsx";
@@ -24,12 +25,15 @@ function isPlainClick(event: MouseEvent): boolean {
 
 export function useViewParam(): ViewParam {
   const view = useSearchParams().get("view") === "watchlist" ? "watchlist" : "all";
+  const track = useTrack();
   return {
     view,
     selectView: (next, event) => {
       if (!isPlainClick(event)) return;
       event.preventDefault();
-      if (next !== view) window.history.pushState(null, "", viewHref(next));
+      if (next === view) return;
+      track({ name: "list_view_changed", view: next });
+      window.history.pushState(null, "", viewHref(next));
     },
   };
 }

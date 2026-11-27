@@ -9,6 +9,7 @@ Live US stock prices, history charts and a watchlist on web and mobile, fed by o
 - `apps/mobile`: Expo, runs in Expo Go
 - `packages/contracts`: Zod schemas, inferred types and the money module
 - `packages/core`: shared client logic for React and React Native
+- `packages/analytics`: the event catalogue, adapters and `useTrack`
 - `packages/tokens`: design values
 
 `pnpm dev` starts the gateway (simulator) and web. `pnpm test`, `pnpm lint`, `pnpm typecheck` and `pnpm format` run across the repo. The `package.json` scripts are the source of truth.
@@ -23,10 +24,10 @@ Live US stock prices, history charts and a watchlist on web and mobile, fed by o
 ## Conventions
 
 - Lay out with logical properties (start and end). Prices, tickers and charts stay left to right.
-- Strings go through `useT()`, and analytics through `track()` inside core hooks.
+- Strings go through `useT()`. Analytics events come from `@mini/analytics`: fired in the core hook that owns the action, or in an app event handler through `useTrack()`.
 - Money is decimal strings on the wire, with all maths in the contracts money module. Times are UTC epoch milliseconds on the wire and shown in ET.
 - Names and types explain the code, and ADRs explain the why. Lint enforces no comments, 80 lines per function in the apps, and 200 lines per file.
-- React: derive values, handle events or subscribe to a store. `useEffect` lives only in core and in each app's `integrations/`. React Compiler handles memoisation. A component showing live data reads its own symbol from the quote store.
+- React: derive values, handle events or subscribe to a store. `useEffect` lives only in core, analytics and each app's `integrations/`. React Compiler handles memoisation. A component showing live data reads its own symbol from the quote store.
 - Choose the simplest solution that works. A fix changes the fewest lines that solve it.
 - Test critical paths only, at the three seams in the spec's Testing Decisions.
 
