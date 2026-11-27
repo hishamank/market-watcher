@@ -1,3 +1,4 @@
+import { arSeoStrings } from "./seo.ts";
 import { arEarningsStrings } from "./earnings.ts";
 import { arNewsStrings } from "./news.ts";
 import { arStatisticsStrings } from "./statistics.ts";
@@ -10,6 +11,7 @@ import { arShellStrings } from "./shell.ts";
 import { arWatchlistStrings } from "./watchlist.ts";
 
 export const ar = {
+  ...arSeoStrings,
   ...arEarningsStrings,
   ...arNewsStrings,
   ...arStatisticsStrings,
