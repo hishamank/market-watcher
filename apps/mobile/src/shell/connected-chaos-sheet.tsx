@@ -11,6 +11,7 @@ function ChaosSheet() {
   const router = useRouter();
   return (
     <ChaosSheetView
+      sharedControls={chaos.sharedControls}
       tickSpike={chaos.tickSpike}
       historyLatency={chaos.historyLatency}
       historyFailureRate={chaos.historyFailureRate}

@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import { allowIndexing, siteUrl } from "../metadata/site.ts";
 import { readMetadataLocale } from "../metadata/page-metadata.ts";
 import { Alexandria } from "next/font/google";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { connection } from "next/server";
 import { localeDirection, parseLocale } from "@mini/core";
 import type { ReactNode } from "react";
 import { gatewayUrl, readShellMeta } from "../gateway/shell-meta.ts";
 import { LOCALE_COOKIE } from "../platform/locale-cookie.ts";
+import { NONCE_HEADER } from "../proxy.ts";
 import { Providers } from "../providers/providers.tsx";
 import { AppShell } from "../shell/app-shell.tsx";
 import { ThemeScript } from "../integrations/theme-script.tsx";
@@ -33,6 +34,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   await connection();
   const meta = await readShellMeta();
   const locale = parseLocale((await cookies()).get(LOCALE_COOKIE)?.value);
+  const nonce = (await headers()).get(NONCE_HEADER) ?? undefined;
   return (
     <html
       lang={locale}
@@ -41,10 +43,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       suppressHydrationWarning
     >
       <head>
-        <ThemeScript />
+        <ThemeScript nonce={nonce} />
       </head>
       <body>
-        <Providers gatewayUrl={gatewayUrl} locale={locale}>
+        <Providers gatewayUrl={gatewayUrl} initialFeedMode={meta.feedMode} locale={locale}>
           <AppShell meta={meta}>{children}</AppShell>
         </Providers>
       </body>

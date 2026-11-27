@@ -1,4 +1,5 @@
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
+import { test } from "./support/feed-fixture.ts";
 import { collectConsoleProblems } from "./support/console.ts";
 
 const response = {
@@ -43,7 +44,9 @@ test("D12 earnings show the next report, latest EPS and four fiscal quarters, an
 
 test("D12 losses, zero, missing estimates and uncertain date ranges are explicit", async ({
   page,
+  useLiveFeed,
 }) => {
+  await useLiveFeed();
   await page.route("**/stocks/AAPL/earnings", (route) => route.fulfill({ json: response }));
   await page.goto("/stocks/AAPL");
   await expect(page.getByTestId("earnings-chart")).toContainText("−$0.50");
@@ -56,14 +59,16 @@ test("D12 losses, zero, missing estimates and uncertain date ranges are explicit
 
 test("D12 partial earnings hide unavailable subsections and failed requests still retry", async ({
   page,
+  useLiveFeed,
 }) => {
+  await useLiveFeed();
   let failing = true;
   await page.route("**/stocks/AAPL/earnings", (route) =>
     failing
       ? route.fulfill({
           status: 503,
           json: {
-            feedMode: "simulated",
+            feedMode: "live",
             marketStatus: "open",
             error: { code: "unavailable", message: "Unavailable" },
           },
@@ -84,7 +89,9 @@ test("D12 partial earnings hide unavailable subsections and failed requests stil
 
 test("D9 D10 D11 D12 sections with no content disappear, including all-null records", async ({
   page,
+  useLiveFeed,
 }) => {
+  await useLiveFeed();
   const routes = {
     profile: {
       profile: {
@@ -141,7 +148,11 @@ for (const width of [360, 1440]) {
   });
 }
 
-test("D12 large EPS and an unconfirmed date fit 320px in both languages", async ({ page }) => {
+test("D12 large EPS and an unconfirmed date fit 320px in both languages", async ({
+  page,
+  useLiveFeed,
+}) => {
+  await useLiveFeed();
   await page.setViewportSize({ width: 320, height: 900 });
   await page.route("**/stocks/AAPL/earnings", (route) =>
     route.fulfill({
