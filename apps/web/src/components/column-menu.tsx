@@ -1,4 +1,5 @@
-import { type TableColumn, useT } from "@mini/core";
+import { useT } from "@mini/core";
+import type { TableColumn } from "../columns/table-columns-store.ts";
 import { buttonClassName } from "./button.tsx";
 
 export interface ColumnOption {

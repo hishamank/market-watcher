@@ -5,6 +5,8 @@ import { FeedSessionBoundary } from "./feed-session-boundary.tsx";
 import { CoreProvider, type Locale } from "@mini/core";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
+import { createTableColumnsStore } from "../columns/table-columns-store.ts";
+import { TableColumnsContext } from "../columns/use-table-columns.ts";
 import { switchDocumentLocale } from "../platform/document-locale.ts";
 import { OfflineControlContext } from "../platform/offline-context.tsx";
 import { createWebPlatform } from "../platform/web-platform.ts";
@@ -23,25 +25,28 @@ export function Providers({ gatewayUrl, initialFeedMode, locale, children }: Pro
   const router = useRouter();
   const [queryClient] = useState(createQueryClient);
   const [platform] = useState(createWebPlatform);
+  const [columns] = useState(() => createTableColumnsStore(platform.storage));
   return (
-    <QueryClientProvider client={queryClient}>
-      <OfflineControlContext value={platform.network}>
-        <CoreProvider
-          gatewayUrl={gatewayUrl}
-          initialFeedMode={initialFeedMode}
-          storage={platform.storage}
-          colorScheme={platform.colorScheme}
-          network={platform.network}
-          lifecycle={platform.lifecycle}
-          locale={locale}
-          switchLocale={(next, apply) => {
-            switchDocumentLocale(next, apply);
-            router.refresh();
-          }}
-        >
-          <FeedSessionBoundary>{children}</FeedSessionBoundary>
-        </CoreProvider>
-      </OfflineControlContext>
-    </QueryClientProvider>
+    <TableColumnsContext value={columns}>
+      <QueryClientProvider client={queryClient}>
+        <OfflineControlContext value={platform.network}>
+          <CoreProvider
+            gatewayUrl={gatewayUrl}
+            initialFeedMode={initialFeedMode}
+            storage={platform.storage}
+            colorScheme={platform.colorScheme}
+            network={platform.network}
+            lifecycle={platform.lifecycle}
+            locale={locale}
+            switchLocale={(next, apply) => {
+              switchDocumentLocale(next, apply);
+              router.refresh();
+            }}
+          >
+            <FeedSessionBoundary>{children}</FeedSessionBoundary>
+          </CoreProvider>
+        </OfflineControlContext>
+      </QueryClientProvider>
+    </TableColumnsContext>
   );
 }

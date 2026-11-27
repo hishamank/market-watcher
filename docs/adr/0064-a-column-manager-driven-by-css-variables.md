@@ -1,5 +1,7 @@
 # A column manager driven by CSS variables
 
+Amended by [ADR 0095](./0095-web-owns-table-column-choices.md): web now owns the store and hook; persistence and presentation behavior are unchanged.
+
 Amends ADR 0049, ADR 0063 and the Layout section of `docs/DESIGN.md`.
 
 A column manager lets the user choose which columns the stock table shows. From 768 px, a **Columns** button next to the All and Watchlist toggle opens a menu with one checkbox per column.
