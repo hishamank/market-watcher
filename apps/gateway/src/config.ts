@@ -24,7 +24,8 @@ export interface GatewayConfig {
 const PROXY_NAMES = new Set(["loopback", "linklocal", "uniquelocal"]);
 
 function shown(value: string): string {
-  return value.length > 80 ? `${value.slice(0, 80)}…` : value;
+  const printable = value.replace(/[^\x20-\x7e]/g, "?");
+  return printable.length > 80 ? `${printable.slice(0, 80)}…` : printable;
 }
 
 function items(value: string | undefined): string[] {
@@ -44,24 +45,27 @@ export function parsePort(value: string | undefined): number {
   return port;
 }
 
-function isOrigin(entry: string): boolean {
+function originOf(entry: string): string | undefined {
   try {
     const url = new URL(entry);
-    return /^https?:$/.test(url.protocol) && url.origin === entry;
+    const bare = url.pathname === "/" && url.search === "" && url.hash === "";
+    const plain = /^https?:$/.test(url.protocol) && url.username === "" && url.password === "";
+    return bare && plain && !entry.includes("?") && !entry.includes("#") ? url.origin : undefined;
   } catch {
-    return false;
+    return undefined;
   }
 }
 
 export function parseOrigins(value: string | undefined): ReadonlySet<string> {
-  const origins = items(value);
-  const bad = origins.find((entry) => !isOrigin(entry));
+  const entries = items(value);
+  const bad = entries.find((entry) => originOf(entry) === undefined);
   if (bad !== undefined) {
     throw new ConfigError(
       `ALLOWED_ORIGINS entry ${shown(bad)} is not an origin. ` +
-        "Use scheme://host or scheme://host:port, with no path and no trailing slash.",
+        "Use scheme://host or scheme://host:port, with no path.",
     );
   }
+  const origins = entries.flatMap((entry) => originOf(entry) ?? []);
   return new Set(origins.length > 0 ? origins : LOCAL_WEB_ORIGINS);
 }
 
@@ -72,7 +76,7 @@ function isProxyEntry(entry: string): boolean {
   if (family === 0 || rest.length > 0) return false;
   return (
     prefix === undefined ||
-    (/^\d{1,3}$/.test(prefix) && Number(prefix) <= (family === 4 ? 32 : 128))
+    (/^[1-9]\d{0,2}$/.test(prefix) && Number(prefix) <= (family === 4 ? 32 : 128))
   );
 }
 
