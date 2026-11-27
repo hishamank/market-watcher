@@ -17,6 +17,7 @@ export interface ChaosFailureRateView {
 }
 
 export interface ChaosControlsResult {
+  readonly sharedControls: boolean;
   readonly tickSpike: ChaosToggleView;
   readonly historyLatency: ChaosToggleView;
   readonly historyFailureRate: ChaosFailureRateView;
@@ -115,6 +116,7 @@ export function useChaosControls(): ChaosControlsResult {
   );
 
   return {
+    sharedControls: snapshot !== null && snapshot.scope === "global",
     tickSpike: {
       enabled: snapshot?.tickSpike.enabled ?? false,
       secondsLeft: secondsLeftFor(snapshot?.tickSpike.revertsAt ?? null, snapshot, nowMs),
