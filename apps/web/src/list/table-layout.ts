@@ -4,7 +4,6 @@ import type { CSSProperties } from "react";
 const NAME_MIN_PX = 220;
 const STAR_PX = 44;
 const GAP_PX = 16;
-const PADDING_PX = 8;
 
 const WIDTHS: Record<Exclude<TableColumn, "name">, number> = {
   symbol: 88,
@@ -32,7 +31,7 @@ export function customColumnStyle(columns: readonly TableColumn[]): CSSPropertie
   );
   const width = columns.reduce(
     (sum, column) => sum + (column === "name" ? NAME_MIN_PX : WIDTHS[column]) + GAP_PX,
-    STAR_PX + PADDING_PX,
+    STAR_PX,
   );
   const shown = Object.fromEntries(
     Object.keys(WIDTHS).map((column) => [

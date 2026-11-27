@@ -13,10 +13,13 @@ import { PriceCell } from "./price-cell.tsx";
 import { StarButton } from "./star-button.tsx";
 
 export const tableColumns =
-  "list-table:grid list-table:grid-cols-[minmax(0,1fr)_88px_110px_128px_96px_124px_124px_44px] list-table:gap-x-16 list-table:ps-20 list-table:pe-8 list-wide:grid-cols-[minmax(0,1fr)_88px_110px_128px_96px_124px_104px_104px_124px_44px] list-compact:grid list-compact:grid-cols-[minmax(0,1fr)_72px_104px_172px_44px] list-compact:gap-x-16 list-compact:ps-20 list-compact:pe-8 list-custom:grid-cols-(--table-cols) list-custom:ps-0";
+  "list-table:grid list-table:grid-cols-[minmax(0,1fr)_88px_110px_128px_96px_124px_124px_44px] list-table:gap-x-16 list-table:ps-20 list-table:pe-8 list-wide:grid-cols-[minmax(0,1fr)_88px_110px_128px_96px_124px_104px_104px_124px_44px] list-compact:grid list-compact:grid-cols-[minmax(0,1fr)_72px_104px_172px_44px] list-compact:gap-x-16 list-compact:ps-20 list-compact:pe-8 list-custom:grid-cols-(--table-cols) list-custom:ps-0 list-custom:pe-0";
 
 export const pinnedName =
   "list-custom:sticky list-custom:start-0 list-custom:z-1 list-custom:self-stretch list-custom:bg-surface list-custom:ps-20";
+
+export const pinnedStar =
+  "contents list-custom:sticky list-custom:end-0 list-custom:z-1 list-custom:grid list-custom:self-stretch list-custom:place-items-center list-custom:bg-surface";
 
 export const tableScroll = "list-custom:relative list-custom:overflow-x-auto";
 export const tableWidth = "list-custom:min-w-(--table-min)";
@@ -169,13 +172,17 @@ export function StockRow(props: StockRowProps) {
           <ReferenceCells {...props} />
         </span>
       </Link>
-      <StarButton
-        symbol={symbol}
-        name={name}
-        starred={props.starred}
-        onToggle={props.onToggleStar}
-        testId={`star-${symbol}`}
-      />
+      <span
+        className={`${pinnedStar} transition-colors duration-(--duration-fast) ease-standard list-custom:group-hover:bg-hover`}
+      >
+        <StarButton
+          symbol={symbol}
+          name={name}
+          starred={props.starred}
+          onToggle={props.onToggleStar}
+          testId={`star-${symbol}`}
+        />
+      </span>
     </div>
   );
 }
