@@ -74,14 +74,18 @@ export function findCachedQuote(cache: QueryCache, symbol: string): Quote | unde
   return quotes.get(symbol);
 }
 
-export function syncQuotesFromQueryCache(cache: QueryCache, quoteStore: QuoteStore): () => void {
+export function syncQuotesFromQueryCache(
+  cache: QueryCache,
+  quoteStore: QuoteStore,
+  canApply: () => boolean = () => true,
+): () => void {
   let attached = true;
 
   function apply(quotes: readonly Quote[]): void {
-    if (quotes.length === 0) return;
+    if (!canApply() || quotes.length === 0) return;
     quoteStore.seed(quotes);
     notifyManager.schedule(() => {
-      if (!attached) return;
+      if (!attached || !canApply()) return;
       quoteStore.upsertMany(
         quotes.filter((quote) => {
           const current = quoteStore.getQuote(quote.symbol);

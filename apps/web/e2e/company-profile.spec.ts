@@ -1,4 +1,5 @@
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
+import { test } from "./support/feed-fixture.ts";
 import { collectConsoleProblems } from "./support/console.ts";
 
 test("D9 overview expands, resets by symbol and distinguishes funds", async ({ page }) => {
@@ -54,7 +55,11 @@ test("D9 a failed profile retries without interrupting prices", async ({ page })
   await expect(page.getByTestId("company-profile")).toHaveAttribute("data-state", "ready");
 });
 
-test("D9 links have safe targets and Yahoo provenance is explicit", async ({ page }) => {
+test("D9 links have safe targets and Yahoo provenance is explicit", async ({
+  page,
+  useLiveFeed,
+}) => {
+  await useLiveFeed();
   await page.route("**/stocks/AAPL/profile", (route) =>
     route.fulfill({
       json: {

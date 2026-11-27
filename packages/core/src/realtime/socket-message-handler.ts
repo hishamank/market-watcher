@@ -23,7 +23,7 @@ export interface FrameHandlerContext {
   gate: RecoveryGate;
   health: ConnectionHealthRecorder | undefined;
   onValidFrame(): void;
-  onWelcome(info: WelcomeInfo): void;
+  onWelcome(info: WelcomeInfo): boolean | void;
   onMarketStatus(marketStatus: MarketStatus): void;
   onChaosState(message: ChaosStateMessage): void;
   onSnapshotsSettled(): void;
@@ -34,11 +34,14 @@ function handleParsedMessage(message: ServerMessage, ctx: FrameHandlerContext): 
   switch (message.type) {
     case "welcome":
       ctx.health?.welcome(message.serverTime);
-      ctx.onWelcome({
-        heartbeatIntervalMs: message.heartbeatIntervalMs,
-        feedMode: message.feedMode,
-        marketStatus: message.marketStatus,
-      });
+      if (
+        ctx.onWelcome({
+          heartbeatIntervalMs: message.heartbeatIntervalMs,
+          feedMode: message.feedMode,
+          marketStatus: message.marketStatus,
+        }) === false
+      )
+        return;
       ctx.subscriptions.resubscribeAll();
       ctx.onSnapshotsSettled();
       return;
