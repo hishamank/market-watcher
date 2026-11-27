@@ -124,7 +124,7 @@ Terms follow [`glossary.md`](./glossary.md). Decisions are in [`adr/`](./adr), a
 
 ### L5. All and Watchlist toggle (R, E2E)
 
-- **Test IDs:** `view-toggle-all`, `view-toggle-watchlist`.
+- **Test IDs:** `view-toggle-all`, `view-toggle-watchlist`, `watchlist-count[data-count]` (the starred count on the Watchlist tab).
 - **Expected:**
   - Selecting Watchlist sets `?view=watchlist`, and selecting All removes it. The switch is instant, with no server render (ADR 0050).
   - The back button restores the previous view.
@@ -291,7 +291,7 @@ Terms follow [`glossary.md`](./glossary.md). Decisions are in [`adr/`](./adr), a
   - Hovering or focusing a label shows a faint arrow beside it, in the gap between columns, without moving any label (Walk). The sorted column's arrow is solid. Pressing `view-toggle-all` from a sorted watchlist fades that arrow out in place instead of removing it at once, and with reduced motion it goes at once (Walk).
   - Pressing a button sorts the rows and sets `?sort={column}-{direction}`. Name and Symbol start ascending; the others start descending. Rows without a day range sort last on Day high and Day low. The second press reverses, and the third returns to newest-starred order and removes `sort`.
   - The order stays still while prices tick. Unstarring a row keeps the others in place.
-  - Reloading, or opening a stock and coming back, keeps the sort (ADR 0099).
+  - Reloading, or opening a stock and coming back, keeps the sort (ADR 0100).
 
 ## Chaos controls (`?debug=1`)
 

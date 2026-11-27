@@ -48,6 +48,8 @@
   --animate-delayed-fade-in: fade-in var(--duration-base) var(--ease-standard) 150ms both;
   --animate-fade-out: fade-out var(--duration-fast) var(--ease-exit) both;
   --animate-digit-roll: digit-roll var(--duration-base) var(--ease-standard) both;
+  --animate-count-out: count-out var(--duration-slow) var(--ease-standard) both;
+  --animate-count-in: count-in var(--duration-slow) var(--ease-standard) both;
   --animate-halo: halo 2s ease-out infinite;
   --animate-dropdown-in: dropdown-in var(--duration-base) var(--ease-standard) both;
 
@@ -128,6 +130,22 @@
   @keyframes digit-roll {
     from {
       translate: 0 30%;
+    }
+  }
+
+  @keyframes count-out {
+    45%,
+    100% {
+      opacity: 0;
+      transform: translateY(calc(var(--flip-dir) * -40%)) rotateX(calc(var(--flip-dir) * 90deg));
+    }
+  }
+
+  @keyframes count-in {
+    0%,
+    35% {
+      opacity: 0;
+      transform: translateY(calc(var(--flip-dir) * 40%)) rotateX(calc(var(--flip-dir) * -90deg));
     }
   }
 

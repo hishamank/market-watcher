@@ -1,6 +1,6 @@
 "use client";
 
-import type { StockSort } from "@mini/core";
+import { useWatchlist, type StockSort } from "@mini/core";
 import { useState, type MouseEvent } from "react";
 import { useTableColumns } from "../columns/use-table-columns.ts";
 import { ViewToggle, type ListView } from "../components/view-toggle.tsx";
@@ -23,6 +23,7 @@ export function ListPage() {
   const wide = useMediaQuery("(width >= 48rem)");
   const [leaving, setLeaving] = useState<LeavingSort | undefined>(undefined);
   const { chosen } = useTableColumns();
+  const watchlist = useWatchlist();
   if (leaving !== undefined && view === "all" && !leaving.shown) {
     setLeaving({ sort: leaving.sort, shown: true });
   }
@@ -38,7 +39,13 @@ export function ListPage() {
     <main className="flex flex-1 flex-col md:p-24">
       <div className="mx-auto flex w-full flex-col md:max-w-[720px] md:gap-16 xl:max-w-[1120px] min-[90rem]:max-w-[1344px]">
         <div className="flex items-center justify-between gap-12 px-16 pt-4 pb-12 md:p-0">
-          <ViewToggle view={view} hrefFor={viewHref} onSelect={switchView} />
+          <ViewToggle
+            view={view}
+            hrefFor={viewHref}
+            onSelect={switchView}
+            watchlistSymbols={watchlist.symbols}
+            watchlistLoaded={watchlist.isLoaded}
+          />
           <ConnectedColumnMenu />
         </div>
         <section

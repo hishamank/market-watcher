@@ -12,6 +12,9 @@ export const arShellStrings = {
   "theme.darkMode": "الوضع الداكن",
   "header.title": "الأسواق",
   "feedMode.simulated": "محاكاة",
+  "feedMode.simulated.title": "ليست بيانات سوق حقيقية",
+  "feedMode.simulated.help":
+    "الأسعار والرسوم البيانية ناتجة عن معادلة تحاكي حركة الأسهم، وليست مأخوذة من البورصة. معلومات الشركات والأخبار أمثلة أيضًا.",
   "feedMode.live": "مباشر",
   "marketStatus.closed": "السوق مغلق",
   "marketStatus.lastClose": "آخر إغلاق ⁦{{time}}⁩",
