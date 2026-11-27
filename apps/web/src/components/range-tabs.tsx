@@ -12,9 +12,9 @@ export function RangeTabs({ range, onSelect }: RangeTabsProps) {
   return (
     <SegmentTrack
       selected={RANGES.indexOf(range)}
-      role="tablist"
+      role="group"
       label={t("detail.rangeTabs")}
-      className="flex gap-2 md:w-[420px] md:max-w-full"
+      className="grid grid-cols-3 gap-2 min-[360px]:flex md:w-[420px] md:max-w-full"
     >
       {(ready) =>
         RANGES.map((option) => {
@@ -23,9 +23,8 @@ export function RangeTabs({ range, onSelect }: RangeTabsProps) {
             <button
               key={option}
               type="button"
-              role="tab"
               data-segment
-              aria-selected={selected}
+              aria-pressed={selected}
               data-testid={`range-tab-${option}`}
               onClick={() => onSelect(option)}
               className={`grid min-h-[44px] flex-1 place-items-center rounded-sm px-8 text-label whitespace-nowrap ${segmentStyle(selected, ready)}`}
