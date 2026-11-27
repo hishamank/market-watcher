@@ -8,6 +8,7 @@ import {
   useConnectionStatus,
   useLocale,
   useQuote,
+  useQuoteWarning,
   useT,
   useWatchlist,
 } from "@mini/core";
@@ -26,8 +27,9 @@ export function ConnectedStockRow({ stock, morph = true, reflowStar }: Connected
   const locale = useLocale();
   const { stockHref } = useListNavigation();
   const quote = useQuote(stock.symbol) ?? stock.quote;
+  const warning = useQuoteWarning(quote);
   const { status } = useConnectionStatus();
-  const stale = status === "stale" || status === "offline";
+  const stale = status === "stale" || status === "offline" || warning.degraded;
   const { flash, flashKey, roll } = useTickFlash(quote.price, stale);
   const watchlist = useWatchlist();
   const starred = watchlist.isLoaded ? watchlist.isStarred(stock.symbol) : undefined;
@@ -44,17 +46,13 @@ export function ConnectedStockRow({ stock, morph = true, reflowStar }: Connected
       dayHigh={quote.dayRange ? formatPrice(quote.dayRange.high) : t("quote.dayRange.none")}
       dayLow={quote.dayRange ? formatPrice(quote.dayRange.low) : t("quote.dayRange.none")}
       lastUpdate={
-        quote.lastKnown
+        quote.lastKnown || warning.degraded
           ? formatMarketDateTime(quote.timestamp, { locale })
           : t("list.lastUpdate", {
               time: formatMarketTime(quote.timestamp, { locale, label: false }),
             })
       }
-      asOf={
-        quote.lastKnown
-          ? t("quote.lastKnown.label", { time: formatMarketDateTime(quote.timestamp, { locale }) })
-          : undefined
-      }
+      asOf={warning.label}
       stale={stale}
       flash={flash}
       flashKey={flashKey}

@@ -1,0 +1,24 @@
+"use client";
+
+import type { Quote } from "@mini/contracts";
+import { formatMarketDateTime } from "../format/time-format.ts";
+import { useLocale, useT } from "./use-t.ts";
+import { useQuoteAvailability } from "./use-quote-availability.ts";
+
+export function useQuoteWarning(quote: Quote) {
+  const availability = useQuoteAvailability(quote.symbol);
+  const locale = useLocale();
+  const t = useT();
+  const degraded = availability === "unavailable";
+  const labels = [
+    degraded ? t("quote.unavailable.label") : undefined,
+    quote.lastKnown
+      ? t("quote.lastKnown.label", { time: formatMarketDateTime(quote.timestamp, { locale }) })
+      : undefined,
+  ].filter(Boolean);
+  return {
+    degraded,
+    label: labels.length > 0 ? labels.join(" · ") : undefined,
+    help: degraded ? t("quote.unavailable.help") : t("quote.lastKnown.help"),
+  };
+}

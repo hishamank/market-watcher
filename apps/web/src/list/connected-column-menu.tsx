@@ -1,6 +1,7 @@
 "use client";
 
-import { useT, useTableColumns } from "@mini/core";
+import { useT } from "@mini/core";
+import { useTableColumns } from "../columns/use-table-columns.ts";
 import { ColumnMenu } from "../components/column-menu.tsx";
 import { useMediaQuery } from "../integrations/use-media-query.ts";
 import { defaultColumns } from "./table-layout.ts";

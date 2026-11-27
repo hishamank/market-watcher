@@ -1,4 +1,10 @@
-import { directionOf, formatPrice, formatSignedPercent, type FlashDirection } from "@mini/core";
+import {
+  useT,
+  directionOf,
+  formatPrice,
+  formatSignedPercent,
+  type FlashDirection,
+} from "@mini/core";
 import Link from "next/link";
 import type { FlashRoll } from "../integrations/use-tick-flash.ts";
 import { ChangePill } from "./change-pill.tsx";
@@ -43,9 +49,13 @@ const wideOnly = "hidden text-end text-label font-normal text-text-secondary lis
 const percentTones = { up: "text-gain", down: "text-loss", flat: "text-flat" } as const;
 
 function ReferenceCells(props: StockRowProps) {
+  const t = useT();
   return (
     <>
       <bdi dir="ltr" className={`${tableOnly} list-custom:[display:var(--col-previousClose)]`}>
+        <span className="sr-only" dir="auto">
+          {t("list.column.previousClose")}:{" "}
+        </span>
         {formatPrice(props.previousClose)}
       </bdi>
       <bdi
@@ -53,6 +63,9 @@ function ReferenceCells(props: StockRowProps) {
         data-testid={`stock-row-high-${props.symbol}`}
         className={`${wideOnly} list-custom:[display:var(--col-dayHigh)]`}
       >
+        <span className="sr-only" dir="auto">
+          {t("list.column.dayHigh")}:{" "}
+        </span>
         {props.dayHigh}
       </bdi>
       <bdi
@@ -60,17 +73,40 @@ function ReferenceCells(props: StockRowProps) {
         data-testid={`stock-row-low-${props.symbol}`}
         className={`${wideOnly} list-custom:[display:var(--col-dayLow)]`}
       >
+        <span className="sr-only" dir="auto">
+          {t("list.column.dayLow")}:{" "}
+        </span>
         {props.dayLow}
       </bdi>
       <bdi dir="ltr" className={`${tableOnly} list-custom:[display:var(--col-lastUpdate)]`}>
+        <span className="sr-only" dir="auto">
+          {t("list.column.lastUpdate")}:{" "}
+        </span>
         {props.lastUpdate}
       </bdi>
     </>
   );
 }
 
+function PercentCell(props: StockRowProps) {
+  const t = useT();
+  return (
+    <bdi
+      dir="ltr"
+      data-testid={`stock-row-percent-${props.symbol}`}
+      className={`hidden text-end text-numeric-change list-table:block list-custom:[display:var(--col-changePercent)] ${props.stale || props.asOf ? "text-text-secondary" : percentTones[directionOf(props.change)]}`}
+    >
+      <span className="sr-only" dir="auto">
+        {t("list.column.changePercent")}:{" "}
+      </span>
+      {formatSignedPercent(props.changePercent)}
+    </bdi>
+  );
+}
+
 export function StockRow(props: StockRowProps) {
   const { symbol, name, stale, flash } = props;
+  const t = useT();
   return (
     <div
       data-testid={`stock-row-${symbol}`}
@@ -105,6 +141,7 @@ export function StockRow(props: StockRowProps) {
         </span>
         <span className="flex shrink-0 flex-col items-end gap-4 list-table:contents list-compact:contents">
           <span className="list-table:text-end list-compact:text-end">
+            <span className="sr-only">{t("list.column.price")}: </span>
             <Morph name={`stock-price-${symbol}`} enabled={props.morph}>
               <PriceCell
                 price={props.price}
@@ -119,6 +156,7 @@ export function StockRow(props: StockRowProps) {
             </Morph>
           </span>
           <span className="list-table:justify-self-end list-compact:justify-self-end list-custom:[display:var(--col-change)]">
+            <span className="sr-only">{t("list.column.change")}: </span>
             <ChangePill
               change={props.change}
               changePercent={props.changePercent}
@@ -127,13 +165,7 @@ export function StockRow(props: StockRowProps) {
               percentClassName="list-table:hidden list-custom:[display:var(--col-pill-percent)]"
             />
           </span>
-          <bdi
-            dir="ltr"
-            data-testid={`stock-row-percent-${symbol}`}
-            className={`hidden text-end text-numeric-change list-table:block list-custom:[display:var(--col-changePercent)] ${stale || props.asOf ? "text-text-secondary" : percentTones[directionOf(props.change)]}`}
-          >
-            {formatSignedPercent(props.changePercent)}
-          </bdi>
+          <PercentCell {...props} />
           <ReferenceCells {...props} />
         </span>
       </Link>

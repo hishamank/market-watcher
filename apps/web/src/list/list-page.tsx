@@ -1,6 +1,6 @@
 "use client";
 
-import { useTableColumns } from "@mini/core";
+import { useTableColumns } from "../columns/use-table-columns.ts";
 import { ViewToggle } from "../components/view-toggle.tsx";
 import { ConnectedColumnMenu } from "./connected-column-menu.tsx";
 import { StockList } from "./stock-list.tsx";

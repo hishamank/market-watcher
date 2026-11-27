@@ -35,7 +35,6 @@ import { createStatisticsFetcher, type StatisticsFetcher } from "./rest/statisti
 import { createProfileFetcher, type ProfileFetcher } from "./rest/profile-query.ts";
 import { createSearchFetcher, type SearchFetcher } from "./rest/search-query.ts";
 import { createWatchlistStore, type WatchlistStore } from "./watchlist/watchlist-store.ts";
-import { createTableColumnsStore, type TableColumnsStore } from "./columns/table-columns-store.ts";
 
 export interface CoreProviderProps {
   gatewayUrl: string;
@@ -69,7 +68,6 @@ export interface CoreContextValue {
   fetchNews: NewsFetcher;
   fetchEarnings: EarningsFetcher;
   watchlistStore: WatchlistStore;
-  tableColumnsStore: TableColumnsStore;
   i18n: I18nService;
   switchLocale: LocaleSwitch;
   analytics: AnalyticsAdapter;
@@ -118,7 +116,6 @@ export function createCoreServices(
     fetchProfile: createProfileFetcher(restOptions),
     searchStocks: createSearchFetcher(restOptions),
     watchlistStore: createWatchlistStore(platform.storage),
-    tableColumnsStore: createTableColumnsStore(platform.storage),
     i18n,
     switchLocale: platform.switchLocale ?? ((_next, apply) => apply()),
     analytics,
