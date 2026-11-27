@@ -37,7 +37,7 @@ function recordLayoutShifts(page: Page) {
   });
 }
 
-test("D5 history latency shows a same-size skeleton, then the chart, with no layout shift", async ({
+test("D5 history latency keeps the dimmed chart with a spinner, then the new range, with no layout shift", async ({
   page,
 }) => {
   const problems = collectConsoleProblems(page);
@@ -50,11 +50,19 @@ test("D5 history latency shows a same-size skeleton, then the chart, with no lay
   try {
     const before = await boxes(page);
     const clickedAt = Date.now();
+    const label = page.getByTestId("detail-change-label");
+    const previousLabel = await label.textContent();
     await page.getByTestId("range-tab-1Y").click();
-    await expect(chart).toHaveAttribute("data-state", "loading");
+    await expect(chart).toHaveAttribute("aria-busy", "true");
+    await expect(chart).toHaveAttribute("data-state", "ready");
+    await expect(page.getByTestId("chart-updating")).toHaveCSS("opacity", "1");
+    await expect(chart).toHaveCSS("opacity", "0.4");
+    await expect(label).toHaveText(previousLabel ?? "");
     expect(await boxes(page)).toEqual(before);
-    await expect(chart).toHaveAttribute("data-state", "ready", { timeout: 10_000 });
+    await expect(chart).toHaveAttribute("aria-busy", "false", { timeout: 10_000 });
     expect(Date.now() - clickedAt).toBeGreaterThanOrEqual(1_500);
+    await expect(page.getByTestId("chart-updating")).toHaveCount(0);
+    await expect(label).not.toHaveText(previousLabel ?? "");
     expect(await boxes(page)).toEqual(before);
     const shift = await page.evaluate(
       () => (window as unknown as { layoutShift: number }).layoutShift,
