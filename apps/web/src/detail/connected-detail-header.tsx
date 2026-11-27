@@ -25,12 +25,12 @@ export function ConnectedDetailHeader({ stock, range, scrub }: ConnectedDetailHe
   const t = useT();
   const locale = useLocale();
   const quote = useQuote(stock.symbol) ?? stock.quote;
-  const history = useLiveHistory(stock.symbol, range);
+  const history = useLiveHistory(stock.symbol, range, { keepPrevious: true });
   const warning = useQuoteWarning(quote);
   const { status } = useConnectionStatus();
   const stale = status === "stale" || status === "offline" || warning.degraded;
   const watchlist = useWatchlist();
-  const scrubbed = scrub !== undefined && history.baseline !== undefined;
+  const scrubbed = scrub !== undefined && history.baseline !== undefined && !history.updating;
   const shownPrice = scrubbed ? scrub.close : quote.price;
   const rangeChange =
     scrubbed && history.baseline !== undefined
@@ -45,8 +45,11 @@ export function ConnectedDetailHeader({ stock, range, scrub }: ConnectedDetailHe
       change={rangeChange?.change ?? quote.change}
       rangeChange={rangeChange}
       changeLoading={history.previousClose === undefined && history.status === "pending"}
+      changeUpdating={history.updating}
       rangeLabel={
-        scrubbed ? formatScrubTime(range, scrub.time, locale) : t(`detail.range.${range}`)
+        scrubbed
+          ? formatScrubTime(range, scrub.time, locale)
+          : t(`detail.range.${history.range ?? range}`)
       }
       asOf={warning.label}
       asOfHelp={warning.help}

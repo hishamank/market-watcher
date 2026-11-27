@@ -30,7 +30,15 @@ export function useStock(symbol: string): UseQueryResult<StockDetailResponse> {
   return useQuery(stockQueryOptions(restClient, symbol, quoteStore));
 }
 
-export function useHistory(symbol: string, range: Range): UseQueryResult<HistoryResponse> {
+export function useHistory(
+  symbol: string,
+  range: Range,
+  keepPrevious = false,
+): UseQueryResult<HistoryResponse> {
   const { restClient } = useCore();
-  return useQuery(historyQueryOptions(restClient, symbol, range));
+  return useQuery({
+    ...historyQueryOptions(restClient, symbol, range),
+    placeholderData: (previous) =>
+      keepPrevious && previous?.symbol === symbol ? previous : undefined,
+  });
 }

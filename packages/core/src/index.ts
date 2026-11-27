@@ -26,7 +26,7 @@ export { useHistory, useStock, useStockList, useStocks } from "./hooks/use-stock
 export { useStockPages } from "./hooks/use-stock-pages.ts";
 export type { StockPagesResult } from "./hooks/use-stock-pages.ts";
 export { useLiveHistory } from "./hooks/use-live-history.ts";
-export type { LiveHistoryResult } from "./hooks/use-live-history.ts";
+export type { LiveHistoryOptions, LiveHistoryResult } from "./hooks/use-live-history.ts";
 export { useWatchlist } from "./hooks/use-watchlist.ts";
 export type { WatchlistResult } from "./hooks/use-watchlist.ts";
 export { useWatchlistStocks } from "./hooks/use-watchlist-stocks.ts";

@@ -5,13 +5,16 @@ import {
   ChartError,
   ChartReadout,
   ChartSkeleton,
+  ChartUpdating,
   type ChartReadoutValue,
 } from "./chart-states.tsx";
+import { updatingFade } from "./updating-fade.ts";
 
 export type ChartState = "loading" | "ready" | "error";
 
 export interface PriceChartProps {
   state: ChartState;
+  updating: boolean;
   direction: Direction;
   drawn: boolean;
   label: string;
@@ -47,42 +50,46 @@ export function PriceChart(props: PriceChartProps) {
         ) : null}
         <ChartReadout value={showChart ? props.readout : undefined} />
       </div>
-      <div
-        role="application"
-        aria-label={props.label}
-        tabIndex={showChart ? 0 : undefined}
-        onKeyDown={props.onKeyDown}
-        onBlur={props.onBlur}
-        data-testid="price-chart"
-        data-state={state}
-        data-direction={direction}
-        className="relative h-[200px] rounded-lg md:h-[344px]"
-      >
+      <div className="relative">
         <div
-          ref={props.plotRef}
-          aria-hidden="true"
-          className={`group pointer-events-none absolute start-0 end-0 top-0 overflow-hidden ${showChart ? "" : "invisible"}`}
+          role="application"
+          aria-label={props.label}
+          aria-busy={props.updating}
+          tabIndex={showChart ? 0 : undefined}
+          onKeyDown={props.onKeyDown}
+          onBlur={props.onBlur}
+          data-testid="price-chart"
+          data-state={state}
+          data-direction={direction}
+          className={`relative h-[200px] rounded-lg md:h-[344px] ${updatingFade(props.updating)}`}
         >
-          <span className="absolute inset-x-0 top-1/3 border-t border-chart-grid" />
-          <span className="absolute inset-x-0 top-2/3 border-t border-chart-grid" />
-          <span className="absolute inset-y-0 start-0 hidden w-full translate-x-(--future-x) bg-fill/35 group-data-[future=true]:block" />
+          <div
+            ref={props.plotRef}
+            aria-hidden="true"
+            className={`group pointer-events-none absolute start-0 end-0 top-0 overflow-hidden ${showChart ? "" : "invisible"}`}
+          >
+            <span className="absolute inset-x-0 top-1/3 border-t border-chart-grid" />
+            <span className="absolute inset-x-0 top-2/3 border-t border-chart-grid" />
+            <span className="absolute inset-y-0 start-0 hidden w-full translate-x-(--future-x) bg-fill/35 group-data-[future=true]:block" />
+          </div>
+          <div
+            ref={props.containerRef}
+            className={`absolute inset-0 ${showChart ? "" : "invisible"}`}
+          />
+          <span
+            ref={props.livePointRef}
+            data-testid="chart-last-price"
+            aria-hidden="true"
+            className={`pointer-events-none invisible absolute start-0 top-0 ${pointTones[direction]} ${showChart ? "" : "hidden"}`}
+          >
+            <span className="absolute size-[20px] -translate-1/2 rounded-full bg-current opacity-[0.22]" />
+            <span className="absolute size-[20px] -translate-1/2 rounded-full bg-current opacity-0 motion-safe:animate-halo" />
+            <span className="absolute size-[8px] -translate-1/2 rounded-full bg-current" />
+          </span>
+          {showSkeleton ? <ChartSkeleton /> : null}
+          {state === "error" ? <ChartError onRetry={props.onRetry} /> : null}
         </div>
-        <div
-          ref={props.containerRef}
-          className={`absolute inset-0 ${showChart ? "" : "invisible"}`}
-        />
-        <span
-          ref={props.livePointRef}
-          data-testid="chart-last-price"
-          aria-hidden="true"
-          className={`pointer-events-none invisible absolute start-0 top-0 ${pointTones[direction]} ${showChart ? "" : "hidden"}`}
-        >
-          <span className="absolute size-[20px] -translate-1/2 rounded-full bg-current opacity-[0.22]" />
-          <span className="absolute size-[20px] -translate-1/2 rounded-full bg-current opacity-0 motion-safe:animate-halo" />
-          <span className="absolute size-[8px] -translate-1/2 rounded-full bg-current" />
-        </span>
-        {showSkeleton ? <ChartSkeleton /> : null}
-        {state === "error" ? <ChartError onRetry={props.onRetry} /> : null}
+        {props.updating ? <ChartUpdating /> : null}
       </div>
     </div>
   );
