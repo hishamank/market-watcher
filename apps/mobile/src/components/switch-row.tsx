@@ -1,5 +1,5 @@
-import { space } from "@mini/tokens";
-import { StyleSheet, Switch, Text, View } from "react-native";
+import { color, space } from "@mini/tokens";
+import { Platform, StyleSheet, Switch, Text, View } from "react-native";
 import { usePalette } from "../theme/palette.ts";
 import { useTextStyles } from "../theme/text-styles.ts";
 import { CountdownPill } from "./countdown-pill.tsx";
@@ -16,6 +16,7 @@ export interface SwitchRowProps {
 export function SwitchRow({ label, help, value, onChange, testID, countdown }: SwitchRowProps) {
   const palette = usePalette();
   const textStyles = useTextStyles();
+  const isIOS = Platform.OS === "ios";
   return (
     <View style={styles.row}>
       <View style={styles.text}>
@@ -34,9 +35,13 @@ export function SwitchRow({ label, help, value, onChange, testID, countdown }: S
         accessibilityLabel={label}
         value={value}
         onValueChange={onChange}
-        trackColor={{ false: palette.fill, true: palette.text }}
-        thumbColor={value ? palette.bg : palette.textSecondary}
-        ios_backgroundColor={palette.fill}
+        trackColor={{
+          false: isIOS ? palette.borderStrong : palette.fill,
+          true: isIOS ? color.light.accent : palette.text,
+        }}
+        {...(isIOS
+          ? { ios_backgroundColor: palette.borderStrong }
+          : { thumbColor: value ? palette.bg : palette.textSecondary })}
       />
     </View>
   );
