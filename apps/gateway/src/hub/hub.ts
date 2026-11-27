@@ -80,7 +80,7 @@ async function answerSubscribe(
     })
     .then((quotes) => adopt(quotes, watchers));
   await withDeadline(ready, REPLY_DEADLINE_MS);
-  await whenWritable(member);
+  if (isOpen()) await whenWritable(member);
   if (isOpen()) {
     expire(book, watchers);
     const unavailable = sendAnswer(member.peer, request.requestId, plan, book.latest);
