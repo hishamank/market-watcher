@@ -3,6 +3,7 @@ import {
   formatMarketDateTime,
   useConnectionStatus,
   useLocale,
+  useMarketStatus,
   useQuote,
   useT,
   useWatchlist,
@@ -23,7 +24,8 @@ export function ConnectedStockRow({ stock, testID }: ConnectedStockRowProps) {
   const quote = useQuote(stock.symbol) ?? stock.quote;
   const { status } = useConnectionStatus();
   const stale = status === "stale" || status === "offline";
-  const { flash, flashKey } = useTickFlash(quote.price, stale);
+  const closed = useMarketStatus() === "closed";
+  const { flash, flashKey } = useTickFlash(quote.price, stale, closed);
   const watchlist = useWatchlist();
   return (
     <StockRow

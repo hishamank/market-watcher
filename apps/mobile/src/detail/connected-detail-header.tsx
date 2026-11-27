@@ -4,6 +4,7 @@ import {
   useConnectionStatus,
   useLiveHistory,
   useLocale,
+  useMarketStatus,
   useQuote,
   useT,
   useWatchlist,
@@ -26,12 +27,13 @@ export function ConnectedDetailHeader({ stock, range, selection }: ConnectedDeta
   const history = useLiveHistory(stock.symbol, range);
   const { status } = useConnectionStatus();
   const stale = status === "stale" || status === "offline";
+  const closed = useMarketStatus() === "closed";
   const watchlist = useWatchlist();
   const baseline = history.baseline;
   const scrub = scrubPointOf(selection, range, history);
   const scrubbed = scrub !== undefined && baseline !== undefined;
   const rangeChange = scrubbed ? changeBetween(baseline, scrub.close) : history.rangeChange;
-  const { flash, flashKey } = useTickFlash(quote.price, stale);
+  const { flash, flashKey } = useTickFlash(quote.price, stale, closed);
   return (
     <DetailHeader
       symbol={stock.symbol}

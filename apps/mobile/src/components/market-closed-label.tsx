@@ -12,9 +12,13 @@ interface MarketClosedLabelProps {
 export function MarketClosedLabel({ label, palette }: MarketClosedLabelProps) {
   const textStyles = useTextStyles();
   return (
-    <View testID="market-status-label" accessible style={styles.label}>
+    <View testID="market-status-label" accessible accessibilityLabel={label} style={styles.label}>
       <Icon name="moon" color={palette.textSecondary} size={16} />
-      <Text style={[textStyles.caption, styles.word, { color: palette.textSecondary }]}>
+      <Text
+        numberOfLines={1}
+        ellipsizeMode="tail"
+        style={[textStyles.caption, styles.word, { color: palette.textSecondary }]}
+      >
         {label}
       </Text>
     </View>
@@ -22,6 +26,6 @@ export function MarketClosedLabel({ label, palette }: MarketClosedLabelProps) {
 }
 
 const styles = StyleSheet.create({
-  label: { flexDirection: "row", alignItems: "center", gap: space[6] },
-  word: { fontWeight: "500" },
+  label: { flexDirection: "row", alignItems: "center", gap: space[6], flexShrink: 1 },
+  word: { fontWeight: "500", flexShrink: 1 },
 });
