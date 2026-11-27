@@ -6,7 +6,7 @@ import { DetailHeader } from "./detail-header.tsx";
 
 vi.mock("@mini/core", async (importOriginal) => {
   const core = await importOriginal<typeof import("@mini/core")>();
-  return { ...core, useT: () => core.createI18n("en").translator("en") };
+  return { ...core, useT: () => core.createI18n("en").translator("en-US") };
 });
 
 vi.mock("./star-button.tsx", () => ({ StarButton: () => null }));
