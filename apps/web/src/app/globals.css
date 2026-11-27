@@ -44,6 +44,7 @@
   --animate-star-dot: star-dot var(--duration-flash) var(--ease-standard) both;
   --animate-sheet-in: sheet-in var(--duration-slow) var(--ease-standard) both;
   --animate-fade-in: fade-in var(--duration-fast) var(--ease-standard) both;
+  --animate-delayed-fade-in: fade-in var(--duration-base) var(--ease-standard) 150ms both;
   --animate-digit-roll: digit-roll var(--duration-base) var(--ease-standard) both;
   --animate-halo: halo 2s ease-out infinite;
   --animate-dropdown-in: dropdown-in var(--duration-base) var(--ease-standard) both;

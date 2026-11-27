@@ -19,6 +19,8 @@ export interface LiveHistoryResult {
   readonly status: UseQueryResult<HistoryResponse>["status"];
   readonly error: Error | null;
   readonly refetch: UseQueryResult<HistoryResponse>["refetch"];
+  readonly updating: boolean;
+  readonly range: Range | undefined;
   readonly bars: readonly Bar[];
   readonly baseline: string | undefined;
   readonly previousClose: string | undefined;
@@ -54,14 +56,17 @@ interface HistoryInputs {
   readonly refetch: LiveHistoryResult["refetch"];
   readonly data: HistoryResponse | undefined;
   readonly dataUpdatedAt: number;
+  readonly isPlaceholderData: boolean;
 }
 
 function deriveLiveHistory(input: HistoryInputs, quote: Quote | undefined): LiveHistoryResult {
-  const { status, error, refetch, data, dataUpdatedAt } = input;
-  const base = { status, error, refetch };
+  const { status, error, refetch, dataUpdatedAt, isPlaceholderData } = input;
+  const data = isPlaceholderData && status === "error" ? undefined : input.data;
+  const base = { status, error, refetch, updating: isPlaceholderData && data !== undefined };
   if (data === undefined) {
     return {
       ...base,
+      range: undefined,
       bars: NO_BARS,
       baseline: undefined,
       previousClose: undefined,
@@ -76,21 +81,32 @@ function deriveLiveHistory(input: HistoryInputs, quote: Quote | undefined): Live
   const baseline = baselineOf(data);
   return {
     ...base,
+    range: data.range,
     bars,
     baseline,
     previousClose: data.previousClose,
     rangeChange: rangeChangeOf(baseline, bars, fallback ? quote?.price : undefined),
     session: data.range === "1D" ? data.session : undefined,
     ageMs: data.ageMs,
-    asOf: asOfOf(data, dataUpdatedAt),
+    asOf: base.updating ? undefined : asOfOf(data, dataUpdatedAt),
   };
 }
 
-export function useLiveHistory(symbol: string, range: Range): LiveHistoryResult {
-  const { status, error, refetch, data, dataUpdatedAt } = useHistory(symbol, range);
+export interface LiveHistoryOptions {
+  readonly keepPrevious?: boolean;
+}
+
+export function useLiveHistory(
+  symbol: string,
+  range: Range,
+  options: LiveHistoryOptions = {},
+): LiveHistoryResult {
+  const query = useHistory(symbol, range, options.keepPrevious);
+  const { status, error, refetch, data, dataUpdatedAt, isPlaceholderData } = query;
   const quote = useQuote(symbol);
   return useMemo(
-    () => deriveLiveHistory({ status, error, refetch, data, dataUpdatedAt }, quote),
-    [status, error, refetch, data, dataUpdatedAt, quote],
+    () =>
+      deriveLiveHistory({ status, error, refetch, data, dataUpdatedAt, isPlaceholderData }, quote),
+    [status, error, refetch, data, dataUpdatedAt, isPlaceholderData, quote],
   );
 }

@@ -8,7 +8,7 @@ import {
   type Direction,
 } from "@mini/core";
 import { Button } from "./button.tsx";
-import { AlertIcon, ClockIcon, DirectionIcon } from "./icons.tsx";
+import { AlertIcon, ClockIcon, DirectionIcon, SpinnerIcon } from "./icons.tsx";
 import { Skeleton } from "./skeleton.tsx";
 
 export interface ChartReadoutValue {
@@ -32,6 +32,20 @@ export function ChartSkeleton() {
         <Skeleton className="h-[10px] w-[40px]" />
         <Skeleton className="h-[10px] w-[40px]" />
         <Skeleton className="h-[10px] w-[56px]" />
+      </span>
+    </div>
+  );
+}
+
+export function ChartUpdating() {
+  return (
+    <div
+      aria-hidden="true"
+      data-testid="chart-updating"
+      className="pointer-events-none absolute inset-0 grid animate-delayed-fade-in place-items-center"
+    >
+      <span className="grid size-[40px] place-items-center rounded-full border border-border bg-raised text-text-secondary shadow-2">
+        <SpinnerIcon className="motion-safe:animate-spin" />
       </span>
     </div>
   );
