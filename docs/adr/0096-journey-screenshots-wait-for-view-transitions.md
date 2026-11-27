@@ -1,0 +1,7 @@
+# Journey screenshots wait for view transitions
+
+Journey screenshots capture the completed view. Before calling Playwright's full-page screenshot, the shared capture helper awaits the current native view transition's `ready` and `finished` promises. A rejected `ready` fails the step; the console gate remains unchanged. Browsers without an active transition capture immediately.
+
+Issue #92 reproduced in production Chromium 159 on main `0c8669e`: warm the AAPL detail route, return to the list at 360 × 740, click AAPL, and capture as soon as its price appears. The DOM callback completed, but the Chromium trace stayed in `WaitingForCaptureRects` while the screenshot was pending, until the native four-second timeout. The same full journey with capture deferred to transition completion passed. The cold-route minimal probe did not start a native transition, so its clean result did not exercise the race.
+
+This is a verification-harness fix. Application navigation, transitions and reduced-motion styles are unchanged. Waiting for a real lifecycle boundary avoids both capturing an intermediate animation frame and competing with the browser's transition capture. Sleeping for a fixed duration, increasing timeouts, allowing the error, and removing the animation would conceal the failure instead. Browser regressions check final screenshot pixels, abort rejection, and warm phone navigation with normal and reduced motion.

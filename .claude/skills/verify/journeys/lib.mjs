@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync, appendFileSync, mkdirSync } from "node:fs"
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { capture } from "./capture.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "../../../..");
@@ -67,11 +68,11 @@ export async function startJourney(feature, { width = 1440, height = 900 } = {})
     } catch (error) {
       failed = true;
       log(`[${id}] FAIL ${String(error.message ?? error).split("\n")[0]}`);
-      await page.screenshot({ path: join(dir, `${id}-failure.png`), fullPage: true }).catch(() => {});
+      await capture(page, { path: join(dir, `${id}-failure.png`), fullPage: true }).catch(() => {});
     }
   };
   const shot = async (name, target = page) => {
-    await target.screenshot({ path: join(dir, `${name}.png`), fullPage: true });
+    await capture(target, { path: join(dir, `${name}.png`), fullPage: true });
     log(`screenshot ${feature}/${name}.png`);
   };
   const save = (name, data) => {

@@ -37,6 +37,7 @@ Preconditions:
 
 ## Gotchas
 
+- `shot()` waits for the active native view transition before full-page capture. A visible detail price can precede transition readiness; capturing then can stall Chromium's transition capture (issue #92, ADR 0096). Keep the console gate and use the shared helper. The warm-route phone regression is in `journey-capture.spec.mjs`.
 - D7's 404 makes the browser log "Failed to load resource: … 404". The journey allows exactly that message during D7. Do not widen the allowance to other steps.
 - `detail-price` text has `$` and thousands separators, and `data-price` is a plain number. Strip `$` and `,` before comparing.
 - Scrubbing replaces the header label with the scrubbed time. Assert on the label, not the price, to tell whether scrubbing is active.
