@@ -29,6 +29,7 @@ const FROZEN_RUNTIME_EXPORTS = [
   "useCompanyProfile",
   "useConnectionHealth",
   "useConnectionStatus",
+  "useFeedMode",
   "useHistory",
   "useLanguage",
   "useLiveHistory",

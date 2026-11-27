@@ -17,6 +17,7 @@ export { useConnectionStatus } from "./hooks/use-connection-status.ts";
 export type { ConnectionStatusResult } from "./hooks/use-connection-status.ts";
 export type { ConnectionStatus } from "./realtime/socket-types.ts";
 export { useMarketStatus } from "./hooks/use-market-status.ts";
+export { useFeedMode } from "./hooks/use-feed-mode.ts";
 
 export { useHistory, useStock, useStockList, useStocks } from "./hooks/use-stocks.ts";
 export { useStockPages } from "./hooks/use-stock-pages.ts";

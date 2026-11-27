@@ -7,6 +7,7 @@ import { chaosStrings } from "./chaos.ts";
 import { detailStrings } from "./detail.ts";
 import { listStrings } from "./list.ts";
 import { searchStrings } from "./search.ts";
+import { settingsStrings } from "./settings.ts";
 import { shellStrings } from "./shell.ts";
 import { watchlistStrings } from "./watchlist.ts";
 
@@ -22,6 +23,7 @@ export const en = {
   ...detailStrings,
   ...searchStrings,
   ...chaosStrings,
+  ...settingsStrings,
 } as const;
 
 type PluralSuffix = "zero" | "one" | "two" | "few" | "many" | "other";

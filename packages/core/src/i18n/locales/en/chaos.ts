@@ -1,6 +1,7 @@
 export const chaosStrings = {
   "chaos.title": "Chaos controls",
   "chaos.subtitle": "Simulated mode only",
+  "chaos.open": "Open chaos controls",
   "chaos.close": "Close",
   "chaos.section.connection": "Your connection",
   "chaos.section.global": "Everyone, reverts after 60 seconds",
