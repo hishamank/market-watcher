@@ -13,8 +13,6 @@ The wide table showed price, day change, day change %, previous close and last u
 
 There is no open column. The simulator's day is one continuous price path, so its open always equals its previous close, and the hosted demo would show a column that repeats another. Volume and bid and ask are left out too. The free plan sees only IEX, which handles a few percent of US volume, so those numbers would look exact and be wrong.
 
-> **Design note:** "I added only what both feeds can fill honestly from data we already fetch. Alpaca's daily bar gives the high and low for free, and each trade keeps them live. The simulator takes them from the same grid the chart draws, so the chart never leaves the range the table shows. The extra columns appear only where the width exists, and the stock page shows them at every width."
-
 ## Considered options
 
 - **One "Day range" column at 1280 px:** fits by widening the cap, but the owner preferred separate high and low columns.

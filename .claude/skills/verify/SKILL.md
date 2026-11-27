@@ -83,7 +83,7 @@ pnpm --filter ./apps/web e2e --project chromium --grep "<IDs separated by |>"
 pnpm --filter ./apps/web e2e --project gateway-down --no-deps --grep "L4|D1"
 ```
 
-Each Playwright test title starts with its feature ID (for example `L2 live ticks`). The `gateway-down` project holds the tests that stop the gateway (L4, and D1's error state). Write the flags straight after `e2e`. A `--` before them reaches Playwright literally, the filter is ignored, and all 55 tests run. Without `--project`, the `gateway-down` project's dependency pulls in every chromium test. The suite builds and starts its own stack, which takes about 2 minutes. Paste the summary lines into the report. A flaky pass (fails, then passes on retry) counts as FAIL, with a note.
+Each Playwright test title starts with its feature ID (for example `L2 live ticks`). The `gateway-down` project holds the tests that stop the gateway (L4, and D1's error state). Write the flags straight after `e2e`. A `--` before them reaches Playwright literally, the filter is ignored, and the whole suite runs. Without `--project`, the `gateway-down` project's dependency pulls in every chromium test. The suite builds and starts its own stack, which takes about 2 minutes. Paste the summary lines into the report. A flaky pass (fails, then passes on retry) counts as FAIL, with a note.
 
 ### Journeys
 

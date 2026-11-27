@@ -1,6 +1,12 @@
 import { once } from "node:events";
 import type { AddressInfo } from "node:net";
-import { encodeFrame, type FeedMode, parseServerFrame, type ServerMessage } from "@mini/contracts";
+import {
+  type ChaosScope,
+  encodeFrame,
+  type FeedMode,
+  parseServerFrame,
+  type ServerMessage,
+} from "@mini/contracts";
 import type { FastifyInstance, FastifyServerOptions } from "fastify";
 import { type ClientOptions, WebSocket } from "ws";
 import { buildApp } from "../app.ts";
@@ -76,6 +82,7 @@ export async function startGateway<F extends Feed = FakeFeed>(
   logger: FastifyServerOptions["logger"] = false,
   feedMode: FeedMode = "simulated",
   now: () => number = () => Date.now(),
+  chaosScope?: ChaosScope,
 ): Promise<Gateway<F>> {
   const app = buildApp({
     feed,
@@ -83,6 +90,7 @@ export async function startGateway<F extends Feed = FakeFeed>(
     now,
     allowedOrigins: new Set([ALLOWED_ORIGIN]),
     logger,
+    ...(chaosScope !== undefined ? { chaosScope } : {}),
   });
   await app.listen({ port: 0, host: "127.0.0.1" });
   const { port } = app.server.address() as AddressInfo;

@@ -3,9 +3,12 @@ import { type RawData, WebSocket } from "ws";
 import type { Hub } from "../hub/hub.ts";
 import {
   CLOSE_CHAOS_DROP,
+  CLOSE_POLICY_VIOLATION,
   CLOSE_TIMEOUT_MS,
   MAX_BUFFERED_BYTES,
+  MAX_OVER_LIMIT_MESSAGES,
   MESSAGES_PER_SECOND,
+  OVER_LIMIT_WINDOW_MS,
 } from "../hub/limits.ts";
 import type { Peer } from "../hub/member.ts";
 import type { Warn } from "../hub/quote-book.ts";
@@ -88,6 +91,14 @@ async function dispatch(
         peer.setFrozen(message.enabled);
         return;
       }
+      if (chaos.scope !== "global") {
+        peer.send({
+          type: "error",
+          code: "invalid_message",
+          message: "Shared chaos controls are disabled on this gateway",
+        });
+        return;
+      }
       chaos.apply(message);
   }
 }
@@ -98,12 +109,28 @@ export function openSession(
   chaos: ChaosController | null,
   now: () => number,
   warn: Warn,
+  onAbuse: () => void = () => undefined,
 ): void {
   const peer = toPeer(socket);
   const rate = createRateLimit(MESSAGES_PER_SECOND, 1_000, now);
+  const overLimit = createRateLimit(MAX_OVER_LIMIT_MESSAGES, OVER_LIMIT_WINDOW_MS, now);
+  let ended = false;
+
+  function endForAbuse(): void {
+    ended = true;
+    warn({ limit: MAX_OVER_LIMIT_MESSAGES }, "closing a connection that kept exceeding the limit");
+    onAbuse();
+    void hub.leave(peer);
+    peer.close(CLOSE_POLICY_VIOLATION, "Too many messages");
+  }
 
   socket.on("message", (data: RawData, isBinary: boolean) => {
+    if (ended) return;
     const verdict = rate();
+    if (verdict !== "allowed" && overLimit() !== "allowed") {
+      endForAbuse();
+      return;
+    }
     const frame = parseClientFrame(isBinary ? data : data.toString());
     if (verdict !== "allowed") {
       if (frame.ok && frame.message.type === "subscribe") {
@@ -128,6 +155,7 @@ export function openSession(
     }
   });
   socket.on("close", () => {
+    ended = true;
     void hub.leave(peer).catch((err: unknown) => {
       warn({ err }, "failed to clean up session on close");
     });

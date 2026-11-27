@@ -1,3 +1,5 @@
 # Chaos controls in simulator mode
 
+Amended by [ADR 0072](./0072-chaos-scope-keeps-shared-controls-off-public-gateways.md): the controls that affect every connection work only where `CHAOS_SCOPE` is `global`. The hosted gateway runs with `connection`, and the claim below that a hosted demo cannot be left broken did not hold.
+
 A small debug panel, available only in simulator mode and opened with `?debug=1`, lets a developer trigger the states that are otherwise hard to see. Some controls affect only the developer's own connection: drop the connection (the gateway closes the socket), freeze the feed (the gateway stops sending, heartbeats included, so the client goes stale) and go offline (the app's network adapter reports no network). Others affect every connection and revert automatically after 60 seconds, so a hosted demo cannot be left broken: a tick-rate spike to show conflation, 2 seconds of history latency to show the cache, a history failure rate of 50% or 100% to show the fallback and the error state, and forcing the market closed. The gateway rejects `chaos` messages outside simulator mode.

@@ -6,8 +6,6 @@ The All and Watchlist toggle was a plain Next `Link`. `/` is a dynamic route, so
 
 Now a plain click on either option calls `window.history.pushState`, the same way the detail page changes `?range=` (ADR 0029). `ListPage` reads the view from `useSearchParams()`, so the toggle and the list change in the same frame. The options stay real links with real `href`s, so a modified or middle click still opens a new tab, and back and forward still restore the view. The watchlist's empty-state button switches back to All the same way.
 
-> **Design note:** "Switching views needed nothing from the server. The list was in the query cache and the watchlist lives on the device. So I made it a shallow URL change instead of a server navigation. It's instant, the URL is still the source of truth, and a direct load still renders on the server."
-
 ## Considered options
 
 - **A `loading.tsx` skeleton:** shows something at once but still waits on the same server render to show real rows. A root one also puts a Suspense boundary in front of L1's first paint. The watchlist already shows a server-rendered skeleton on a direct load.
