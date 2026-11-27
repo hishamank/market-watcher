@@ -1,3 +1,4 @@
+import { FeedSessionBoundary } from "./feed-session-boundary.tsx";
 import { CoreProvider } from "@mini/core";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
@@ -17,7 +18,7 @@ export function Providers({ children }: { children: ReactNode }) {
         lifecycle={platform.lifecycle}
         switchLocale={switchNativeLocale}
       >
-        {children}
+        <FeedSessionBoundary>{children}</FeedSessionBoundary>
       </CoreProvider>
     </QueryClientProvider>
   );

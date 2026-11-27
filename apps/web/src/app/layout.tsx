@@ -44,7 +44,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <ThemeScript />
       </head>
       <body>
-        <Providers gatewayUrl={gatewayUrl} locale={locale}>
+        <Providers gatewayUrl={gatewayUrl} initialFeedMode={meta.feedMode} locale={locale}>
           <AppShell meta={meta}>{children}</AppShell>
         </Providers>
       </body>

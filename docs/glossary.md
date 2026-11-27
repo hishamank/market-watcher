@@ -165,3 +165,7 @@ _Avoid_: theme mode, night mode
 **Company news**: A ticker-focused batch of headlines and article links obtained by the gateway, independently of prices. A destination site identifies the linked host when the feed does not supply the original publisher.
 
 **Earnings**: Fiscal-quarter earnings per share (EPS), their analyst estimates and upcoming reporting dates. GAAP and non-GAAP identify the accounting basis supplied by the provider; fiscal quarter labels may differ from calendar quarters.
+
+**Feed session**:
+The period in which an app uses one consistent feed mode. If the gateway changes between Simulated and Live, the app hides market data and requires a reload or restart before displaying the new source.
+_Avoid_: connection status, market session

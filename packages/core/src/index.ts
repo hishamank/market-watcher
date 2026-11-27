@@ -86,3 +86,5 @@ export { useStockNews, type StockNewsView } from "./hooks/use-stock-news.ts";
 export { useStockEarnings, type StockEarningsView } from "./hooks/use-stock-earnings.ts";
 
 export { createI18n } from "./i18n/create-i18n.ts";
+
+export { useFeedSession } from "./hooks/use-feed-session.ts";
