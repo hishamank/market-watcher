@@ -1,10 +1,12 @@
-import { useChaosControls, useConnectionHealth, useFeedMode } from "@mini/core";
-import { useRouter } from "expo-router";
+import { useChaosControls, useConnectionHealth, useFeedMode, useLanguage } from "@mini/core";
+import { Redirect, useRouter } from "expo-router";
 import { ChaosSheetView } from "../components/chaos-sheet-view.tsx";
+import { useDebugTools, useDebugToolsRestored } from "../platform/debug-tools.ts";
 
 function ChaosSheet() {
   const chaos = useChaosControls();
   const health = useConnectionHealth();
+  const { direction } = useLanguage();
   const router = useRouter();
   return (
     <ChaosSheetView
@@ -13,7 +15,8 @@ function ChaosSheet() {
       historyFailureRate={chaos.historyFailureRate}
       forceClosed={chaos.forceClosed}
       health={health}
-      onClose={() => router.back()}
+      direction={direction}
+      onClose={() => (router.canGoBack() ? router.back() : router.replace("/"))}
       onDrop={chaos.dropConnection}
       onFreeze={chaos.freezeFeed}
       onTickSpikeChange={chaos.setTickSpike}
@@ -26,6 +29,9 @@ function ChaosSheet() {
 
 export function ConnectedChaosSheet() {
   const feedMode = useFeedMode();
-  if (feedMode !== "simulated") return null;
+  const debugTools = useDebugTools();
+  const restored = useDebugToolsRestored();
+  if (feedMode === null || !restored) return null;
+  if (feedMode !== "simulated" || !debugTools) return <Redirect href="/" />;
   return <ChaosSheet />;
 }

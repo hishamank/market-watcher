@@ -1,5 +1,10 @@
 import type { HistoryFailureRate } from "@mini/contracts";
-import { type ChaosFailureRateView, type ChaosToggleView, useT } from "@mini/core";
+import {
+  type ChaosFailureRateView,
+  type ChaosToggleView,
+  type TextDirection,
+  useT,
+} from "@mini/core";
 import { ChaosSection } from "./chaos-section.tsx";
 import { CountdownPill } from "./countdown-pill.tsx";
 import { SegmentedControl } from "./segmented-control.tsx";
@@ -22,6 +27,7 @@ export interface ChaosGlobalSectionProps {
   historyLatency: ChaosToggleView;
   historyFailureRate: ChaosFailureRateView;
   forceClosed: ChaosToggleView;
+  direction: TextDirection;
   onTickSpikeChange: (enabled: boolean) => void;
   onHistoryLatencyChange: (enabled: boolean) => void;
   onHistoryFailureRateChange: (rate: HistoryFailureRate) => void;
@@ -37,10 +43,12 @@ function useSecondsLeft(): (secondsLeft: number | null) => string | null {
 function FailureRateControl({
   rate,
   secondsLeft,
+  direction,
   onChange,
 }: {
   rate: HistoryFailureRate;
   secondsLeft: number | null;
+  direction: TextDirection;
   onChange: (rate: HistoryFailureRate) => void;
 }) {
   const t = useT();
@@ -64,6 +72,7 @@ function FailureRateControl({
         label={t("chaos.historyFailures")}
         options={options}
         value={RATES.find((option) => option.rate === rate)?.key ?? "0"}
+        direction={direction}
         onSelect={(key) => onChange(RATES.find((option) => option.key === key)?.rate ?? 0)}
       />
     </View>
@@ -109,6 +118,7 @@ export function ChaosGlobalSection(props: ChaosGlobalSectionProps) {
       <FailureRateControl
         rate={props.historyFailureRate.rate}
         secondsLeft={props.historyFailureRate.secondsLeft}
+        direction={props.direction}
         onChange={props.onHistoryFailureRateChange}
       />
     </ChaosSection>

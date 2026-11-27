@@ -6,6 +6,7 @@ export const SAVED_DEBUG_TOOLS_KEY = "debug-tools:v1";
 const listeners = new Set<() => void>();
 let enabled = false;
 let chosen = false;
+let restored = false;
 
 export function parseDebugTools(saved: string | null): boolean {
   return saved === "on";
@@ -13,12 +14,13 @@ export function parseDebugTools(saved: string | null): boolean {
 
 function apply(next: boolean): void {
   enabled = next;
+  restored = true;
   for (const listener of Array.from(listeners)) listener();
 }
 
 export function chooseDebugTools(next: boolean): void {
   chosen = true;
-  void AsyncStorage.setItem(SAVED_DEBUG_TOOLS_KEY, next ? "on" : "off");
+  void AsyncStorage.setItem(SAVED_DEBUG_TOOLS_KEY, next ? "on" : "off").catch(() => undefined);
   apply(next);
 }
 
@@ -37,4 +39,12 @@ export function isDebugToolsOn(): boolean {
 
 export function useDebugTools(): boolean {
   return useSyncExternalStore(subscribe, isDebugToolsOn);
+}
+
+export function isDebugToolsRestored(): boolean {
+  return restored;
+}
+
+export function useDebugToolsRestored(): boolean {
+  return useSyncExternalStore(subscribe, isDebugToolsRestored);
 }
