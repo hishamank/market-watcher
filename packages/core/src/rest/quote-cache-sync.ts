@@ -9,6 +9,7 @@ import {
   notifyManager,
   type QueryCache,
   type QueryKey,
+  type Query,
 } from "@tanstack/react-query";
 import type { QuoteStore } from "../realtime/quote-store.ts";
 import { stockQueryKeys } from "./stock-queries.ts";
@@ -44,8 +45,33 @@ function newestBySymbol(quotes: readonly Quote[]): readonly Quote[] {
   return Array.from(newest.values());
 }
 
+interface QuoteIndex {
+  sources: ReadonlyArray<{ query: Query; data: unknown }>;
+  quotes: ReadonlyMap<string, Quote>;
+}
+
+const quoteIndexes = new WeakMap<QueryCache, QuoteIndex>();
+
 export function findCachedQuote(cache: QueryCache, symbol: string): Quote | undefined {
-  return newestBySymbol(cachedQuotes(cache).filter((quote) => quote.symbol === symbol))[0];
+  const queries = cache.findAll({ queryKey: stockQueryKeys.all });
+  const previous = quoteIndexes.get(cache);
+  if (
+    previous !== undefined &&
+    previous.sources.length === queries.length &&
+    previous.sources.every(
+      (source, index) => source.query === queries[index] && source.data === source.query.state.data,
+    )
+  ) {
+    return previous.quotes.get(symbol);
+  }
+  const sources = queries.map((query) => ({ query, data: query.state.data }));
+  const quotes = new Map(
+    newestBySymbol(sources.flatMap(({ query, data }) => quotesIn(query.queryKey, data))).map(
+      (quote) => [quote.symbol, quote] as const,
+    ),
+  );
+  quoteIndexes.set(cache, { sources, quotes });
+  return quotes.get(symbol);
 }
 
 export function syncQuotesFromQueryCache(cache: QueryCache, quoteStore: QuoteStore): () => void {
