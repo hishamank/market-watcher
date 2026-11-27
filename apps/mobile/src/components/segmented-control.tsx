@@ -1,4 +1,4 @@
-import { useLanguage } from "@mini/core";
+import type { TextDirection } from "@mini/core";
 import { duration, easing, radius, space } from "@mini/tokens";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View, type LayoutRectangle } from "react-native";
@@ -17,6 +17,7 @@ export interface SegmentedControlProps<T extends string> {
   label: string;
   options: readonly SegmentOption<T>[];
   value: T;
+  direction: TextDirection;
   onSelect: (value: T) => void;
 }
 
@@ -25,9 +26,8 @@ function offsetX(option: LayoutRectangle, trackWidth: number, rtl: boolean): num
 }
 
 export function SegmentedControl<T extends string>(props: SegmentedControlProps<T>) {
-  const { label, options, value, onSelect } = props;
+  const { label, options, value, direction, onSelect } = props;
   const textStyles = useTextStyles();
-  const { direction } = useLanguage();
   const palette = usePalette();
   const raised = useElevation(1);
   const reduceMotion = useReduceMotion();

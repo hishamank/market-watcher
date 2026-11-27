@@ -23,7 +23,7 @@ function apply(choice: AppearanceChoice): void {
 
 export function chooseAppearance(choice: AppearanceChoice): void {
   chosen = true;
-  void AsyncStorage.setItem(SAVED_APPEARANCE_KEY, choice);
+  void AsyncStorage.setItem(SAVED_APPEARANCE_KEY, choice).catch(() => undefined);
   apply(choice);
 }
 

@@ -14,7 +14,7 @@ const LANGUAGES = [
 export function SettingsScreen() {
   const t = useT();
   const appearance = useAppearance();
-  const { locale, setLocale } = useLanguage();
+  const { locale, direction, setLocale } = useLanguage();
   const themeOptions = APPEARANCES.map((value) => ({
     value,
     label: t(`settings.appearance.${value}`),
@@ -28,6 +28,7 @@ export function SettingsScreen() {
             label={t("settings.appearance")}
             options={themeOptions}
             value={appearance}
+            direction={direction}
             onSelect={chooseAppearance}
           />
         </View>

@@ -5,9 +5,11 @@ import { restoreAppearance, SAVED_APPEARANCE_KEY } from "../platform/appearance.
 export function useSavedAppearance(): void {
   useEffect(() => {
     let active = true;
-    void AsyncStorage.getItem(SAVED_APPEARANCE_KEY).then((saved) => {
-      if (active) restoreAppearance(saved);
-    });
+    void AsyncStorage.getItem(SAVED_APPEARANCE_KEY)
+      .catch(() => null)
+      .then((saved) => {
+        if (active) restoreAppearance(saved);
+      });
     return () => {
       active = false;
     };
