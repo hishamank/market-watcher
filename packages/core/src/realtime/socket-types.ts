@@ -6,6 +6,7 @@ import type { ChaosSnapshot } from "./chaos-state-store.ts";
 import type { ConnectionHealthRecorder } from "./connection-health.ts";
 import type { QuoteStore } from "./quote-store.ts";
 import type { SocketFactory } from "./transport.ts";
+import type { SocketDiagnostics } from "./socket-diagnostics.ts";
 
 export type ConnectionStatus = "connecting" | "connected" | "stale" | "offline";
 
@@ -32,6 +33,7 @@ export interface SocketClientOptions {
 }
 
 export interface SocketClient {
+  getDiagnostics(): SocketDiagnostics;
   start(): void;
   stop(): void;
   getStatus(): ConnectionStatus;

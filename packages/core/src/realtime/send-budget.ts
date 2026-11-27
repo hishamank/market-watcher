@@ -4,6 +4,7 @@ export const MAX_MESSAGES_PER_WINDOW = 10;
 export const BUDGET_WINDOW_MS = 1_000;
 
 export interface SendBudget<T> {
+  size(): number;
   enqueue(item: T): void;
   clear(): void;
 }
@@ -42,6 +43,7 @@ export function createSendBudget<T>(write: (item: T) => void): SendBudget<T> {
   }
 
   return {
+    size: () => queue.length,
     enqueue(item) {
       queue.push(item);
       drain();

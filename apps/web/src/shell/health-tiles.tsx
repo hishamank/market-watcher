@@ -43,6 +43,16 @@ export function HealthSection({ health }: { health: ConnectionHealth }) {
           testId="health-skipped"
         />
       </div>
+      <details>
+        <summary>{t("chaos.health.diagnostics")}</summary>
+        <pre
+          data-testid="health-diagnostics"
+          dir="ltr"
+          className="max-h-[256px] overflow-auto text-caption"
+        >
+          {JSON.stringify(health.diagnostics, null, 2)}
+        </pre>
+      </details>
     </div>
   );
 }

@@ -5,6 +5,7 @@ export const REPLY_DEADLINE_MS = 10_000;
 
 export interface PendingRequest {
   readonly requestId: RequestId;
+  readonly deadlineAt: number;
   readonly symbols: readonly string[];
   readonly unsubscribesAtSend: number;
   readonly isResend: boolean;
@@ -12,6 +13,7 @@ export interface PendingRequest {
 }
 
 export interface RequestTracker {
+  snapshot(): Pick<PendingRequest, "requestId" | "symbols" | "deadlineAt" | "isResend">[];
   open(symbols: readonly string[], isResend: boolean): PendingRequest;
   find(requestId: RequestId): PendingRequest | undefined;
   close(requestId: RequestId): PendingRequest | undefined;
@@ -38,6 +40,7 @@ export function createRequestTracker(onTimeout: (request: PendingRequest) => voi
   function open(symbols: readonly string[], isResend: boolean): PendingRequest {
     const request = {
       requestId: nextRequestId,
+      deadlineAt: Date.now() + REPLY_DEADLINE_MS,
       symbols: [...symbols],
       unsubscribesAtSend: unsubscribes,
       isResend,
@@ -61,6 +64,13 @@ export function createRequestTracker(onTimeout: (request: PendingRequest) => voi
   }
 
   return {
+    snapshot: () =>
+      [...pending.values()].map(({ request }) => ({
+        requestId: request.requestId,
+        symbols: [...request.symbols],
+        deadlineAt: request.deadlineAt,
+        isResend: request.isResend,
+      })),
     open,
     find: (requestId) => pending.get(requestId)?.request,
     close,
