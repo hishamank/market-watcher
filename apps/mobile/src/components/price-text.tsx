@@ -24,6 +24,8 @@ export function PriceText(props: PriceTextProps) {
       {flash === undefined ? null : <FlashTint key={flashKey} direction={flash} />}
       <Text
         testID={testID}
+        numberOfLines={1}
+        adjustsFontSizeToFit
         style={[
           display ? textStyles.display : textStyles.price,
           { color: stale ? palette.textMuted : palette.text, writingDirection: "ltr" },

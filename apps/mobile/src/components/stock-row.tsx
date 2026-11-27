@@ -99,10 +99,13 @@ const styles = StyleSheet.create({
   link: {
     flex: 1,
     flexDirection: "row",
+    flexWrap: "wrap",
     alignItems: "center",
+    alignContent: "center",
     alignSelf: "stretch",
+    paddingBlock: space[6],
     gap: space[12],
   },
-  names: { flex: 1, minWidth: 0, alignItems: "flex-start", gap: 3 },
-  numbers: { alignItems: "flex-end", gap: space[4] },
+  names: { flexGrow: 1, flexBasis: 120, alignItems: "flex-start", gap: 3 },
+  numbers: { maxWidth: "100%", alignItems: "flex-end", gap: space[4] },
 });

@@ -139,7 +139,7 @@ _Avoid_: correlation ID, sequence number
 ## Demo
 
 **Chaos controls**:
-The debug panel, available only in Simulated mode, that triggers dropped connections, frozen feeds, offline, tick spikes, slow or failing history, and a closed market on demand.
+The debug panel, available only in Simulated mode, that triggers dropped connections, frozen feeds, offline, tick spikes, slow or failing history, and a closed market on demand. On mobile it opens from a bolt button that a Settings switch turns on, and it has no offline control.
 _Avoid_: debug menu, dev tools
 
 ## Last-known quote
@@ -151,6 +151,10 @@ A held quote from an earlier trading phase, served with `lastKnown: true` after 
 **Locale**:
 The language the apps are shown in: English (`en-US`) or Arabic (`ar`). It sets the strings, the month names and the text direction, never the digits, which stay Latin. On web it lives in the `locale` cookie, and on mobile in device storage.
 _Avoid_: language setting, lang, i18n mode
+
+**Appearance**:
+The colour scheme the app is drawn in. Web offers light or dark and otherwise follows the system. Mobile offers System, Light or Dark in Settings. Both keep the choice under `color-scheme:v1`.
+_Avoid_: theme mode, night mode
 
 **Key statistics**: Supplemental valuation, dividend, trading-volume and 52-week-range data for a security, loaded independently of its quote and company overview.
 
