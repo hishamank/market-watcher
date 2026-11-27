@@ -4,7 +4,7 @@ import { useSegmentIndicator } from "../integrations/use-segment-indicator.ts";
 export interface SegmentTrackProps {
   selected: number;
   className: string;
-  role?: "tablist" | "radiogroup";
+  role?: "tablist" | "radiogroup" | "group";
   label?: string;
   children: (ready: boolean) => ReactNode;
 }
