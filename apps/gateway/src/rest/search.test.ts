@@ -44,7 +44,7 @@ describe("REST search ranking and limits", () => {
     const prefixSymbols = prefixBody.results.map((item) => item.symbol);
     const firstNameMatchIndex = prefixSymbols.findIndex((symbol) => !symbol.startsWith("AP"));
     expect(firstNameMatchIndex).toBeGreaterThan(0);
-    expect(prefixSymbols.slice(0, firstNameMatchIndex).every((s) => s.startsWith("AP"))).toBe(true);
+    expect(prefixSymbols.slice(firstNameMatchIndex).some((s) => s.startsWith("AP"))).toBe(false);
     expect(prefixSymbols.slice(firstNameMatchIndex)).toContain("AAPL");
   });
 

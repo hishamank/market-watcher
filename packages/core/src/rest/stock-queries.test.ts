@@ -12,7 +12,6 @@ import {
 } from "../testing/fake-rest.ts";
 import { createRestClient } from "./rest-client.ts";
 import {
-  HISTORY_STALE_MS,
   historyQueryOptions,
   historyRefetchMs,
   stockListQueryOptions,
@@ -94,7 +93,7 @@ describe("stock queries", () => {
 
     expect(historyQueryOptions(client, "AAPL", "1D").staleTime).toBe(60_000);
     expect(historyQueryOptions(client, "AAPL", "1W").staleTime).toBe(300_000);
-    expect(historyQueryOptions(client, "AAPL", "5Y").staleTime).toBe(HISTORY_STALE_MS["5Y"]);
+    expect(historyQueryOptions(client, "AAPL", "5Y").staleTime).toBe(3_600_000);
     expect(historyQueryOptions(client, "AAPL", "1Y").queryKey).toEqual([
       "stocks",
       "history",
