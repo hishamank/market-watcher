@@ -1,5 +1,7 @@
 # A column manager driven by CSS variables
 
+Amended by [ADR 0095](./0095-web-owns-table-column-choices.md): web now owns the store and hook; persistence and presentation behavior are unchanged.
+
 Amends ADR 0049, ADR 0063 and the Layout section of `docs/DESIGN.md`.
 
 A column manager lets the user choose which columns the stock table shows. From 768 px, a **Columns** button next to the All and Watchlist toggle opens a menu with one checkbox per column.
@@ -12,8 +14,6 @@ A column manager lets the user choose which columns the stock table shows. From 
 - **The menu is a native popover.** It closes on Escape and on a click outside, with no effect or state in a component, and CSS anchor positioning places it under the button.
 
 The column manager is web only. Mobile shows rows, not a table. The list pane beside the stock page keeps its rows.
-
-> **Design note:** "Core owns the column choice like it owns the watchlist: it validates it, keeps Name and Price locked, and saves it per device. The web turns the choice into a handful of CSS variables on the list, so the rows stay plain views and the server render with no choice is exactly what it was. When someone picks more than fits, the table scrolls sideways with the name pinned, rather than silently hiding what they asked for."
 
 ## Considered options
 

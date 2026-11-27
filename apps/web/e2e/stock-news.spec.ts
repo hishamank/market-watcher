@@ -1,4 +1,5 @@
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
+import { test } from "./support/feed-fixture.ts";
 import { collectConsoleProblems } from "./support/console.ts";
 
 const liveNews = {
@@ -44,7 +45,9 @@ test("D11 sample news shows three stories, expands, resets by symbol and has an 
 
 test("D11 Yahoo stories use publisher or destination site, ET dates and safe external links", async ({
   page,
+  useLiveFeed,
 }) => {
+  await useLiveFeed();
   await page.route("**/stocks/AAPL/news", (route) => route.fulfill({ json: liveNews }));
   await page.goto("/stocks/AAPL");
   const story = page.getByTestId("news-story").first();
@@ -110,7 +113,11 @@ for (const width of [360, 1440]) {
   });
 }
 
-test("D11 supplied thumbnails render and failed images fall back to text", async ({ page }) => {
+test("D11 supplied thumbnails render and failed images fall back to text", async ({
+  page,
+  useLiveFeed,
+}) => {
+  await useLiveFeed();
   let imageFails = false;
   await page.route("https://images.example.com/story.svg", (route) =>
     imageFails

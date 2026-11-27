@@ -1,4 +1,4 @@
-import { encodeFrame, type FeedMode, PROTOCOL_VERSION } from "@mini/contracts";
+import { type ChaosScope, encodeFrame, type FeedMode, PROTOCOL_VERSION } from "@mini/contracts";
 import type { FastifyInstance } from "fastify";
 import type { WebSocket } from "ws";
 import type { Feed } from "../feeds/types.ts";
@@ -21,6 +21,8 @@ export interface SocketOptions {
   allowedOrigins: ReadonlySet<string>;
   now: () => number;
   hub: Hub;
+  chaosScope?: ChaosScope;
+  maxConnections?: number;
 }
 
 function rejectVersion(socket: WebSocket): void {
@@ -48,9 +50,14 @@ export async function socketRoute(app: FastifyInstance, options: SocketOptions):
   const { hub } = options;
   const chaos =
     options.feedMode === "simulated"
-      ? createChaosController({ feed: options.feed, now: options.now, broadcast: hub.broadcast })
+      ? createChaosController({
+          feed: options.feed,
+          now: options.now,
+          broadcast: hub.broadcast,
+          ...(options.chaosScope !== undefined ? { scope: options.chaosScope } : {}),
+        })
       : null;
-  const admission = createAdmission(options.allowedOrigins);
+  const admission = createAdmission(options.allowedOrigins, options.now, options.maxConnections);
   const stopLiveness = startLiveness(app.websocketServer, PING_INTERVAL_MS);
   app.addHook("onClose", async () => {
     chaos?.close();
@@ -68,7 +75,7 @@ export async function socketRoute(app: FastifyInstance, options: SocketOptions):
         return;
       }
       welcome(socket, hub, options);
-      openSession(socket, hub, chaos, options.now, warn);
+      openSession(socket, hub, chaos, options.now, warn, () => admission.penalize(request.ip));
     },
   );
 }

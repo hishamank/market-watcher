@@ -1,11 +1,33 @@
 import { describe, expect, it } from "vitest";
-import { createFakeStorage, settle } from "../testing/fake-platform.ts";
+import type { KeyValueListener, KeyValueStore } from "@mini/core";
 import {
   createTableColumnsStore,
   parseTableColumns,
   TABLE_COLUMNS_STORAGE_KEY,
   toggleColumn,
 } from "./table-columns-store.ts";
+
+function createFakeStorage(): KeyValueStore {
+  const values = new Map<string, string>();
+  const listeners = new Set<KeyValueListener>();
+  return {
+    getItem: async (key) => values.get(key) ?? null,
+    setItem: async (key, value) => {
+      values.set(key, value);
+      for (const listener of listeners) listener(key);
+    },
+    removeItem: async (key) => {
+      values.delete(key);
+      for (const listener of listeners) listener(key);
+    },
+    subscribe(listener) {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+  };
+}
+
+const settle = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 
 describe("table columns", () => {
   it("falls back to the default layout for missing or corrupt storage", () => {

@@ -6,6 +6,7 @@ import {
   useConnectionStatus,
   useLocale,
   useQuote,
+  useQuoteWarning,
   useT,
 } from "@mini/core";
 import { ChangePill } from "../components/change-pill.tsx";
@@ -15,8 +16,9 @@ export function ConnectedDetailFacts({ stock }: { stock: Stock }) {
   const t = useT();
   const locale = useLocale();
   const quote = useQuote(stock.symbol) ?? stock.quote;
+  const warning = useQuoteWarning(quote);
   const { status } = useConnectionStatus();
-  const stale = status === "stale" || status === "offline";
+  const stale = status === "stale" || status === "offline" || warning.degraded;
   return (
     <DetailFacts
       facts={[
@@ -50,9 +52,10 @@ export function ConnectedDetailFacts({ stock }: { stock: Stock }) {
         {
           label: t("detail.lastUpdate"),
           testID: "detail-last-update",
-          value: quote.lastKnown
-            ? formatMarketDateTime(quote.timestamp, { locale })
-            : formatMarketTime(quote.timestamp, { locale }),
+          value:
+            quote.lastKnown || warning.degraded
+              ? formatMarketDateTime(quote.timestamp, { locale })
+              : formatMarketTime(quote.timestamp, { locale }),
         },
       ]}
     />

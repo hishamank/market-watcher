@@ -21,11 +21,9 @@ export function createLocalStorageStore(): KeyValueStore {
     },
     setItem: async (key, value) => {
       knownKeys.add(key);
-      try {
-        browserStorage()?.setItem(key, value);
-      } catch {
-        return;
-      }
+      const storage = browserStorage();
+      if (storage === null) throw new Error("Browser storage is unavailable");
+      storage.setItem(key, value);
     },
     removeItem: async (key) => {
       knownKeys.add(key);

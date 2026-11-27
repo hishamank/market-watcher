@@ -1,112 +1,42 @@
 import type {
-  ChaosFailureRateState,
   ChaosMessage,
+  ChaosScope,
   ChaosStateMessage,
-  ChaosToggleState,
   HistoryFailureRate,
   ServerMessage,
 } from "@mini/contracts";
-import type { SimulatorChaosSettings, SimulatorFailureRate } from "../feeds/simulator/index.ts";
 import type { Feed } from "../feeds/types.ts";
-import {
-  CHAOS_HISTORY_LATENCY_MS,
-  CHAOS_REVERT_MS,
-  CHAOS_TICK_SPIKE_MULTIPLIER,
-} from "../hub/limits.ts";
+import { CHAOS_REVERT_MS } from "../hub/limits.ts";
 import type { Peer } from "../hub/member.ts";
+import {
+  asSettingsTarget,
+  buildSnapshot,
+  type ChaosState,
+  initialState,
+  type SimulatorSettingsTarget,
+  TOGGLE_SPECS,
+  type ToggleKey,
+  toSimulatorRate,
+} from "./chaos-state.ts";
 
 export type GlobalChaosMessage = Exclude<ChaosMessage, { action: "drop" | "freeze" }>;
 
 type GlobalControlKey = GlobalChaosMessage["action"];
-type ToggleKey = "tick_spike" | "history_latency" | "force_closed";
-type ToggleField = "tickSpike" | "historyLatency" | "forceClosed";
-
-interface SimulatorSettingsTarget {
-  getSettings(): Readonly<SimulatorChaosSettings>;
-  updateSettings(patch: Partial<SimulatorChaosSettings>): void;
-}
-
-interface ChaosState {
-  tickSpike: ChaosToggleState;
-  historyLatency: ChaosToggleState;
-  historyFailureRate: ChaosFailureRateState;
-  forceClosed: ChaosToggleState;
-}
 
 export interface ChaosControllerOptions {
   feed: Feed;
   now: () => number;
   broadcast: (message: ServerMessage) => void;
+  scope?: ChaosScope;
   revertMs?: number;
 }
 
 export interface ChaosController {
+  readonly scope: ChaosScope;
   apply(message: GlobalChaosMessage): void;
   sendState(peer: Peer): void;
   snapshot(): ChaosStateMessage;
   close(): void;
-}
-
-interface ToggleSpec {
-  readonly field: ToggleField;
-  readonly onPatch: Partial<SimulatorChaosSettings>;
-  readonly offPatch: Partial<SimulatorChaosSettings>;
-}
-
-const TOGGLE_SPECS: Record<ToggleKey, ToggleSpec> = {
-  tick_spike: {
-    field: "tickSpike",
-    onPatch: { tickRateMultiplier: CHAOS_TICK_SPIKE_MULTIPLIER },
-    offPatch: { tickRateMultiplier: 1 },
-  },
-  history_latency: {
-    field: "historyLatency",
-    onPatch: { historyLatencyMs: CHAOS_HISTORY_LATENCY_MS },
-    offPatch: { historyLatencyMs: 0 },
-  },
-  force_closed: {
-    field: "forceClosed",
-    onPatch: { forceClosed: true },
-    offPatch: { forceClosed: false },
-  },
-};
-
-function asSettingsTarget(feed: Feed): SimulatorSettingsTarget | null {
-  const candidate = feed as Partial<SimulatorSettingsTarget>;
-  return typeof candidate.updateSettings === "function" &&
-    typeof candidate.getSettings === "function"
-    ? (candidate as SimulatorSettingsTarget)
-    : null;
-}
-
-const toSimulatorRate = (rate: HistoryFailureRate): SimulatorFailureRate =>
-  rate === 50 ? 0.5 : rate === 100 ? 1 : 0;
-
-const fromSimulatorRate = (rate: SimulatorFailureRate): HistoryFailureRate =>
-  rate === 0.5 ? 50 : rate === 1 ? 100 : 0;
-
-function initialState(target: SimulatorSettingsTarget | null): ChaosState {
-  const initial = target?.getSettings();
-  return {
-    tickSpike: { enabled: (initial?.tickRateMultiplier ?? 1) > 1, revertsAt: null },
-    historyLatency: { enabled: (initial?.historyLatencyMs ?? 0) > 0, revertsAt: null },
-    historyFailureRate: {
-      rate: initial ? fromSimulatorRate(initial.historyFailureRate) : 0,
-      revertsAt: null,
-    },
-    forceClosed: { enabled: initial?.forceClosed ?? false, revertsAt: null },
-  };
-}
-
-function buildSnapshot(state: ChaosState, serverTime: number): ChaosStateMessage {
-  return {
-    type: "chaos_state",
-    serverTime,
-    tickSpike: { ...state.tickSpike },
-    historyLatency: { ...state.historyLatency },
-    historyFailureRate: { ...state.historyFailureRate },
-    forceClosed: { ...state.forceClosed },
-  };
 }
 
 interface ApplyContext {
@@ -124,6 +54,9 @@ function applyToggle(ctx: ApplyContext, key: ToggleKey, enabled: boolean): void 
     ctx.target?.updateSettings(offPatch);
     return;
   }
+  if (ctx.state[field].revertsAt !== null) {
+    return;
+  }
   const revertsAt = ctx.scheduleRevert(key, () => {
     ctx.state[field] = { enabled: false, revertsAt: null };
     ctx.target?.updateSettings(offPatch);
@@ -139,22 +72,25 @@ function applyFailureRate(ctx: ApplyContext, rate: HistoryFailureRate): void {
     ctx.target?.updateSettings({ historyFailureRate: 0 });
     return;
   }
-  const revertsAt = ctx.scheduleRevert("history_failure_rate", () => {
-    ctx.state.historyFailureRate = { rate: 0, revertsAt: null };
-    ctx.target?.updateSettings({ historyFailureRate: 0 });
-  });
+  const revertsAt =
+    ctx.state.historyFailureRate.revertsAt ??
+    ctx.scheduleRevert("history_failure_rate", () => {
+      ctx.state.historyFailureRate = { rate: 0, revertsAt: null };
+      ctx.target?.updateSettings({ historyFailureRate: 0 });
+    });
   ctx.state.historyFailureRate = { rate, revertsAt };
   ctx.target?.updateSettings({ historyFailureRate: toSimulatorRate(rate) });
 }
 
 export function createChaosController(options: ChaosControllerOptions): ChaosController {
   const target = asSettingsTarget(options.feed);
+  const scope = options.scope ?? "global";
   const revertMs = options.revertMs ?? CHAOS_REVERT_MS;
   const state = initialState(target);
   const timers = new Map<GlobalControlKey, ReturnType<typeof setTimeout>>();
   let closed = false;
 
-  const snapshot = (): ChaosStateMessage => buildSnapshot(state, options.now());
+  const snapshot = (): ChaosStateMessage => buildSnapshot(state, scope, options.now());
 
   const clearTimer = (key: GlobalControlKey): void => {
     const existing = timers.get(key);
@@ -180,8 +116,9 @@ export function createChaosController(options: ChaosControllerOptions): ChaosCon
   const ctx: ApplyContext = { state, target, clearTimer, scheduleRevert };
 
   return {
+    scope,
     apply(message) {
-      if (closed) return;
+      if (closed || scope !== "global") return;
       if (message.action === "history_failure_rate") {
         applyFailureRate(ctx, message.rate);
       } else {

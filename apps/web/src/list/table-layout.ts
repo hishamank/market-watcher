@@ -1,4 +1,4 @@
-import type { TableColumn } from "@mini/core";
+import type { TableColumn } from "../columns/table-columns-store.ts";
 import type { CSSProperties } from "react";
 
 const NAME_MIN_PX = 220;

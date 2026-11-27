@@ -1,4 +1,4 @@
-import type { KeyValueStore } from "../platform/key-value-store.ts";
+import type { KeyValueStore } from "@mini/core";
 
 export const TABLE_COLUMNS_STORAGE_KEY = "table-columns:v1";
 

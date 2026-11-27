@@ -1,17 +1,18 @@
 "use client";
 
-import { useCallback, useSyncExternalStore } from "react";
+import { createContext, useCallback, useContext, useSyncExternalStore } from "react";
 import {
   DEFAULT_TABLE_COLUMNS,
   LOCKED_TABLE_COLUMNS,
   TABLE_COLUMNS,
   type TableColumn,
   type TableColumnsSnapshot,
+  type TableColumnsStore,
   toggleColumn,
-} from "../columns/table-columns-store.ts";
-import { useCore } from "../core-provider.tsx";
+} from "./table-columns-store.ts";
+export const TableColumnsContext = createContext<TableColumnsStore | null>(null);
 
-export type { TableColumn } from "../columns/table-columns-store.ts";
+export type { TableColumn } from "./table-columns-store.ts";
 
 export interface TableColumnsResult {
   readonly all: readonly TableColumn[];
@@ -27,7 +28,8 @@ function getServerSnapshot(): TableColumnsSnapshot {
 }
 
 export function useTableColumns(): TableColumnsResult {
-  const { tableColumnsStore: store } = useCore();
+  const store = useContext(TableColumnsContext);
+  if (store === null) throw new Error("useTableColumns requires the web table columns provider");
   const subscribe = useCallback((listener: () => void) => store.subscribe(listener), [store]);
   const getSnapshot = useCallback(() => store.getSnapshot(), [store]);
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);

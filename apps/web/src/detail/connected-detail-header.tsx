@@ -2,11 +2,11 @@
 
 import { changeBetween, type Range, type Stock } from "@mini/contracts";
 import {
-  formatMarketDateTime,
   useConnectionStatus,
   useLiveHistory,
   useLocale,
   useQuote,
+  useQuoteWarning,
   useT,
   useWatchlist,
 } from "@mini/core";
@@ -26,8 +26,9 @@ export function ConnectedDetailHeader({ stock, range, scrub }: ConnectedDetailHe
   const locale = useLocale();
   const quote = useQuote(stock.symbol) ?? stock.quote;
   const history = useLiveHistory(stock.symbol, range);
+  const warning = useQuoteWarning(quote);
   const { status } = useConnectionStatus();
-  const stale = status === "stale" || status === "offline";
+  const stale = status === "stale" || status === "offline" || warning.degraded;
   const watchlist = useWatchlist();
   const scrubbed = scrub !== undefined && history.baseline !== undefined;
   const shownPrice = scrubbed ? scrub.close : quote.price;
@@ -47,12 +48,8 @@ export function ConnectedDetailHeader({ stock, range, scrub }: ConnectedDetailHe
       rangeLabel={
         scrubbed ? formatScrubTime(range, scrub.time, locale) : t(`detail.range.${range}`)
       }
-      asOf={
-        quote.lastKnown
-          ? t("quote.lastKnown.label", { time: formatMarketDateTime(quote.timestamp, { locale }) })
-          : undefined
-      }
-      asOfHelp={t("quote.lastKnown.help")}
+      asOf={warning.label}
+      asOfHelp={warning.help}
       stale={stale}
       flash={scrubbed ? undefined : flash}
       flashKey={flashKey}

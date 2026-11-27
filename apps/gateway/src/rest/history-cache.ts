@@ -45,7 +45,6 @@ interface CacheState {
   readonly controllers: Set<AbortController>;
   lastKnownStatus: MarketStatus;
   openEpoch: number;
-  lastClosedAt: number | undefined;
 }
 
 async function fetchFromChain(
@@ -69,13 +68,10 @@ async function fetchFromChain(
   throw lastError ?? new Error("No history sources configured");
 }
 
-function syncStatus(state: CacheState, next: MarketStatus, time: number): void {
+function syncStatus(state: CacheState, next: MarketStatus): void {
   if (next === state.lastKnownStatus) return;
   if (next === "open") {
     state.openEpoch += 1;
-    state.lastClosedAt = undefined;
-  } else {
-    state.lastClosedAt = time;
   }
   state.lastKnownStatus = next;
 }
@@ -97,6 +93,14 @@ function refreshEntry(
 
   const promise = fetchFromChain(state, options.sources, symbol, range, requestNow, options.warn)
     .then((series) => {
+      const completedAt = options.now();
+      if (
+        options.calendar.status(completedAt) !== statusAtStart ||
+        options.calendar.session(completedAt).open !== sessionAtStart.open ||
+        state.openEpoch !== epochAtStart
+      ) {
+        throw new Error("History response crossed a market phase; retry for current history");
+      }
       const freshness = freshnessFor(range, requestNow, statusAtStart, sessionAtStart);
       putEntry(
         state.entries,
@@ -131,18 +135,17 @@ export function createHistoryCache(options: HistoryCacheOptions): HistoryCache {
     controllers: new Set(),
     lastKnownStatus: options.calendar.status(options.now()),
     openEpoch: 0,
-    lastClosedAt: undefined,
   };
 
   const counts: HistoryCacheStats = { hits: 0, misses: 0 };
   const stopStatus = options.calendar.onStatusChange((status) => {
-    syncStatus(state, status, options.now());
+    syncStatus(state, status);
   });
 
   async function get(symbol: string, range: Range): Promise<HistoryCacheResult> {
     const currentNow = options.now();
     const status = options.calendar.status(currentNow);
-    syncStatus(state, status, currentNow);
+    syncStatus(state, status);
     const key = cacheKey(symbol, range);
     const entry = state.entries.get(key);
 
@@ -152,7 +155,6 @@ export function createHistoryCache(options: HistoryCacheOptions): HistoryCache {
         currentNow,
         status,
         state.openEpoch,
-        state.lastClosedAt,
         options.calendar.session(currentNow).open,
       );
       if (entryState !== "expired") counts.hits += 1;
@@ -176,7 +178,7 @@ export function createHistoryCache(options: HistoryCacheOptions): HistoryCache {
         touchEntry(state.entries, key, entry);
         return {
           series: entry.series,
-          ageMs: Math.max(0, Math.floor(currentNow - entry.fetchedAt)),
+          ageMs: Math.max(0, Math.floor(options.now() - entry.fetchedAt)),
         };
       }
       throw err;

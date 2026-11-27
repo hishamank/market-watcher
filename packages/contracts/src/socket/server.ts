@@ -66,9 +66,12 @@ export const ChaosFailureRateStateSchema = z.object({
   revertsAt: EpochMsSchema.nullable(),
 });
 
+export const ChaosScopeSchema = z.enum(["global", "connection"]);
+
 export const ChaosStateMessageSchema = z.object({
   type: z.literal("chaos_state"),
   serverTime: EpochMsSchema,
+  scope: ChaosScopeSchema.optional(),
   tickSpike: ChaosToggleStateSchema,
   historyLatency: ChaosToggleStateSchema,
   historyFailureRate: ChaosFailureRateStateSchema,
@@ -111,6 +114,7 @@ export type HeartbeatMessage = z.infer<typeof HeartbeatMessageSchema>;
 export type MarketStatusMessage = z.infer<typeof MarketStatusMessageSchema>;
 export type ChaosToggleState = z.infer<typeof ChaosToggleStateSchema>;
 export type ChaosFailureRateState = z.infer<typeof ChaosFailureRateStateSchema>;
+export type ChaosScope = z.infer<typeof ChaosScopeSchema>;
 export type ChaosStateMessage = z.infer<typeof ChaosStateMessageSchema>;
 export type ErrorMessage = z.infer<typeof ErrorMessageSchema>;
 export type ServerMessage = z.infer<typeof ServerMessageSchema>;

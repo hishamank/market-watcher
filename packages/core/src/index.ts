@@ -12,6 +12,9 @@ export type {
   HttpResponse,
 } from "./rest/rest-client.ts";
 
+export { useQuoteWarning } from "./hooks/use-quote-warning.ts";
+export { useQuoteAvailability } from "./hooks/use-quote-availability.ts";
+export type { QuoteAvailability } from "./realtime/quote-store.ts";
 export { useQuote } from "./hooks/use-quote.ts";
 export { useConnectionStatus } from "./hooks/use-connection-status.ts";
 export type { ConnectionStatusResult } from "./hooks/use-connection-status.ts";
@@ -28,8 +31,6 @@ export { useWatchlist } from "./hooks/use-watchlist.ts";
 export type { WatchlistResult } from "./hooks/use-watchlist.ts";
 export { useWatchlistStocks } from "./hooks/use-watchlist-stocks.ts";
 export type { WatchlistStockRow, WatchlistStocksResult } from "./hooks/use-watchlist-stocks.ts";
-export { useTableColumns } from "./hooks/use-table-columns.ts";
-export type { TableColumn, TableColumnsResult } from "./hooks/use-table-columns.ts";
 
 export {
   historyQueryOptions,
@@ -86,3 +87,5 @@ export { useStockNews, type StockNewsView } from "./hooks/use-stock-news.ts";
 export { useStockEarnings, type StockEarningsView } from "./hooks/use-stock-earnings.ts";
 
 export { createI18n } from "./i18n/create-i18n.ts";
+
+export { useFeedSession } from "./hooks/use-feed-session.ts";
