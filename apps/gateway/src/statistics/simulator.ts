@@ -4,7 +4,7 @@ import type { StatisticsSource } from "./source.ts";
 const sample: StockStatistics = {
   currency: "USD",
   marketCap: "2800000000000",
-  trailingPE: "28.42",
+  trailingPE: null,
   trailingEps: "6.43",
   dividendYield: "0.0045",
   averageVolume: 52400000,

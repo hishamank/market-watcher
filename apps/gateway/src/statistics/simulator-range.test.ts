@@ -11,7 +11,7 @@ afterEach(async () => {
   for (const gateway of active.splice(0)) await gateway.close();
 });
 
-it("omits unsupported simulated year bounds instead of contradicting deterministic prices", async () => {
+it("omits simulated price-dependent statistics that contradict deterministic prices", async () => {
   const gateway = await startRestGateway({
     seed: "demo-v1",
     initialNow: Date.UTC(2026, 10, 27, 12),
@@ -30,5 +30,6 @@ it("omits unsupported simulated year bounds instead of contradicting determinist
     expect(body.source).toBe("simulated");
     expect(body.statistics).not.toBeNull();
     expect(body.statistics?.yearRange).toBeNull();
+    expect(body.statistics?.trailingPE).toBeNull();
   }
 });

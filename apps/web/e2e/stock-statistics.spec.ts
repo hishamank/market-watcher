@@ -10,11 +10,13 @@ test("D10 statistics format values and distinguish missing fund data", async ({ 
   await expect(page.getByTestId("statistics-averageVolume")).toHaveText("52.40M");
   await expect(page.getByTestId("statistics-source")).toHaveText("Sample statistics · USD");
   await expect(page.getByTestId("stock-statistics").getByRole("button")).toHaveCount(0);
-  await expect(page.getByTestId("statistics-year-range")).toHaveCount(0);
+  await expect(page.getByTestId("statistics-yearRange")).toHaveText("—");
+  await expect(page.getByTestId("statistics-trailingPE")).toHaveText("—");
   await page.goto("/stocks/SPY");
   await expect(page.getByTestId("statistics-marketCap")).toHaveText("—");
   await expect(page.getByTestId("statistics-trailingEps")).toHaveText("—");
-  await expect(page.getByTestId("statistics-year-range")).toHaveCount(0);
+  await expect(page.getByTestId("statistics-yearRange")).toHaveText("—");
+  await expect(page.getByTestId("statistics-trailingPE")).toHaveText("—");
   const emptyResponse = page.waitForResponse((response) =>
     response.url().endsWith("/stocks/NVDA/statistics"),
   );
