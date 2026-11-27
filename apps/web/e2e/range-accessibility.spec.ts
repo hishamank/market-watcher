@@ -1,25 +1,27 @@
 import { expect, test } from "@playwright/test";
 
-for (const theme of ["light", "dark"] as const) {
-  test(`D2 G4 Arabic ranges fit 320px in ${theme}`, async ({ page }) => {
-    await page.setViewportSize({ width: 320, height: 740 });
-    await page.emulateMedia({ colorScheme: theme });
-    await page.goto("/stocks/AAPL");
-    await page.getByTestId("language-option-ar").click();
-    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
-    await expect(page.getByTestId("price-chart")).toHaveAttribute("data-state", "ready");
-    for (const range of ["1D", "1W", "1M", "3M", "1Y", "5Y"]) {
-      const button = page.getByTestId(`range-tab-${range}`);
-      const box = await button.boundingBox();
-      expect(box).not.toBeNull();
-      expect(box!.x).toBeGreaterThanOrEqual(0);
-      expect(box!.x + box!.width).toBeLessThanOrEqual(320);
-      expect(box!.width).toBeGreaterThanOrEqual(44);
-      expect(box!.height).toBeGreaterThanOrEqual(44);
-      expect(await button.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true);
-    }
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
-  });
+for (const width of [320, 360, 375, 390]) {
+  for (const theme of ["light", "dark"] as const) {
+    test(`D2 G4 Arabic ranges fit ${width}px in ${theme}`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 740 });
+      await page.emulateMedia({ colorScheme: theme });
+      await page.goto("/stocks/AAPL");
+      await page.getByTestId("language-option-ar").click();
+      await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+      await expect(page.getByTestId("price-chart")).toHaveAttribute("data-state", "ready");
+      for (const range of ["1D", "1W", "1M", "3M", "1Y", "5Y"]) {
+        const button = page.getByTestId(`range-tab-${range}`);
+        const box = await button.boundingBox();
+        expect(box).not.toBeNull();
+        expect(box!.x).toBeGreaterThanOrEqual(0);
+        expect(box!.x + box!.width).toBeLessThanOrEqual(width);
+        expect(box!.width).toBeGreaterThanOrEqual(44);
+        expect(box!.height).toBeGreaterThanOrEqual(44);
+        expect(await button.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true);
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+    });
+  }
 }
 
 test("D2 G4 range buttons expose selection and support native keyboard activation", async ({

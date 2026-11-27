@@ -14,7 +14,7 @@ export function RangeTabs({ range, onSelect }: RangeTabsProps) {
       selected={RANGES.indexOf(range)}
       role="group"
       label={t("detail.rangeTabs")}
-      className="grid grid-cols-3 gap-2 min-[360px]:flex md:w-[420px] md:max-w-full"
+      className="grid grid-cols-3 gap-2 min-[375px]:flex md:w-[420px] md:max-w-full"
     >
       {(ready) =>
         RANGES.map((option) => {
