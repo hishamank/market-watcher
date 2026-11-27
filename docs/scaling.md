@@ -1,6 +1,6 @@
 # Scaling to 100,000 concurrent users
 
-This document separates **what is implemented today**, **what has been measured locally**, and **what is an unmeasured distributed-scaling proposal**. None of the multi-node infrastructure below is built for this project; the goal is to state the real limits and engineering prerequisites accurately.
+This document separates **what is implemented today**, **what has been measured locally**, and **what is an unmeasured distributed-scaling proposal**. None of the multi-node infrastructure below is built in this project; the goal is to state the real limits and engineering prerequisites accurately.
 
 ## What is implemented today
 
@@ -16,7 +16,7 @@ At today's configured **2,000-socket** ceiling, 100,000 concurrent sockets would
 ## Measurements vs projections
 
 - **Local simulator loopback load test (`07a9bf3`):** Short local run (10, 100, 500 and 1,000 concurrent sockets, 50 shared symbols per socket, gateway logger disabled, 10 sockets per distinct `127/8` loopback IP, **17.03 s** total at 1,000 sockets including ramp-up) delivered all snapshots with zero recorded connection errors, ~3,755 frames/s, 256 ms p99 quote age, and returned active connections and watchers to 0 after teardown. Full workload conditions and caveats live in [`docs/verification.md#local-load-test-workload`](verification.md#local-load-test-workload).
-- **Single-core container admission check ([ADR 0092](adr/0092-a-total-connection-cap-and-ipv6-budgets-by-prefix.md)):** Local simulator run in a 1-core, 512 MB container with every socket subscribed to the 50 default symbols measured 170 MB RSS and 43–61% of one laptop core at 2,000 sockets (206 MB at 3,000 sockets) at ~4.1 frames/socket/s. A shared cloud vCPU is slower and distinct live-mode symbols cost more per socket; 2,000 is an admission guardrail, not certified production capacity.
+- **Single-core container admission check ([ADR 0092](adr/0092-a-total-connection-cap-and-ipv6-budgets-by-prefix.md)):** Local simulator run in a 1-core, 512 MB container with every socket subscribed to the 50 default symbols measured 170 MB RSS and 43–61% of one laptop core at 2,000 sockets (206 MB at 3,000 sockets) at ~4.1 frames/socket/s. A shared cloud vCPU is slower and distinct live-mode symbols cost more per socket; 2,000 is an admission guardrail, not proof of production capacity.
 - **Client cache microbenchmark ([`docs/performance/quote-cache-index.md`](performance/quote-cache-index.md)):** Controlled Node A/B microbenchmark on the client's cold-cache hydration fallback (10,000 cached stocks, 50-row snapshot batch: 25.25 ms → 1.91 ms median; 7-round ranges, not p99 latencies). This is a client helper microbenchmark, not a gateway load test or full-page/mobile benchmark.
 - **Projected 100,000-user topology:** Everything below is an **unmeasured architectural design**; neither sustained production load nor 100,000 concurrent users has been tested.
 

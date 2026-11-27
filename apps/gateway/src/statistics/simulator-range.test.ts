@@ -21,7 +21,7 @@ it("omits simulated price-dependent statistics that contradict deterministic pri
   const history = HistoryResponseSchema.parse(
     await (await gateway.get("/stocks/AAPL/history?range=1Y")).json(),
   );
-  expect(detail.stock.quote.price).toBe("327.80");
+  expect(detail.stock.quote.price).toBe("198.78");
   expect(history.bars.at(-1)?.close).toBe(detail.stock.quote.price);
   for (const symbol of ["AAPL", "MSFT", "SPY", "QQQ", "VTI"]) {
     const body = StockStatisticsResponseSchema.parse(

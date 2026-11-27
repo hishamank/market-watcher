@@ -1,6 +1,6 @@
 # Stock news comes through the gateway
 
-A company-news section follows the overview, backed by Yahoo ticker RSS through our gateway. The fast-xml-parser dependency is gateway-only. Web and mobile use the same `StockNewsResponse` contract and `useStockNews` hook; this explicitly extends the frozen core API.
+A company-news section is added after the overview, backed by Yahoo ticker RSS through our gateway. The fast-xml-parser dependency is gateway-only. Web and mobile use the same `StockNewsResponse` contract and `useStockNews` hook; this explicitly extends the frozen core API.
 
 `GET /stocks/:symbol/news` checks the catalogue and returns up to nine stories, newest first, with IDs, plain-text titles, article URLs, destination sites, optional publishers, UTC publication times and optional thumbnail URLs. Live mode fetches `https://finance.yahoo.com/rss/headline?s=<symbol>&region=US&lang=en-US` with an identifying RSS-reader user agent. The older feeds.finance.yahoo.com URL returned 404 during this implementation. Direct AAPL and SPY requests to the current URL succeeded on 27 November 2026.
 

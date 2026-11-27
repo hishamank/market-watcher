@@ -1,6 +1,6 @@
 # Earnings and hidden empty sections
 
-An earnings section is added, and supplemental sections disappear when no data is available. Overview, statistics, earnings and news now return no section markup for empty data. All-null profile/statistics records are also empty. A temporary request error remains distinct and retains its retry action. Partial records retain available content; no-data subparts of earnings are omitted.
+An earnings section is added and supplemental sections disappear when no data is available. Overview, statistics, earnings and news now return no section markup for empty data. All-null profile/statistics records are also empty. A temporary request error remains distinct and retains its retry action. Partial records retain available content; no-data subparts of earnings are omitted.
 
 `GET /stocks/:symbol/earnings` is independent of prices, statistics, profiles and news. Live mode uses the existing yahoo-finance2 dependency. It first checks quoteType and omits non-equities, avoiding the earnings-module error returned for ETFs such as SPY. For equities, calendarEvents supplies upcoming report dates and estimate status; earnings supplies fiscal quarters, actual/estimated EPS, financial currency and accounting basis. EPS is displayed only when USD is explicitly supplied. The default GAAP/non-GAAP basis is shown, or marked unknown. Date ranges are preserved; an absent confirmation flag is labelled Date not confirmed, not Scheduled.
 
