@@ -27,6 +27,7 @@ export interface AppOptions {
   feedMode: FeedMode;
   allowedOrigins: ReadonlySet<string>;
   chaosScope?: ChaosScope;
+  maxConnections?: number;
   revision?: string;
   now?: () => number;
   logger?: FastifyServerOptions["logger"];

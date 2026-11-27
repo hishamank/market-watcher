@@ -1,5 +1,11 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { ABUSE_COOLDOWN_MS, CONNECTIONS_PER_IP, MAX_COOLDOWN_ENTRIES } from "../hub/limits.ts";
+import {
+  ABUSE_COOLDOWN_MS,
+  CONNECTIONS_PER_IP,
+  MAX_CONNECTIONS,
+  MAX_COOLDOWN_ENTRIES,
+} from "../hub/limits.ts";
+import { addressKey } from "./address-key.ts";
 
 export const LOCAL_WEB_ORIGINS = ["http://localhost:3000", "http://localhost:3100"];
 
@@ -21,16 +27,18 @@ export interface Admission {
 export function createAdmission(
   allowedOrigins: ReadonlySet<string>,
   now: () => number = () => Date.now(),
+  maxConnections: number = MAX_CONNECTIONS,
 ): Admission {
   const openByIp = new Map<string, number>();
   const coolingUntil = new Map<string, number>();
+  let open = 0;
 
-  function cooling(ip: string): boolean {
-    const until = coolingUntil.get(ip);
+  function cooling(key: string): boolean {
+    const until = coolingUntil.get(key);
     if (until !== undefined && until <= now()) {
-      coolingUntil.delete(ip);
+      coolingUntil.delete(key);
     }
-    return coolingUntil.has(ip);
+    return coolingUntil.has(key);
   }
 
   function penalize(ip: string): void {
@@ -38,7 +46,7 @@ export function createAdmission(
       [...coolingUntil.keys()].forEach(cooling);
     }
     if (coolingUntil.size < MAX_COOLDOWN_ENTRIES) {
-      coolingUntil.set(ip, now() + ABUSE_COOLDOWN_MS);
+      coolingUntil.set(addressKey(ip), now() + ABUSE_COOLDOWN_MS);
     }
   }
 
@@ -46,26 +54,31 @@ export function createAdmission(
     const origin = request.headers.origin;
     if (origin !== undefined && !allowedOrigins.has(origin)) {
       await reply.code(403).send({ error: "origin_not_allowed" });
-    } else if (cooling(request.ip)) {
+    } else if (cooling(addressKey(request.ip))) {
       await reply.code(429).send({ error: "cooling_down" });
-    } else if ((openByIp.get(request.ip) ?? 0) >= CONNECTIONS_PER_IP) {
+    } else if ((openByIp.get(addressKey(request.ip)) ?? 0) >= CONNECTIONS_PER_IP) {
       await reply.code(429).send({ error: "too_many_connections" });
+    } else if (open >= maxConnections) {
+      await reply.code(503).send({ error: "at_capacity" });
     }
+  }
+
+  function opened(ip: string): void {
+    const key = addressKey(ip);
+    open += 1;
+    openByIp.set(key, (openByIp.get(key) ?? 0) + 1);
   }
 
   function closed(ip: string): void {
-    const count = (openByIp.get(ip) ?? 0) - 1;
+    const key = addressKey(ip);
+    const count = (openByIp.get(key) ?? 0) - 1;
+    open -= 1;
     if (count > 0) {
-      openByIp.set(ip, count);
+      openByIp.set(key, count);
     } else {
-      openByIp.delete(ip);
+      openByIp.delete(key);
     }
   }
 
-  return {
-    check,
-    opened: (ip) => void openByIp.set(ip, (openByIp.get(ip) ?? 0) + 1),
-    closed,
-    penalize,
-  };
+  return { check, opened, closed, penalize };
 }
