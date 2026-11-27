@@ -40,8 +40,13 @@ test("a client that never answers the protocol ping is closed", async () => {
   await expect(client.closed).resolves.toBe(1006);
 });
 
-test("an unsubscribe over the limit gets one anonymous rate_limited and is dropped", async () => {
+test("unsubscribes over the limit release the symbol and get one anonymous rate_limited", async () => {
   const client = await gateway.connect();
+  client.send({ type: "subscribe", requestId: 1, symbols: ["AAPL"] });
+  await client.next("snapshot");
+  for (let count = 0; count < 20; count += 1) {
+    client.send({ type: "unsubscribe", symbols: ["MSFT"] });
+  }
   for (let count = 0; count < 25; count += 1) {
     client.send({ type: "unsubscribe", symbols: ["AAPL"] });
   }
@@ -50,9 +55,14 @@ test("an unsubscribe over the limit gets one anonymous rate_limited and is dropp
     { type: "error", code: "rate_limited", message: "Too many messages" },
   ]);
 
+  expect(gateway.feed.upstream()).toEqual([]);
+  expect(gateway.feed.upstreamCalls).toEqual([
+    { action: "subscribe", symbols: ["AAPL"] },
+    { action: "unsubscribe", symbols: ["AAPL"] },
+  ]);
   vi.advanceTimersByTime(1_000);
-  client.send({ type: "subscribe", requestId: 1, symbols: ["AAPL"] });
-  await expect(client.next("snapshot")).resolves.toMatchObject({ requestId: 1 });
+  client.send({ type: "subscribe", requestId: 2, symbols: ["AAPL"] });
+  await expect(client.next("snapshot")).resolves.toMatchObject({ requestId: 2 });
 });
 
 test("22 subscribes in one window get 20 snapshots and 2 rate_limited with their IDs", async () => {

@@ -111,7 +111,7 @@ export function openSession(
       } else if (verdict === "limited") {
         peer.send({ type: "error", code: "rate_limited", message: "Too many messages" });
       }
-      return;
+      if (!frame.ok || frame.message.type !== "unsubscribe") return;
     }
     if (frame.ok) {
       void dispatch(hub, chaos, peer, frame.message).catch((err: unknown) => {
