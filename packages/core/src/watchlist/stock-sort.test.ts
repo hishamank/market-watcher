@@ -79,6 +79,15 @@ describe("watchlist sorting", () => {
       expect(removed.snapshot?.order).toEqual(["NVDA", "MSFT"]);
     });
 
+    it("keeps the held order through a render with no stocks, such as a loading state", () => {
+      const first = holdSortOrder(undefined, "price", stocks, () => byPrice(stocks));
+      const loading = holdSortOrder(first.snapshot, "price", [], () => []);
+      expect(loading.snapshot).toBe(first.snapshot);
+      const ticked = [{ ...msft, quote: makeQuote("MSFT", "900.00", 2000) }, aapl, nvda];
+      const ready = holdSortOrder(loading.snapshot, "price", ticked, () => byPrice(ticked));
+      expect(symbols(ready.stocks)).toEqual(["NVDA", "AAPL", "MSFT"]);
+    });
+
     it("sorts afresh when a removed symbol comes back or the sort is turned off and on", () => {
       const first = holdSortOrder(undefined, "price", stocks, () => byPrice(stocks));
       const removed = holdSortOrder(first.snapshot, "price", [msft, nvda], () =>

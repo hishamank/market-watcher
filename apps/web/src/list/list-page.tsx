@@ -1,7 +1,6 @@
 "use client";
 
 import type { StockSort } from "@mini/core";
-import { useSearchParams } from "next/navigation";
 import { useState, type MouseEvent } from "react";
 import { useTableColumns } from "../columns/use-table-columns.ts";
 import { ViewToggle, type ListView } from "../components/view-toggle.tsx";
@@ -14,22 +13,24 @@ import { WatchlistView } from "./watchlist-view.tsx";
 
 interface LeavingSort {
   readonly sort: StockSort;
-  readonly from: string;
+  readonly shown: boolean;
 }
 
 export function ListPage() {
   const { view, selectView } = useViewParam();
   const { sort } = useSortParam();
-  const search = useSearchParams().toString();
   const [leaving, setLeaving] = useState<LeavingSort | undefined>(undefined);
   const { chosen } = useTableColumns();
-  if (view === "watchlist" && leaving !== undefined && leaving.from !== search) {
-    setLeaving(undefined);
+  if (leaving !== undefined && view === "all" && !leaving.shown) {
+    setLeaving({ sort: leaving.sort, shown: true });
   }
+  if (leaving !== undefined && view === "watchlist" && leaving.shown) setLeaving(undefined);
   const switchView = (next: ListView, event: MouseEvent) => {
-    const fading = view === "watchlist" && next === "all" ? sort : undefined;
-    setLeaving(fading === undefined ? undefined : { sort: fading, from: search });
     selectView(next, event);
+    const fading = view === "watchlist" && next === "all" ? sort : undefined;
+    if (event.defaultPrevented) {
+      setLeaving(fading === undefined ? undefined : { sort: fading, shown: false });
+    }
   };
   return (
     <main className="flex flex-1 flex-col md:p-24">
