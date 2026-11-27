@@ -1,6 +1,7 @@
 import { useChaosControls, useConnectionHealth, useFeedMode, useLanguage } from "@mini/core";
-import { Redirect, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { ChaosSheetView } from "../components/chaos-sheet-view.tsx";
+import { useLeaveToMarkets } from "../integrations/use-leave-to-markets.ts";
 import { useDebugTools, useDebugToolsRestored } from "../platform/debug-tools.ts";
 
 function ChaosSheet() {
@@ -31,7 +32,8 @@ export function ConnectedChaosSheet() {
   const feedMode = useFeedMode();
   const debugTools = useDebugTools();
   const restored = useDebugToolsRestored();
-  if (feedMode === null || !restored) return null;
-  if (feedMode !== "simulated" || !debugTools) return <Redirect href="/" />;
-  return <ChaosSheet />;
+  const known = feedMode !== null && restored;
+  const allowed = feedMode === "simulated" && debugTools;
+  useLeaveToMarkets(known && !allowed);
+  return known && allowed ? <ChaosSheet /> : null;
 }
