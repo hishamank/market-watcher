@@ -138,7 +138,7 @@ Terms follow [`glossary.md`](./glossary.md). Decisions are in [`adr/`](./adr), a
 - **Expected:**
   - Until someone changes a column, each width shows its usual layout, and the menu's checkboxes match it. Name and Price are checked and disabled.
   - Unchecking or checking a column removes or adds it in the header and every row at once, and saves the choice to `localStorage["table-columns:v1"]`. The choice survives a reload, applies at every width from 768 px and follows to other tabs.
-  - When the chosen columns are wider than the list, the list scrolls sideways, with Name pinned at the start. The page itself never scrolls sideways.
+  - When the chosen columns are wider than the list, the list scrolls sideways, with Name pinned at the start and the star pinned at the end, in both directions. The page itself never scrolls sideways.
   - **Reset to default** appears only after a change. It clears the saved choice and brings back the usual layout for each width.
   - The column icon stays in view when the list scrolls sideways. It lives in the table header, so it is absent while the list is loading and when the watchlist is empty. The menu stays within the space below the button and scrolls when the window is short (for example 1024 × 360), so every option and Reset stay reachable. When there is no room below the button (for example 1024 × 240), the menu opens above it. It closes on Escape or on a click outside it. Below 768 px there is no Columns button, and the list pane beside the stock page keeps its rows (ADR 0064).
 
