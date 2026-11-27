@@ -23,7 +23,14 @@ function recordLayoutShifts(page: Page) {
     const target = window as unknown as { layoutShift: number };
     target.layoutShift = 0;
     new PerformanceObserver((list) => {
-      for (const entry of list.getEntries() as unknown as Array<{ value: number }>) {
+      for (const entry of list.getEntries() as unknown as Array<{
+        value: number;
+        sources: Array<{ node?: Element }>;
+      }>) {
+        const debugOnly =
+          entry.sources.length > 0 &&
+          entry.sources.every(({ node }) => node?.closest('[data-testid="chaos-panel"]'));
+        if (debugOnly) continue;
         target.layoutShift += entry.value;
       }
     }).observe({ type: "layout-shift", buffered: true });
