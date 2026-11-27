@@ -1,5 +1,5 @@
 import type { ConnectionHealth } from "@mini/core";
-import { ScrollView, StyleSheet, Text } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { usePalette } from "../theme/palette.ts";
 import { useTextStyles } from "../theme/text-styles.ts";
 import { ltr } from "./ltr.ts";
@@ -12,7 +12,7 @@ export function HealthDiagnostics({
   const palette = usePalette();
   const textStyles = useTextStyles();
   return (
-    <ScrollView nestedScrollEnabled style={styles.viewport}>
+    <View style={styles.viewport}>
       <Text
         testID="health-diagnostics"
         selectable
@@ -20,11 +20,11 @@ export function HealthDiagnostics({
       >
         {diagnostics && JSON.stringify(diagnostics, null, 2).split("\n").map(ltr).join("\n")}
       </Text>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  viewport: { maxHeight: 256, flexGrow: 0, direction: "ltr" },
+  viewport: { direction: "ltr" },
   text: { textAlign: "left", writingDirection: "ltr" },
 });

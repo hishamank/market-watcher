@@ -5,6 +5,7 @@ import { HealthDiagnostics } from "./health-diagnostics.tsx";
 
 vi.mock("react-native", () => ({
   ScrollView: "ScrollView",
+  View: "View",
   Text: "Text",
   StyleSheet: { create: (styles: object) => styles },
 }));
@@ -20,7 +21,7 @@ function render(diagnostics: ConnectionHealth["diagnostics"]) {
   return { viewport, text };
 }
 
-test("diagnostic lines retain JSON content inside LTR isolates and a bounded nested scroller", () => {
+test("diagnostic lines retain JSON content and leave scrolling to the sheet", () => {
   const diagnostics: ConnectionHealth["diagnostics"] = {
     transportStatus: "connected",
     socketOpen: true,
@@ -33,10 +34,8 @@ test("diagnostic lines retain JSON content inside LTR isolates and a bounded nes
     lastGatewayError: null,
   };
   const { viewport, text } = render(diagnostics);
-  expect(viewport.props).toMatchObject({
-    nestedScrollEnabled: true,
-    style: { direction: "ltr", maxHeight: 256, flexGrow: 0 },
-  });
+  expect(viewport.type).toBe("View");
+  expect(viewport.props.style).toEqual({ direction: "ltr" });
   expect(text.props.style).toContainEqual({ textAlign: "left", writingDirection: "ltr" });
   const lines = String(text.props.children).split("\n");
   expect(lines.every((line) => line.startsWith("\u2066") && line.endsWith("\u2069"))).toBe(true);
