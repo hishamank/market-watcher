@@ -27,6 +27,7 @@ export interface FrameHandlerContext {
   onMarketStatus(marketStatus: MarketStatus): void;
   onChaosState(message: ChaosStateMessage): void;
   onSnapshotsSettled(): void;
+  onGatewayError?(message: ErrorMessage): void;
   onWarning(message: string, detail?: unknown): void;
 }
 
@@ -73,6 +74,7 @@ function handleParsedMessage(message: ServerMessage, ctx: FrameHandlerContext): 
 }
 
 function handleError(message: ErrorMessage, ctx: FrameHandlerContext): void {
+  ctx.onGatewayError?.(message);
   if ("symbols" in message) {
     ctx.subscriptions.recordSymbolError(message.code, message.requestId, message.symbols);
   } else if (message.code === "rate_limited") {

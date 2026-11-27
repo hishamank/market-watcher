@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useCore } from "../core-provider.tsx";
-import type { ConnectionHealth } from "../realtime/connection-health.ts";
+import type { ConnectionHealth as Counters } from "../realtime/connection-health.ts";
 import {
   cancelInterval,
   cancelTimeout,
@@ -10,7 +10,11 @@ import {
   scheduleTimeout,
 } from "../realtime/timers.ts";
 
-export type { ConnectionHealth } from "../realtime/connection-health.ts";
+import type { SocketDiagnostics } from "../realtime/socket-diagnostics.ts";
+
+export interface ConnectionHealth extends Counters {
+  readonly diagnostics?: SocketDiagnostics;
+}
 
 export const HEALTH_REFRESH_MS = 1_000;
 
@@ -22,18 +26,19 @@ const BEFORE_HYDRATION: ConnectionHealth = {
 };
 
 export function useConnectionHealth(): ConnectionHealth {
-  const { health } = useCore();
+  const { health, socketClient } = useCore();
   const [current, setCurrent] = useState<ConnectionHealth>(BEFORE_HYDRATION);
 
   useEffect(() => {
-    const refresh = () => setCurrent(health.snapshot());
+    const refresh = () =>
+      setCurrent({ ...health.snapshot(), diagnostics: socketClient.getDiagnostics() });
     const first = scheduleTimeout(refresh, 0);
     const timer = scheduleInterval(refresh, HEALTH_REFRESH_MS);
     return () => {
       cancelTimeout(first);
       cancelInterval(timer);
     };
-  }, [health]);
+  }, [health, socketClient]);
 
   return current;
 }

@@ -38,6 +38,8 @@ function SheetHeader({ onClose }: { onClose: () => void }) {
 
 function HealthSection({ health }: { health: ConnectionHealth }) {
   const t = useT();
+  const palette = usePalette();
+  const textStyles = useTextStyles();
   const none = t("chaos.health.none");
   const latency =
     health.latencyMs === null ? none : t("chaos.health.latencyValue", { value: health.latencyMs });
@@ -60,6 +62,16 @@ function HealthSection({ health }: { health: ConnectionHealth }) {
           { label: t("chaos.health.skipped"), value: skipped, testID: "health-skipped" },
         ]}
       />
+      <Text accessibilityRole="header" style={[textStyles.label, { color: palette.text }]}>
+        {t("chaos.health.diagnostics")}
+      </Text>
+      <Text
+        testID="health-diagnostics"
+        selectable
+        style={[textStyles.caption, { color: palette.text, writingDirection: "ltr" }]}
+      >
+        {JSON.stringify(health.diagnostics, null, 2)}
+      </Text>
     </ChaosSection>
   );
 }

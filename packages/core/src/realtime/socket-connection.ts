@@ -1,3 +1,4 @@
+import type { RecoveryReason } from "./socket-diagnostics.ts";
 import { encodeFrame, type ClientMessage } from "@mini/contracts";
 import { computeBackoffDelay } from "./backoff.ts";
 import { createSendBudget } from "./send-budget.ts";
@@ -13,10 +14,11 @@ export interface ManagedConnectionOptions {
   random: () => number;
   isActive(): boolean;
   onRawFrame(data: unknown): void;
-  onLinkLost(): void;
+  onLinkLost(reason: RecoveryReason): void;
 }
 
 export interface ManagedConnection {
+  queuedMessages(): number;
   open(): void;
   close(): void;
   isOpen(): boolean;
@@ -73,7 +75,7 @@ export function createManagedConnection(options: ManagedConnectionOptions): Mana
     clearSilenceTimer();
     silenceTimer = scheduleTimeout(() => {
       silenceTimer = null;
-      options.onLinkLost();
+      options.onLinkLost("silence_timeout");
     }, heartbeatIntervalMs * MISSED_HEARTBEATS_TO_STALE);
   }
 
@@ -95,12 +97,12 @@ export function createManagedConnection(options: ManagedConnectionOptions): Mana
     };
     ws.onerror = () => {
       if (socket === ws && options.isActive()) {
-        options.onLinkLost();
+        options.onLinkLost("socket_error");
       }
     };
     ws.onclose = () => {
       if (socket === ws && options.isActive()) {
-        options.onLinkLost();
+        options.onLinkLost("socket_closed");
       }
     };
     resetSilenceTimer();
@@ -130,6 +132,7 @@ export function createManagedConnection(options: ManagedConnectionOptions): Mana
   }
 
   return {
+    queuedMessages: outbox.size,
     open,
     close,
     isOpen: () => socket !== null && socket.readyState === SOCKET_READY_STATE.OPEN,

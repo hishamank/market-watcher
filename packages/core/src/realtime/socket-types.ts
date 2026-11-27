@@ -1,3 +1,4 @@
+import type { SocketDiagnostics } from "./socket-diagnostics.ts";
 import type { ClientMessage, FeedMode, MarketStatus } from "@mini/contracts";
 import type { AppLifecycle } from "../platform/app-lifecycle.ts";
 import type { NetworkStatus } from "../platform/network-status.ts";
@@ -30,6 +31,7 @@ export interface SocketClientOptions {
 }
 
 export interface SocketClient {
+  getDiagnostics(): SocketDiagnostics;
   start(): void;
   stop(): void;
   getStatus(): ConnectionStatus;
