@@ -6,6 +6,7 @@ import {
   loadAlpacaFeed,
 } from "./feeds/index.ts";
 import { parseAllowedOrigins } from "./socket/admission.ts";
+import { ChaosScopeError, parseChaosScope } from "./socket/chaos-scope.ts";
 
 async function selectFeed(
   feedName: string,
@@ -22,6 +23,16 @@ async function selectFeed(
   );
 }
 
+function readChaosScope(): ReturnType<typeof parseChaosScope> {
+  try {
+    return parseChaosScope(process.env["CHAOS_SCOPE"]);
+  } catch (err: unknown) {
+    console.error(err instanceof ChaosScopeError ? err.message : err);
+    process.exit(1);
+  }
+}
+
+const chaosScope = readChaosScope();
 const selected = await selectFeed(process.env["FEED"] ?? "simulator").catch((err: unknown) => {
   console.error(err instanceof AlpacaStartupError ? err.message : err);
   process.exit(1);
@@ -34,6 +45,7 @@ const app = buildApp({
   feed,
   feedMode: selected.live ? "live" : "simulated",
   allowedOrigins: parseAllowedOrigins(process.env["ALLOWED_ORIGINS"]),
+  chaosScope,
   trustProxy: parseTrustProxy(process.env["TRUST_PROXY"]),
   ...(rateLimit !== undefined ? { rateLimit } : {}),
 });
@@ -41,3 +53,4 @@ app.addHook("onClose", async () => feed.close());
 
 await app.listen({ port, host });
 console.log(`gateway listening on http://${host}:${port}`);
+if (!selected.live) console.log(`chaos scope: ${chaosScope}`);

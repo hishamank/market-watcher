@@ -1,4 +1,4 @@
-import { encodeFrame, type FeedMode, PROTOCOL_VERSION } from "@mini/contracts";
+import { type ChaosScope, encodeFrame, type FeedMode, PROTOCOL_VERSION } from "@mini/contracts";
 import type { FastifyInstance } from "fastify";
 import type { WebSocket } from "ws";
 import type { Feed } from "../feeds/types.ts";
@@ -21,6 +21,7 @@ export interface SocketOptions {
   allowedOrigins: ReadonlySet<string>;
   now: () => number;
   hub: Hub;
+  chaosScope?: ChaosScope;
 }
 
 function rejectVersion(socket: WebSocket): void {
@@ -48,7 +49,12 @@ export async function socketRoute(app: FastifyInstance, options: SocketOptions):
   const { hub } = options;
   const chaos =
     options.feedMode === "simulated"
-      ? createChaosController({ feed: options.feed, now: options.now, broadcast: hub.broadcast })
+      ? createChaosController({
+          feed: options.feed,
+          now: options.now,
+          broadcast: hub.broadcast,
+          ...(options.chaosScope !== undefined ? { scope: options.chaosScope } : {}),
+        })
       : null;
   const admission = createAdmission(options.allowedOrigins);
   const stopLiveness = startLiveness(app.websocketServer, PING_INTERVAL_MS);

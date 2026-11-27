@@ -88,6 +88,14 @@ async function dispatch(
         peer.setFrozen(message.enabled);
         return;
       }
+      if (chaos.scope !== "global") {
+        peer.send({
+          type: "error",
+          code: "invalid_message",
+          message: "Shared chaos controls are disabled on this gateway",
+        });
+        return;
+      }
       chaos.apply(message);
   }
 }
