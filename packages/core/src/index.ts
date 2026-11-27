@@ -28,6 +28,7 @@ export type { StockPagesResult } from "./hooks/use-stock-pages.ts";
 export { useLiveHistory } from "./hooks/use-live-history.ts";
 export type { LiveHistoryResult } from "./hooks/use-live-history.ts";
 export { useWatchlist } from "./hooks/use-watchlist.ts";
+export { WATCHLIST_STORAGE_KEY } from "./watchlist/watchlist-store.ts";
 export type { WatchlistResult } from "./hooks/use-watchlist.ts";
 export { useWatchlistStocks } from "./hooks/use-watchlist-stocks.ts";
 export type { WatchlistStockRow, WatchlistStocksResult } from "./hooks/use-watchlist-stocks.ts";

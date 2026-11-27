@@ -43,6 +43,17 @@ test("L5 /?view=watchlist server-renders the skeleton, then the watchlist", asyn
   expect(problems).toEqual([]);
 });
 
+test("L5 an empty stored watchlist paints the empty state before hydration", async ({ page }) => {
+  await page.route("**/_next/static/**/*.js", (route) => route.abort());
+  await page.goto("/?view=watchlist");
+  await expect(page.getByTestId("watchlist-empty")).toBeVisible();
+  await expect(page.getByTestId("watchlist-skeleton")).toBeHidden();
+  await page.evaluate(() => localStorage.setItem("watchlist:v1", JSON.stringify(["MSFT"])));
+  await page.reload();
+  await expect(page.getByTestId("watchlist-skeleton")).toBeVisible();
+  await expect(page.getByTestId("watchlist-empty")).toBeHidden();
+});
+
 test("W1 a row star toggles aria-pressed at once and every star agrees", async ({ page }) => {
   const problems = collectConsoleProblems(page);
   const html = await (await page.request.get("/")).text();

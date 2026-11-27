@@ -128,7 +128,7 @@ Terms follow [`glossary.md`](./glossary.md). Decisions are in [`adr/`](./adr), a
 - **Expected:**
   - Selecting Watchlist sets `?view=watchlist`, and selecting All removes it. The switch is instant, with no server render (ADR 0050).
   - The back button restores the previous view.
-  - Loading `/?view=watchlist` directly shows a skeleton (`watchlist-skeleton`) on the server render, then the watchlist after hydration.
+  - Loading `/?view=watchlist` directly shows a skeleton (`watchlist-skeleton`) on the server render, then the watchlist after hydration. When the stored watchlist is empty, the empty state (`watchlist-empty`) shows from the first paint instead (ADR 0099).
   - The selected option's indicator slides to the new option (Walk). With reduced motion it jumps.
 
 ### L6. Column manager (N, Walk)

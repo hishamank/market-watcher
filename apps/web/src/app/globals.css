@@ -5,6 +5,8 @@
 @import "../shell/language-switch.css";
 @import "../shell/locale-turn.css";
 
+@custom-variant stored-watchlist-empty (&:where([data-stored-watchlist="empty"] *));
+
 @custom-variant list-table {
   @media (width >= 80rem) {
     &:not(:where([data-list-pane] *)) {

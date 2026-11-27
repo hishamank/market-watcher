@@ -11,7 +11,7 @@ import { LOCALE_COOKIE } from "../platform/locale-cookie.ts";
 import { NONCE_HEADER } from "../proxy.ts";
 import { Providers } from "../providers/providers.tsx";
 import { AppShell } from "../shell/app-shell.tsx";
-import { ThemeScript } from "../integrations/theme-script.tsx";
+import { PrePaintScript } from "../integrations/pre-paint-script.tsx";
 import "./globals.css";
 
 const alexandria = Alexandria({
@@ -43,7 +43,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       suppressHydrationWarning
     >
       <head>
-        <ThemeScript nonce={nonce} />
+        <PrePaintScript nonce={nonce} />
       </head>
       <body>
         <Providers gatewayUrl={gatewayUrl} initialFeedMode={meta.feedMode} locale={locale}>
