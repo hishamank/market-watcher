@@ -6,12 +6,13 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck && tsc -p .",
-    "test": "turbo run test",
+    "test": "node scripts/check-adrs.ts && turbo run test",
     "lint": "oxlint --deny-warnings --ignore-pattern '**/lint-fixtures/**'",
     "lint:fixtures": "node scripts/lint-fixtures.ts",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
-    "check:direction": "node scripts/check-direction.ts apps/web"
+    "check:direction": "node scripts/check-direction.ts apps/web",
+    "check:adrs": "node scripts/check-adrs.ts"
   },
   "devDependencies": {
     "@types/node": "26.6.7",
