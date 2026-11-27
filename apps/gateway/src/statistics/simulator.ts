@@ -8,7 +8,7 @@ const sample: StockStatistics = {
   trailingEps: "6.43",
   dividendYield: "0.0045",
   averageVolume: 52400000,
-  yearRange: { low: "124.17", high: "320.49" },
+  yearRange: null,
 };
 
 export const simulatorStatisticsSource: StatisticsSource = {
@@ -22,7 +22,6 @@ export const simulatorStatisticsSource: StatisticsSource = {
         trailingEps: null,
         dividendYield: "0.012",
         averageVolume: 71300000,
-        yearRange: { low: "400.25", high: "650.80" },
       };
     return null;
   },

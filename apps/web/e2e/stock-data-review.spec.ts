@@ -97,6 +97,14 @@ test("D12 estimate-only earnings omit the summary and give the chart the full de
 });
 
 test("D10 Arabic last-price prose follows locale while the range stays LTR", async ({ page }) => {
+  await page.route("**/stocks/AAPL/statistics", async (route) => {
+    const response = await route.fetch();
+    const body = await response.json();
+    await route.fulfill({
+      response,
+      json: { ...body, statistics: { ...body.statistics, yearRange: { low: "1", high: "1000" } } },
+    });
+  });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/stocks/AAPL");
   await page.getByTestId("language-option-ar").click();
