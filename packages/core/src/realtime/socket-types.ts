@@ -1,3 +1,4 @@
+import type { FeedSession } from "./feed-session.ts";
 import type { ClientMessage, FeedMode, MarketStatus } from "@mini/contracts";
 import type { AppLifecycle } from "../platform/app-lifecycle.ts";
 import type { NetworkStatus } from "../platform/network-status.ts";
@@ -19,6 +20,7 @@ export type ReconnectListener = () => void;
 
 export interface SocketClientOptions {
   url: string;
+  session?: FeedSession;
   quoteStore: QuoteStore;
   health?: ConnectionHealthRecorder | undefined;
   network: NetworkStatus;

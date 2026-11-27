@@ -1,4 +1,5 @@
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
+import { test } from "./support/feed-fixture.ts";
 import { collectConsoleProblems } from "./support/console.ts";
 
 test("D10 statistics format values and distinguish missing fund data", async ({ page }) => {
@@ -10,10 +11,13 @@ test("D10 statistics format values and distinguish missing fund data", async ({ 
   await expect(page.getByTestId("statistics-averageVolume")).toHaveText("52.40M");
   await expect(page.getByTestId("statistics-source")).toHaveText("Sample statistics · USD");
   await expect(page.getByTestId("stock-statistics").getByRole("button")).toHaveCount(0);
-  await expect(page.getByTestId("statistics-range-marker")).toBeVisible();
+  await expect(page.getByTestId("statistics-yearRange")).toHaveText("—");
+  await expect(page.getByTestId("statistics-trailingPE")).toHaveText("—");
   await page.goto("/stocks/SPY");
   await expect(page.getByTestId("statistics-marketCap")).toHaveText("—");
   await expect(page.getByTestId("statistics-trailingEps")).toHaveText("—");
+  await expect(page.getByTestId("statistics-yearRange")).toHaveText("—");
+  await expect(page.getByTestId("statistics-trailingPE")).toHaveText("—");
   const emptyResponse = page.waitForResponse((response) =>
     response.url().endsWith("/stocks/NVDA/statistics"),
   );
@@ -48,7 +52,8 @@ test("D10 statistics failure retries independently of prices and overview", asyn
   await expect(page.getByTestId("stock-statistics")).toHaveAttribute("data-state", "ready");
 });
 
-test("D10 negative EPS, zero yield and flat ranges stay honest", async ({ page }) => {
+test("D10 negative EPS, zero yield and flat ranges stay honest", async ({ page, useLiveFeed }) => {
+  await useLiveFeed();
   await page.route("**/stocks/AAPL/statistics", (route) =>
     route.fulfill({
       json: {

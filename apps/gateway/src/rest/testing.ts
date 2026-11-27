@@ -9,6 +9,7 @@ import type {
   HistorySeries,
   HistorySource,
   LiveFeed,
+  MarketCalendar,
 } from "../feeds/types.ts";
 import type { RestRateLimitOptions } from "./plugins.ts";
 
@@ -26,6 +27,7 @@ export interface RestGatewayOptions {
   historySourceTimeoutMs?: number;
   rateLimit?: RestRateLimitOptions;
   wrapHistory?: (base: HistorySource) => HistorySource;
+  wrapCalendar?: (base: MarketCalendar) => MarketCalendar;
   wrapLive?: (base: LiveFeed) => LiveFeed;
   wrapCatalogue?: (base: Catalogue) => Catalogue;
 }
@@ -62,7 +64,7 @@ export async function startRestGateway(options: RestGatewayOptions = {}): Promis
     live: options.wrapLive ? options.wrapLive(feed.live) : feed.live,
     history: spiedHistory,
     catalogue: options.wrapCatalogue ? options.wrapCatalogue(feed.catalogue) : feed.catalogue,
-    calendar: feed.calendar,
+    calendar: options.wrapCalendar ? options.wrapCalendar(feed.calendar) : feed.calendar,
   };
   const app = buildApp({
     feed: wiredFeed,

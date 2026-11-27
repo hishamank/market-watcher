@@ -11,6 +11,7 @@ import { FailureRateControl, SwitchRow } from "./chaos-controls-ui.tsx";
 import { HealthSection } from "./health-tiles.tsx";
 
 export interface ChaosPanelViewProps {
+  sharedControls: boolean;
   offline: boolean;
   tickSpike: ChaosToggleView;
   historyLatency: ChaosToggleView;
@@ -116,7 +117,7 @@ export function ChaosPanelView(props: ChaosPanelViewProps) {
           </Button>
         </header>
         <ConnectionSection {...props} />
-        <GlobalSection {...props} />
+        {props.sharedControls && <GlobalSection {...props} />}
         <HealthSection health={props.health} />
       </section>
     </>

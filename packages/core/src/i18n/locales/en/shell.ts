@@ -1,4 +1,11 @@
 export const shellStrings = {
+  "feedChanged.title": "Market data source changed",
+  "feedChanged.help":
+    "Prices are hidden to avoid mixing live and simulated data. Reload to start a new session.",
+  "feedChanged.reload": "Reload",
+  "feedChanged.mobileHelp":
+    "Prices are hidden to avoid mixing live and simulated data. Close and reopen the app to start a new session.",
+
   "theme.darkMode": "Dark mode",
   "header.title": "Markets",
   "feedMode.simulated": "Simulated",

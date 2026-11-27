@@ -10,6 +10,7 @@ import { HealthTiles } from "./health-tiles.tsx";
 import { Icon } from "./icon.tsx";
 
 export interface ChaosSheetViewProps extends ChaosGlobalSectionProps {
+  sharedControls: boolean;
   health: ConnectionHealth;
   onClose: () => void;
   onDrop: () => void;
@@ -96,7 +97,7 @@ export function ChaosSheetView(props: ChaosSheetViewProps) {
           </View>
         </View>
       </ChaosSection>
-      <ChaosGlobalSection {...props} />
+      {props.sharedControls && <ChaosGlobalSection {...props} />}
       <HealthSection health={props.health} />
     </ScrollView>
   );

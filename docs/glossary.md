@@ -20,6 +20,10 @@ _Avoid_: throttling, debouncing, batching
 Where all prices in a running system come from: Simulated or Live. It is fixed for the life of the gateway, and the two are never mixed.
 _Avoid_: data source, environment
 
+**Feed session**:
+The period in which an app uses one consistent feed mode. If the gateway changes between Simulated and Live, the app hides market data and requires a reload or restart before displaying the new source.
+_Avoid_: connection status, market session
+
 **Market status**:
 Whether a session is currently open according to the market calendar: open or closed.
 _Avoid_: trading status, market state

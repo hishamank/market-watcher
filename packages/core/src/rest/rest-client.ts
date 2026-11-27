@@ -1,3 +1,4 @@
+import type { FeedSession } from "../realtime/feed-session.ts";
 import {
   type HistoryResponse,
   HistoryResponseSchema,
@@ -62,6 +63,7 @@ export interface RestClient {
 
 export interface RestClientOptions {
   gatewayUrl: string;
+  session?: FeedSession;
   fetch?: HttpFetch | undefined;
 }
 
@@ -122,6 +124,7 @@ export function createRestRequester(options: RestClientOptions): RestRequester {
     schema: ResponseSchema<T>,
     signal?: AbortSignalLike,
   ): Promise<T> {
+    options.session?.check();
     let response: HttpResponse;
     try {
       response = await fetchFn(`${baseUrl}${path}`, {
@@ -133,13 +136,17 @@ export function createRestRequester(options: RestClientOptions): RestRequester {
       throw new RestClientError(0, "network_error", "The gateway could not be reached");
     }
     const payload = await readJson(response);
+    options.session?.check();
     if (!response.ok) {
-      throw toError(response.status, payload);
+      const error = toError(response.status, payload);
+      options.session?.check(error.body);
+      throw error;
     }
     const parsed = schema.safeParse(payload);
     if (!parsed.success) {
       throw new RestClientError(response.status, "invalid_response", "Unexpected gateway response");
     }
+    options.session?.check(parsed.data);
     return parsed.data;
   };
 }
