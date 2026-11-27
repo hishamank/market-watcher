@@ -24,5 +24,6 @@ export const chaosStrings = {
   "chaos.health.latency": "Latency",
   "chaos.health.latencyValue": "{{value}} ms",
   "chaos.health.skipped": "Skipped frames",
+  "chaos.health.diagnostics": "Diagnostic details",
   "chaos.health.none": "—",
 } as const;

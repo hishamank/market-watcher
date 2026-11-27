@@ -6,6 +6,7 @@ import { useTextStyles } from "../theme/text-styles.ts";
 import { Button } from "./button.tsx";
 import { ChaosGlobalSection, type ChaosGlobalSectionProps } from "./chaos-global-section.tsx";
 import { ChaosSection } from "./chaos-section.tsx";
+import { HealthDiagnostics } from "./health-diagnostics.tsx";
 import { HealthTiles } from "./health-tiles.tsx";
 import { Icon } from "./icon.tsx";
 
@@ -39,6 +40,8 @@ function SheetHeader({ onClose }: { onClose: () => void }) {
 
 function HealthSection({ health }: { health: ConnectionHealth }) {
   const t = useT();
+  const palette = usePalette();
+  const textStyles = useTextStyles();
   const none = t("chaos.health.none");
   const latency =
     health.latencyMs === null ? none : t("chaos.health.latencyValue", { value: health.latencyMs });
@@ -61,6 +64,10 @@ function HealthSection({ health }: { health: ConnectionHealth }) {
           { label: t("chaos.health.skipped"), value: skipped, testID: "health-skipped" },
         ]}
       />
+      <Text accessibilityRole="header" style={[textStyles.label, { color: palette.text }]}>
+        {t("chaos.health.diagnostics")}
+      </Text>
+      <HealthDiagnostics diagnostics={health.diagnostics} />
     </ChaosSection>
   );
 }

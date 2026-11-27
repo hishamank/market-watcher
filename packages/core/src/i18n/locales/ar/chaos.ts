@@ -31,5 +31,6 @@ export const arChaosStrings = {
   "chaos.health.latency": "زمن الاستجابة",
   "chaos.health.latencyValue": "⁦{{value}} ms⁩",
   "chaos.health.skipped": "الإطارات المتخطّاة",
+  "chaos.health.diagnostics": "تفاصيل التشخيص",
   "chaos.health.none": "—",
 } satisfies Translation<typeof chaosStrings>;

@@ -1,3 +1,4 @@
+import type { RequestTracker } from "./request-tracker.ts";
 import type { RequestId, SymbolErrorCode } from "@mini/contracts";
 
 export interface SubscriptionManagerOptions {
@@ -13,6 +14,7 @@ export interface SubscriptionManagerOptions {
 }
 
 export interface SubscriptionManager {
+  getPending: RequestTracker["snapshot"];
   acquire(symbol: string): () => void;
   getReferencedSymbols(): string[];
   resubscribeAll(): string[];

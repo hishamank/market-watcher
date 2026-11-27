@@ -153,6 +153,7 @@ export function createSubscriptionManager(
   }
 
   return {
+    getPending: requests.snapshot,
     acquire,
     getReferencedSymbols: () => Array.from(refCounts.keys()),
     resubscribeAll() {

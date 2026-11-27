@@ -20,9 +20,8 @@ import type {
 import { createSubscriptionManager } from "./subscription-manager.ts";
 import { logWarning } from "./timers.ts";
 import { createDefaultSocket } from "./transport.ts";
-
+import { createSocketDiagnostics, type RecoveryReason } from "./socket-diagnostics.ts";
 const DEFAULT_BACKGROUND_GRACE_MS = 10_000;
-
 export function createSocketClient(options: SocketClientOptions): SocketClient {
   const statusListeners = new Set<StatusListener>();
   const marketStatusListeners = new Set<MarketStatusListener>();
@@ -37,19 +36,23 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
   let hasEverWelcomed = false;
   let hasEverConnected = false;
   let marketStatus: MarketStatus | null = null;
-
+  const diagnostics = createSocketDiagnostics({
+    getStatus: () => status,
+    getConnection: () => connection,
+    getSubscriptions: () => subscriptions,
+    gate,
+    quoteStore: options.quoteStore,
+  });
   function setStatus(next: ConnectionStatus): void {
     if (status === next) return;
     status = next;
     notifyAll(statusListeners);
   }
-
   function setMarketStatus(next: MarketStatus): void {
     if (marketStatus === next) return;
     marketStatus = next;
     notifyAll(marketStatusListeners);
   }
-
   function checkConnected(): void {
     if (
       session.isBlocked() ||
@@ -63,7 +66,6 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
     setStatus("connected");
     if (wasReconnect) notifyAll(reconnectListeners);
   }
-
   const subscriptions = createSubscriptionManager({
     canSend: () => gate.isWelcomed() && connection.isOpen(),
     sendSubscribe: (requestId, symbols) => {
@@ -79,12 +81,12 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
     onSettled: (symbols, outcomes) => settleAvailability(options.quoteStore, symbols, outcomes),
     onUnanswered: () => {
       connection.close();
-      handleLinkLost();
+      handleLinkLost("subscription_deadline");
     },
     unsubscribeDelayMs: options.unsubscribeDelayMs,
   });
-
-  function handleLinkLost(): void {
+  function handleLinkLost(reason: RecoveryReason): void {
+    diagnostics.recovery(reason);
     clearSession();
     if (session.isBlocked() || !started || platform.isPausedInBackground()) return;
     if (platform.isOffline()) {
@@ -94,7 +96,6 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
     setStatus("stale");
     connection.scheduleReconnect();
   }
-
   const clearSession = (): void => {
     connection.close();
     subscriptions.resetSession();
@@ -111,12 +112,12 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
     setStatus(hasEverWelcomed ? "stale" : "connecting");
     openFreshSocket();
   };
-
   const platform = createPlatformBridge({
     network: options.network,
     lifecycle: options.lifecycle,
     backgroundGraceMs: options.backgroundGraceMs ?? DEFAULT_BACKGROUND_GRACE_MS,
     onOffline: () => {
+      diagnostics.recovery("network_offline");
       connection.cancelReconnect();
       clearSession();
       setStatus("offline");
@@ -130,6 +131,7 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
       resumeOnline();
     },
     onBackgroundPause: () => {
+      diagnostics.recovery("background_pause");
       connection.cancelReconnect();
       clearSession();
       if (status === "connected") setStatus("stale");
@@ -138,7 +140,6 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
       if (!platform.isOffline()) resumeOnline();
     },
   });
-
   const frameContext = {
     quoteStore: options.quoteStore,
     health: options.health,
@@ -156,9 +157,9 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
     onMarketStatus: setMarketStatus,
     onChaosState: chaosStore.update,
     onSnapshotsSettled: checkConnected,
+    onGatewayError: diagnostics.gatewayError,
     onWarning: options.onWarning ?? logWarning,
   };
-
   const connection = createManagedConnection({
     url: options.url,
     socketFactory: options.socketFactory ?? createDefaultSocket,
@@ -176,6 +177,7 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
   });
 
   return {
+    getDiagnostics: diagnostics.snapshot,
     start() {
       if (started || session.isBlocked()) return;
       started = true;
