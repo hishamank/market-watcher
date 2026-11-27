@@ -56,7 +56,7 @@ export async function socketRoute(app: FastifyInstance, options: SocketOptions):
           ...(options.chaosScope !== undefined ? { scope: options.chaosScope } : {}),
         })
       : null;
-  const admission = createAdmission(options.allowedOrigins);
+  const admission = createAdmission(options.allowedOrigins, options.now);
   const stopLiveness = startLiveness(app.websocketServer, PING_INTERVAL_MS);
   app.addHook("onClose", async () => {
     chaos?.close();
@@ -74,7 +74,7 @@ export async function socketRoute(app: FastifyInstance, options: SocketOptions):
         return;
       }
       welcome(socket, hub, options);
-      openSession(socket, hub, chaos, options.now, warn);
+      openSession(socket, hub, chaos, options.now, warn, () => admission.penalize(request.ip));
     },
   );
 }

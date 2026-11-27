@@ -16,6 +16,7 @@ export interface Member {
   readonly unquoted: Set<string>;
   readonly inOrder: Serial;
   readonly writable: (() => void)[];
+  pending: number;
   skippedFrames: number;
   stuckSince: number | undefined;
 }
@@ -28,6 +29,7 @@ export function createMember(peer: Peer): Member {
     unquoted: new Set(),
     inOrder: createSerial(),
     writable: [],
+    pending: 0,
     skippedFrames: 0,
     stuckSince: undefined,
   };
