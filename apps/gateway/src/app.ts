@@ -27,6 +27,7 @@ export interface AppOptions {
   feedMode: FeedMode;
   allowedOrigins: ReadonlySet<string>;
   chaosScope?: ChaosScope;
+  revision?: string;
   now?: () => number;
   logger?: FastifyServerOptions["logger"];
   trustProxy?: FastifyServerOptions["trustProxy"];
@@ -73,6 +74,7 @@ export function buildApp({
     feedMode: options.feedMode,
     now,
     connectionStats: hub.stats,
+    ...(options.revision !== undefined ? { revision: options.revision } : {}),
     ...(historyFallbacks !== undefined ? { historyFallbacks } : {}),
     ...(historyCacheMaxEntries !== undefined ? { historyCacheMaxEntries } : {}),
     ...(historySourceTimeoutMs !== undefined ? { historySourceTimeoutMs } : {}),

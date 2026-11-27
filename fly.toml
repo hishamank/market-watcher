@@ -1,5 +1,7 @@
 app = "hisham-stocks-gateway"
 primary_region = "fra"
+kill_signal = "SIGTERM"
+kill_timeout = "10s"
 
 [build]
 dockerfile = "Dockerfile.gateway"
