@@ -13,8 +13,6 @@ A column manager lets the user choose which columns the stock table shows. From 
 
 The column manager is web only. Mobile shows rows, not a table. The list pane beside the stock page keeps its rows.
 
-> **Design note:** "Core owns the column choice like it owns the watchlist: it validates it, keeps Name and Price locked, and saves it per device. The web turns the choice into a handful of CSS variables on the list, so the rows stay plain views and the server render with no choice is exactly what it was. When someone picks more than fits, the table scrolls sideways with the name pinned, rather than silently hiding what they asked for."
-
 ## Considered options
 
 - **Hide columns that do not fit, by priority:** no sideways scroll, but a column someone turned on could still be missing, which the owner rejected.

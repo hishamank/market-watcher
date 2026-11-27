@@ -12,8 +12,6 @@ Arabic is the second locale. A text button in the header, reading "العربي�
 
 The additive core exports are: `useLanguage`, `LanguageResult`, `parseLocale`, `localeDirection`, `Locale`, `TextDirection`, `LocaleSwitch`, and the optional `switchLocale` prop on `CoreProviderProps`. `useLocale()` keeps its signature and now follows the switch. `MessageKey` gains `language.switch`.
 
-> **Design note:** "The layout was written in start and end from day one, so Arabic was mostly a catalogue and a switch. I made the switch in place, because a reload drops the live socket. Core owns the locale as a store, and each platform applies it its own way: a cookie and a view transition on web, so the server renders the right direction first time, and a root direction style on mobile, because Expo Go won't keep a forced RTL setting across reloads."
-
 ## Considered options
 
 - **Reload on switch:** the simplest, but it drops the socket and the cache, and blanks the page.

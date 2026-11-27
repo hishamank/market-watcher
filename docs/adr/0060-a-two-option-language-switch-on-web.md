@@ -13,8 +13,6 @@ The web header now shows both languages, "EN" and "ع", with the current one fil
 
 The catalogue gains `language.label`, `language.english`, `language.englishShort`, `language.arabic` and `language.arabicShort`. `language.switch` stays for mobile.
 
-> **Design note:** "One button that names the other language is the minimum, but it never tells you where you are. Two options do, and I pinned their order so the one you press never jumps under your finger when the page mirrors. I copied the slide from a public UI kit's timings, with our ink colours, and gave the switch its own view transition so the page's cross-fade doesn't swallow it."
-
 ## Considered options
 
 - **Keep the single button:** fewest pixels and already shipped, but it doesn't show the current language.
