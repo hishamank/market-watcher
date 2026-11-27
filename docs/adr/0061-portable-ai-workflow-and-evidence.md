@@ -8,7 +8,7 @@ The repository described planning, implementation and independent review but com
 
 ## Decision
 
-Commit portable, reconstructed prompts and an index in `docs/ai`. Clearly separate these reusable templates from the historical build account; do not claim they are recovered transcripts. Keep common guardrails in root `CLAUDE.md`, shared through `AGENTS.md` symlinks, and describe Claude settings as tool-specific restrictions.
+Vendor the owner's selected skills (`grill-with-docs`, `code-review`, `pr`) and the grilling/domain-modeling dependencies in `.claude/skills`, with relative aliases in `.agents/skills`. Retain source attribution, licenses and local file hashes. Document repository adaptations in `docs/ai/SOURCES.md`. Keep supplementary reconstructed implementation/fix prompts and the workflow index in `docs/ai`. Clearly separate these reusable templates from the historical build account; do not claim they are recovered transcripts. Keep common guardrails in root `CLAUDE.md`, shared through `AGENTS.md` symlinks, and describe Claude settings as tool-specific restrictions.
 
 The owner or orchestrator supplies models and effort for each assignment. Prefer independent review across model families when available, with no silent provider substitution. This supersedes ADR 0025's original fixed model allowlist. Its owner-only merge rule remains in force.
 
