@@ -5,13 +5,17 @@ import { Icon } from "../components/icon.tsx";
 import { useDebugTools } from "../platform/debug-tools.ts";
 import { usePalette } from "../theme/palette.ts";
 
+export function useChaosAvailable(): boolean {
+  const debugTools = useDebugTools();
+  const feedMode = useFeedMode();
+  return debugTools && feedMode === "simulated";
+}
+
 export function ChaosButton() {
   const t = useT();
   const palette = usePalette();
   const router = useRouter();
-  const debugTools = useDebugTools();
-  const feedMode = useFeedMode();
-  if (!debugTools || feedMode !== "simulated") return null;
+  if (!useChaosAvailable()) return null;
   return (
     <Pressable
       testID="chaos-open"

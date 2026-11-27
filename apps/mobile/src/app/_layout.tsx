@@ -11,13 +11,14 @@ import { useSavedAppearance } from "../integrations/use-saved-appearance.ts";
 import { useSavedDebugTools } from "../integrations/use-saved-debug-tools.ts";
 import { useSavedLocale } from "../integrations/use-saved-locale.ts";
 import { Providers } from "../providers/providers.tsx";
-import { ChaosButton } from "../shell/chaos-button.tsx";
+import { ChaosButton, useChaosAvailable } from "../shell/chaos-button.tsx";
 import { usePalette } from "../theme/palette.ts";
 
 function AppStack() {
   const t = useT();
   const palette = usePalette();
   const reduceMotion = useReduceMotion();
+  const chaosAvailable = useChaosAvailable();
   return (
     <Stack
       screenOptions={{
@@ -37,7 +38,10 @@ function AppStack() {
         }}
       />
       <Stack.Screen name="settings" options={{ title: t("settings.title") }} />
-      <Stack.Screen name="stocks/[symbol]" options={{ headerRight: () => <ChaosButton /> }} />
+      <Stack.Screen
+        name="stocks/[symbol]"
+        options={chaosAvailable ? { headerRight: () => <ChaosButton /> } : {}}
+      />
       <Stack.Screen
         name="debug"
         dangerouslySingular
