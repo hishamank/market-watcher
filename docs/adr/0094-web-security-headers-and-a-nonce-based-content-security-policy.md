@@ -1,6 +1,6 @@
 # Web security headers and a nonce-based Content Security Policy
 
-The web app sent no security headers of its own. A security review at `07a9bf3` read the hosted page's response: `strict-transport-security` from Vercel and `x-powered-by: Next.js`, and nothing else. It found no XSS sink, so this is defence in depth: a later mistake or a compromised front-end dependency should not be able to load script from anywhere or send data anywhere.
+The web app sent no security headers of its own. A security review at `07a9bf3` read the hosted page's response: `strict-transport-security` from Vercel and `x-powered-by: Next.js`, and nothing else. It found no XSS sink, so this is defence in depth against markup injected by a later mistake: an inline script or a script tag without the request's nonce does not run, the page cannot be framed, and `fetch`, XHR and WebSocket connections go only to the app and the gateway.
 
 **Headers on every response** (`next.config.ts`): `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, a `Permissions-Policy` that turns off camera, microphone, geolocation and payment, and no `X-Powered-By`.
 
@@ -18,6 +18,8 @@ The web app sent no security headers of its own. A security review at `07a9bf3` 
 Every page was already rendered per request (the layout reads the gateway and the locale cookie), which a nonce requires.
 
 Zod probes for `eval` once by calling `new Function("")`, and under this policy the browser reports each probe as a violation even though Zod catches it and carries on. Contracts now tells Zod to skip its compiled parsers when it loads in a browser, so the policy reports nothing in normal use. The gateway and React Native keep the compiled parsers.
+
+**What the policy does not do.** It does not contain code that already runs as a trusted script, such as a compromised dependency in the bundle. `'strict-dynamic'` lets a trusted script load further scripts from any origin, which is what lets Next.js load its own chunks without listing them, and `img-src https:` lets any script make requests to any HTTPS host by setting an image URL, so it is also a way to send data out. Narrowing `img-src` would need the gateway to proxy news thumbnails. Exact dependency versions and the seven-day release age (ADR 0054) are the controls for that risk, not this policy.
 
 Checked on the production build with both themes and both languages, on the list, the watchlist view, the debug panel and a detail page with two ranges: the socket connected, the chart drew, and there were no policy violations and no console errors.
 
