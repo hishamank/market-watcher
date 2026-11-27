@@ -3,8 +3,14 @@
 import { useFeedSession, useT } from "@mini/core";
 import type { ReactNode } from "react";
 
-export function FeedSessionBoundary({ children }: { children: ReactNode }) {
-  const { reloadRequired } = useFeedSession();
+export function FeedSessionBoundary({
+  children,
+  pendingData,
+}: {
+  children: ReactNode;
+  pendingData?: readonly unknown[];
+}) {
+  const { reloadRequired } = useFeedSession(pendingData);
   const t = useT();
   if (!reloadRequired) return children;
   return (

@@ -11,6 +11,7 @@ export interface FeedSession {
   isBlocked(): boolean;
   mode(): FeedMode | null;
   accept(mode: FeedMode): boolean;
+  isCompatible(data: readonly unknown[]): boolean;
   check(data?: unknown): void;
   subscribe(listener: () => void): () => void;
 }
@@ -45,6 +46,11 @@ export function createFeedSession(initialMode: FeedMode | null = null): FeedSess
     isBlocked: () => blocked,
     mode: () => current,
     accept,
+    isCompatible(data) {
+      const modes = data.flatMap(modesIn);
+      const expected = current ?? modes[0];
+      return !blocked && modes.every((mode) => mode === expected);
+    },
     check(data) {
       if (blocked || !modesIn(data).every(accept)) throw new FeedChangedError();
     },

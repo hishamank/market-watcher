@@ -12,9 +12,14 @@ import { stockListBody } from "./testing/fake-rest.ts";
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
 
-it.each(["live", "simulated"] as const)(
-  "rejects the replacement dataset after %s",
-  async (first) => {
+it.each([
+  ["live", 1000],
+  ["live", 3000],
+  ["simulated", 1000],
+  ["simulated", 3000],
+] as const)(
+  "rejects the replacement dataset after %s at timestamp %i",
+  async (first, timestamp) => {
     const gateway = createFakeGateway({ autoWelcome: false });
     const services = createCoreServices({
       gatewayUrl: "http://test",
@@ -31,8 +36,9 @@ it.each(["live", "simulated"] as const)(
     services.socketClient.retryNow();
     await vi.advanceTimersByTimeAsync(0);
     gateway.latestConnection().sendWelcome({ feedMode: first === "live" ? "simulated" : "live" });
-    gateway.latestConnection().sendQuotes([makeQuote("AAPL", "222.00", 3000)]);
+    gateway.latestConnection().sendQuotes([makeQuote("AAPL", "222.00", timestamp)]);
     expect(services.quoteStore.getQuote("AAPL")?.price).toBe("100.00");
+    expect(services.feedSession.isBlocked()).toBe(true);
     services.socketClient.stop();
   },
 );

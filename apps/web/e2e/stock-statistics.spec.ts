@@ -1,4 +1,5 @@
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
+import { test } from "./support/feed-fixture.ts";
 import { collectConsoleProblems } from "./support/console.ts";
 
 test("D10 statistics format values and distinguish missing fund data", async ({ page }) => {
@@ -48,7 +49,8 @@ test("D10 statistics failure retries independently of prices and overview", asyn
   await expect(page.getByTestId("stock-statistics")).toHaveAttribute("data-state", "ready");
 });
 
-test("D10 negative EPS, zero yield and flat ranges stay honest", async ({ page }) => {
+test("D10 negative EPS, zero yield and flat ranges stay honest", async ({ page, useLiveFeed }) => {
+  await useLiveFeed();
   await page.route("**/stocks/AAPL/statistics", (route) =>
     route.fulfill({
       json: {

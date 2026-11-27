@@ -1,4 +1,5 @@
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
+import { test } from "./support/feed-fixture.ts";
 import { collectConsoleProblems } from "./support/console.ts";
 
 const profile = {
@@ -34,7 +35,8 @@ const earnings = {
   },
 };
 
-test("D9 Yahoo overview timestamps follow Arabic locale", async ({ page }) => {
+test("D9 Yahoo overview timestamps follow Arabic locale", async ({ page, useLiveFeed }) => {
+  await useLiveFeed();
   await page.route("**/stocks/AAPL/profile", (route) => route.fulfill({ json: profile }));
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/stocks/AAPL");
@@ -44,7 +46,11 @@ test("D9 Yahoo overview timestamps follow Arabic locale", async ({ page }) => {
   await expect(page.getByTestId("company-profile-source")).not.toContainText("Nov");
 });
 
-test("D9 description-only profiles omit the empty facts container", async ({ page }) => {
+test("D9 description-only profiles omit the empty facts container", async ({
+  page,
+  useLiveFeed,
+}) => {
+  await useLiveFeed();
   await page.route("**/stocks/AAPL/profile", (route) => route.fulfill({ json: profile }));
   await page.goto("/stocks/AAPL");
   await expect(page.getByTestId("company-description")).toHaveText(profile.profile.description);
@@ -53,7 +59,9 @@ test("D9 description-only profiles omit the empty facts container", async ({ pag
 
 test("D12 timestamps on the same ET date display one report date with no duplicate keys", async ({
   page,
+  useLiveFeed,
 }) => {
+  await useLiveFeed();
   const problems = collectConsoleProblems(page);
   await page.route("**/stocks/AAPL/earnings", (route) =>
     route.fulfill({
@@ -79,7 +87,9 @@ test("D12 timestamps on the same ET date display one report date with no duplica
 
 test("D12 estimate-only earnings omit the summary and give the chart the full desktop width", async ({
   page,
+  useLiveFeed,
 }) => {
+  await useLiveFeed();
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.route("**/stocks/AAPL/earnings", (route) => route.fulfill({ json: earnings }));
   await page.goto("/stocks/AAPL");
