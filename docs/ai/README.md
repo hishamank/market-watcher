@@ -1,44 +1,31 @@
 # Working with AI
 
-This guide is the entry point for repeating the workflow. The [build account](../../README.md#how-it-was-built-with-ai) describes the original work; the bundled skills are copies of the owner's installed workflows, with the repository adaptations listed in [SOURCES.md](SOURCES.md). The owner reports using them during development; the copied versions were matched to a pinned upstream revision today, not independently established as the exact historical versions. The remaining implementation/fix prompts are reconstructed templates, not original transcripts.
+Start with a ticket that states the behavior, constraints and acceptance criteria. Use the shared rules and skills below to turn it into a change another teammate can review and maintain. The same workflow works without the owner's orchestration tools or model configuration.
 
-## Setup
+## Start here
 
-1. Follow the [root README](../../README.md#quick-start-no-keys) for Node, pnpm and dependency installation. Use the pinned toolchain and `pnpm install --frozen-lockfile`.
-2. Open the checkout in your agent tool. Read the root [CLAUDE.md](../../CLAUDE.md) and the instructions in each affected workspace. `AGENTS.md` is a relative symlink to `CLAUDE.md` at each level; both names share one source. If your tool does not load either automatically, explicitly attach those files.
-3. For Claude Code, the repository supplies [settings](../../.claude/settings.json) and the [verify skill](../../.claude/skills/verify/SKILL.md). Settings enable the external `frontend-design@claude-plugins-official` plugin; its implementation is not vendored. Install that plugin in your Claude environment when using it for design work. The plain-text prompts and verification scripts do not require it.
-4. For Codex or Gemini, attach the selected prompt file or ask the agent to read its repository path, then supply the inputs listed at the top. Claude can use the same approach. The supplementary Markdown prompts are not slash commands. The bundled skills live in `.claude/skills/`, with repository-relative aliases in `.agents/skills/`; no home-directory paths are needed. Invoke `/grill-with-docs`, `/code-review` or `/pr` when your harness exposes those commands. Otherwise ask the agent to read the corresponding `SKILL.md` and follow it. Claude's `/verify` invokes the existing skill; other agents should read and follow that skill explicitly.
-5. Verification needs Playwright Chromium (`pnpm --filter ./apps/web exec playwright install chromium`). Its stack helpers need Linux with Bash, `setsid`, `ss`, `pkill` and `curl`. The skill documents separate mobile and live-feed prerequisites. Reserve distinct ports when multiple worktrees run; never stop another checkout's processes.
+1. Follow the [quick start](../../README.md#quick-start-no-keys). Read root [CLAUDE.md](../../CLAUDE.md) and affected workspace instructions. `AGENTS.md` shares those instructions through relative symlinks.
+2. Skills live in `.claude/skills/`, with relative aliases in `.agents/skills/`. Use `/grill-with-docs`, `/code-review`, `/pr` and `/verify` where your harness exposes them. Otherwise ask the agent to read the corresponding `SKILL.md` directly; this also works for Gemini. Preserve symlinks when cloning.
+3. Claude's [settings](../../.claude/settings.json) enable the external `frontend-design@claude-plugins-official` plugin for design work. It is not needed for the bundled planning, review, PR or verification workflows. Claude-specific deny entries supplement the [shared guardrails](../../CLAUDE.md#guardrails); they are not a cross-provider security boundary.
+4. For application verification, follow the [verify prerequisites](../../.claude/skills/verify/SKILL.md#2-launch). Browser journeys need Playwright Chromium and Linux tools (`setsid`, `ss`, `pkill`, `curl`). Mobile and live feeds have separate prerequisites. Documentation-only work follows the skill's smaller check path.
 
-The [shared guardrails](../../CLAUDE.md#guardrails) apply to every agent. Claude's deny entries are tool-specific restrictions, not a cross-provider security boundary. Worktrees isolate files and branches; they do not sandbox credentials or the host. Keep live credentials outside agent-readable files and use the simulator for ordinary development.
+## Make a change
 
-## Sequence
-
-| Stage | Input | Artifact and completion criterion |
+| Stage | What a teammate does | Result |
 | --- | --- | --- |
-| [Grill with docs](../../.claude/skills/grill-with-docs/SKILL.md) | Brief, constraints, owner decisions | Agreed scope, unresolved decisions and acceptance criteria; owner confirms consequential choices |
-| [Implement a ticket](prompts/implement-ticket.md) | Issue, base, allowed scope, feature IDs | Scoped branch and PR with checks and verification evidence |
-| [Code review](../../.claude/skills/code-review/SKILL.md) | Base/head SHAs, ticket, review scope | Reproduced or source-supported findings, coverage limits and verdict |
-| [Fix review findings](prompts/fix-review.md) | Findings and reviewed SHA | Disposition of each finding, targeted fixes and fresh evidence |
-| [Write the PR](../../.claude/skills/pr/SKILL.md) | Diff, decision and verification evidence | Concise Summary, Evidence and Merge Danger sections |
-| Verify and hand back | Final code and affected feature IDs | [Verification report](../../.claude/skills/verify/SKILL.md#6-report), accessible evidence and owner merge |
+| Plan | Use [grill-with-docs](../../.claude/skills/grill-with-docs/SKILL.md) for unresolved design choices | Agreed scope, terms and decisions; owner resolves consequential choices |
+| Implement | Give the agent the issue, base revision, dependencies and allowed scope | A focused branch meeting the ticket's acceptance criteria |
+| Verify | Follow [verify](../../.claude/skills/verify/SKILL.md) for the actual diff | Observed results with commands, tested revision and accessible evidence |
+| Open a PR | Use [pr](../../.claude/skills/pr/SKILL.md) | Summary, evidence and change risks; draft status follows verify |
+| Review | Use [code-review](../../.claude/skills/code-review/SKILL.md) for standards and spec coverage; use the [bug-review brief](prompts/review.md) for behavioral defects | Separate standards/spec findings or reproduction-backed bug findings, with coverage limits |
+| Resolve and hand back | Assess findings, fix accepted defects, rerun affected checks and request re-review | Updated evidence and disposition of each finding; owner merges |
 
-Use a separate review context, preferably a different model family when available. The owner or orchestrator supplies the model and effort; the templates do not silently select a replacement. Invoking `code-review` requests its two review agents; `grilling` also uses agents for factual exploration. Explicit session restrictions take precedence. Other delegation requires authorization. The agent never merges.
+Use a fresh review context, preferably a different model family when available. The owner or orchestrator supplies model and effort per assignment ([ADR 0067](../adr/0067-model-selection-per-assignment.md)). Invoking code-review requests its two review agents; explicit session restrictions take precedence.
 
-Example invocation after filling the placeholders:
+## A real ticket as the prompt
 
-```text
-Read docs/ai/prompts/implement-ticket.md and follow it.
-Issue: <URL or complete ticket text>
-Base: <branch and commit SHA>
-Allowed scope: <workspaces and behavior>
-Feature IDs: <IDs from docs/feature-map.md>
-Dependencies: <merged prerequisites or parent branch>
-Constraints: <extra boundaries, or none>
-```
+[Issue #30](https://github.com/hishamank/stocks-watchlist/issues/30) specifies request IDs, dependencies, frozen interfaces and observable acceptance criteria. [PR #31](https://github.com/hishamank/stocks-watchlist/pull/31) changes the contracts; [PR #28](https://github.com/hishamank/stocks-watchlist/pull/28) implements the gateway side and [PR #27](https://github.com/hishamank/stocks-watchlist/pull/27) implements core recovery and records the real-core/real-gateway probe.
 
-## Historical example
+That is the reusable pattern: the ticket supplies the task context; shared rules supply constraints; the PR carries the evidence and the decisions a reviewer needs. Use those artifacts as examples when writing the next ticket, rather than depending on an undocumented personal prompt.
 
-The [README's review account](../../README.md#what-cross-family-review-caught) links [PR #27](https://github.com/hishamank/stocks-watchlist/pull/27), [PR #28](https://github.com/hishamank/stocks-watchlist/pull/28) and the fix in [PR #31](https://github.com/hishamank/stocks-watchlist/pull/31). It reports that matching subscribe replies by arrival order failed under rate limiting, backpressure and asynchronous upstream work. [ADR 0038](../adr/0038-subscribe-replies-carry-a-request-id.md) records the resulting request-ID decision.
-
-This is a navigation aid to existing evidence, not a reconstructed transcript or a new reproduction. The useful loop is a concrete finding, an explicit design decision, a scoped fix and verification. For new work, retain the actual task prompt and a sanitized finding/fix summary in the PR when useful; link evidence a reviewer can access rather than only local filenames.
+[Sources and adaptations](SOURCES.md) record provenance and how to maintain the bundled skills.

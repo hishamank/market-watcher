@@ -1,6 +1,6 @@
 # Unattended agents work in worktrees, open PRs and never merge
 
-Status: historical build policy, amended by [ADR 0061](0061-portable-ai-workflow-and-evidence.md). The original model allowlist below was expanded during the build as recorded in the README; it is not the current model-selection rule.
+Status: historical build policy, amended by [ADR 0067](0067-model-selection-per-assignment.md). The original model allowlist below was expanded during the build as recorded in the README; it is not the current model-selection rule.
 
 Agents run unattended, and the owner reviews and merges between runs.
 

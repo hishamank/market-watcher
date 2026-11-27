@@ -10,7 +10,7 @@ Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
 
 Both axes run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their findings. Start every sub-agent with a fresh context window.
 
-Repository setup: use GitHub issues in `hishamank/stocks-watchlist`, the supplied ticket or PR, and `docs/spec.md` / `docs/feature-map.md`. Read root and affected workspace instructions. This review is read-only: no edits, commits, pushes or merges. Use the connected GitHub tools or CLI to read issue evidence; no separate setup skill is required. Report commands actually run, evidence and coverage limits; source inspection alone is not an executed test. If delegation is prohibited or unavailable, perform the two axes sequentially and disclose that they were not independent sub-agent reviews.
+Repository setup: use the supplied ticket or PR URL to identify the GitHub repository; otherwise inspect the checkout remote. Confirm the intended repository if multiple remotes are ambiguous. Use `docs/spec.md` / `docs/feature-map.md` for project scope. Read root and affected workspace instructions. This review is read-only: no edits, commits, pushes or merges. Use the connected GitHub tools or CLI to read issue evidence; no separate setup skill is required. Report commands actually run, evidence and coverage limits; source inspection alone is not an executed test. If delegation is prohibited or unavailable, perform the two axes sequentially and disclose that they were not independent sub-agent reviews.
 
 ## Process
 

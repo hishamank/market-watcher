@@ -34,7 +34,7 @@ Use this template for writing the PR body:
 
 ## Sections
 
-Skip all preambles and keep prose brief. Use the user's domain language from `docs/glossary.md`. Read root and affected workspace instructions. Include the verification table and accessible evidence required by [verify](../verify/SKILL.md#6-report); required FAIL or BLOCKED checks keep the PR in draft. Writing a PR description does not authorize merging.
+Skip all preambles and keep prose brief. Use the user's domain language from `docs/glossary.md`. Read root and affected workspace instructions. Include the verification table and accessible evidence required by [verify](../verify/SKILL.md#6-report), including its rules for documentation-only changes and draft status. Writing a PR description does not authorize merging.
 
 ### Summary
 

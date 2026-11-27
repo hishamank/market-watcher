@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Prove that a change works end to end in the running app, and report PASS, FAIL or BLOCKED for each feature ID in docs/feature-map.md. It starts an isolated simulator stack, runs the E2E suite and the scripted browser journeys, walks what needs judgement, and covers the Expo app and Live mode. Use before calling any ticket done, before opening or updating a PR, and when asked to verify, check or prove a feature.
+description: Validate documentation-only changes or prove application changes end to end, and report PASS, FAIL or BLOCKED for each feature ID in docs/feature-map.md. It starts an isolated simulator stack, runs the E2E suite and the scripted browser journeys, walks what needs judgement, and covers the Expo app and Live mode. Use before calling any ticket done, before opening or updating a PR, and when asked to verify, check or prove a feature.
 ---
 
 # Verify
@@ -21,7 +21,9 @@ All commands run from the repo root, with `S=.claude/skills/verify`.
 
 - Every feature ID listed on the ticket or PR.
 - Every feature whose route, component, hook or gateway path your diff touches, even if the ticket did not list it. Search the feature map and `features/` for the test IDs and routes in your diff.
-- Always the smoke set: **G1, G3 (step 1), L1, L2, D1.**
+- For application, test or executable-tooling changes, include the smoke set: **G1, G3 (step 1), L1, L2, D1.**
+
+For a documentation-only diff with no application, test, executable tooling, dependency, build or runtime configuration changes, no application feature IDs or smoke set are required. Skills and agent instructions qualify only when their changes are prose, metadata or discovery aliases; executable verification helpers do not. Check the diff against the PR merge-base, inspect instructions for consistency, resolve changed links/aliases, and run the repository's required static checks and tests. Record "No feature IDs touched" and a documentation-check row using PASS, FAIL or BLOCKED, then report under step 6 without launching an app stack. Report unrelated runtime observations separately; do not count them as checks of this documentation change.
 
 Write the list down before launching. It is your completion criterion: every ID on it ends as PASS, FAIL or BLOCKED, with evidence.
 
@@ -164,7 +166,7 @@ End every run with this table, in your reply and in the PR description. The exam
 - **FAIL:** something else was observed. Say what you saw.
 - **BLOCKED:** it cannot be checked yet, because the feature, a dependency or a prerequisite is missing. Name the blocker.
 
-The ticket is done only when every feature it touched is PASS. A FAIL means fix and re-run. A ticket with a required FAIL or BLOCKED result opens or remains as a draft PR with the table and the action needed to unblock it.
+The ticket is done only when every required check (documentation checks or affected features) is PASS. A FAIL means fix and re-run. A ticket with a required FAIL or BLOCKED result opens or remains as a draft PR with the table and the action needed to unblock it.
 
 ## 7. Cleanup
 
