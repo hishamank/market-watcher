@@ -19,6 +19,9 @@ test("H1 health tiles update live and count a reconnect after drop connection", 
   await page.getByTestId("chaos-drop").click();
   await expect.poll(async () => Number(await reconnects.textContent())).toBeGreaterThan(before);
   const diagnostics = page.getByTestId("health-diagnostics");
+  await diagnostics.locator("..").locator("summary").click();
+  await expect(diagnostics).toHaveCSS("max-height", "256px");
+  await expect(diagnostics).toHaveCSS("overflow-y", "auto");
   await expect
     .poll(async () => JSON.parse((await diagnostics.textContent()) ?? "{}"))
     .toMatchObject({

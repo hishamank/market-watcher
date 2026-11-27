@@ -48,7 +48,7 @@ export function HealthSection({ health }: { health: ConnectionHealth }) {
         <pre
           data-testid="health-diagnostics"
           dir="ltr"
-          className="max-h-256 overflow-auto text-caption"
+          className="max-h-[256px] overflow-auto text-caption"
         >
           {JSON.stringify(health.diagnostics, null, 2)}
         </pre>
