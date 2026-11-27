@@ -7,6 +7,7 @@ const paths = {
   search: "M10.5 4.5a6 6 0 1 0 0 12a6 6 0 1 0 0-12zM15 15l4.5 4.5",
   chevronStart: "M14.5 5.5L8 12l6.5 6.5",
   close: "M6.5 6.5l11 11M17.5 6.5l-11 11",
+  moon: "M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z",
 } as const;
 
 export type IconName = keyof typeof paths;
