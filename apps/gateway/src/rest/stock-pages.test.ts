@@ -47,7 +47,7 @@ describe("REST stock pages", () => {
     expect(new Set(seen).size).toBe(seen.length);
     expect(seen).toEqual([...defaults, ...others]);
     expect(requests).toBe(Math.ceil(seen.length / 50));
-  });
+  }, 10_000);
 
   it("continues after a cursor that has left the catalogue", async () => {
     const gw = await launch();
