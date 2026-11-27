@@ -15,7 +15,7 @@ There is no open column. The simulator's day is one continuous price path, so it
 
 ## Considered options
 
-- **One "Day range" column at 1280 px:** fits by widening the cap, but the owner preferred separate high and low columns.
+- **One "Day range" column at 1280 px:** fits by widening the cap, but separate high and low columns are used.
 - **Open, high and low together:** open repeats previous close in Simulated mode, where the demo runs.
 - **Track the range in the hub for both feeds:** one place, but the hub would need each feed's session rules, which already live in the feeds.
 - **Sample the simulator every minute:** a tighter range, but about 45 ms per symbol for a full day, and the chart would then dip under a low it never draws.

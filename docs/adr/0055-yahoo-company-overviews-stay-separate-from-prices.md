@@ -1,6 +1,6 @@
 # Yahoo company overviews stay separate from prices
 
-For the project, use Yahoo Finance as a temporary supplemental profile source in live mode. Keep Alpaca prices and history unchanged. A separate gateway endpoint and shared profile contract let a licensed provider replace Yahoo without changing the views. The yahoo-finance2 dependency is gateway-only, with a shared core hook for web and mobile.
+Use Yahoo Finance as a temporary supplemental profile source in live mode. Keep Alpaca prices and history unchanged. A separate gateway endpoint and shared profile contract let a licensed provider replace Yahoo without changing the views. The gateway adds a yahoo-finance2 dependency and a shared core hook for web and mobile.
 
 Cache profiles for 24 hours, coalesce concurrent requests, bound upstream work and fail within eight seconds. Empty profiles are cached for five minutes. Show the retrieval time rather than claiming it is the issuer's update time. A profile failure never blocks the quote or chart. Simulator mode uses labelled fictional fixtures and never contacts Yahoo. ETFs use fund wording and omit sector and industry.
 

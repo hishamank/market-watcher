@@ -2,7 +2,7 @@
 
 Checked 2026-11-26. Research only; recommendation, not an adopted architecture decision. Scope: Finnhub, Financial Modeling Prep (FMP), Alpha Vantage. Alpaca/Yahoo/RSS are researched separately.
 
-**Recommendation:** no provider here is a verified free option for a public hosted project. Keep the simulator demo self-contained. For a private prototype, Finnhub is the strongest starting point for metrics, news and earnings, but its free profile lacks company description and sector. If all target fields must come from one provider, investigate FMP with explicit display permission and suitable endpoint coverage. Do not buy a personal subscription assuming it grants public display rights.
+**Recommendation:** no provider here is a verified free option for a public hosted demo. Keep the simulator demo self-contained. For a private prototype, Finnhub is the strongest starting point for metrics, news and earnings, but its free profile lacks company description and sector. If all target fields must come from one provider, investigate FMP with explicit display permission and suitable endpoint coverage. Do not buy a personal subscription assuming it grants public display rights.
 
 ## Evidence and limits
 

@@ -17,7 +17,7 @@ The column manager is web only. Mobile shows rows, not a table. The list pane be
 
 ## Considered options
 
-- **Hide columns that do not fit, by priority:** no sideways scroll, but a column someone turned on could still be missing, which the owner rejected.
+- **Hide columns that do not fit, by priority:** no sideways scroll, but a column someone turned on could still be missing.
 - **Pass the chosen columns to every row as props:** explicit, but every row would re-render on a toggle and the row view would carry layout logic.
 - **Generate a class per column combination:** Tailwind only sees class names written in the source, so runtime combinations need inline variables anyway.
 - **Save the choice on the server by device ID (ADR 0031):** survives a cleared browser, but no server-side preferences exist yet, and the watchlist itself is still local.

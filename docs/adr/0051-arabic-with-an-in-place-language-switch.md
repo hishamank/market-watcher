@@ -10,7 +10,7 @@ Arabic is the second locale. A text button in the header, reading "العربي�
 - **Values stay left to right.** Interpolated values in Arabic strings (times, prices, symbols, queries, names) are wrapped in Unicode isolates in the catalogue, so they never reorder the sentence around them. Arabic dates from the core formatters are wrapped in a right-to-left isolate, because they often sit inside a left-to-right container such as the chart or a value cell. Digits stay Latin, and the calendar is pinned to Gregorian. Company names get `dir="auto"` on web and a left-to-right isolate on mobile, so "Apple Inc." keeps its full stop at the end.
 - **The catalogue is typed.** Each Arabic feature file `satisfies` a type derived from its English twin, with every plural key needing all six Arabic forms. A missing or extra key fails the type check, rather than falling back to English at runtime.
 
-The additive core exports are: `useLanguage`, `LanguageResult`, `parseLocale`, `localeDirection`, `Locale`, `TextDirection`, `LocaleSwitch`, and the optional `switchLocale` prop on `CoreProviderProps`. `useLocale()` keeps its signature and now follows the switch. `MessageKey` gains `language.switch`.
+These additive core exports extend the frozen core API: `useLanguage`, `LanguageResult`, `parseLocale`, `localeDirection`, `Locale`, `TextDirection`, `LocaleSwitch`, and the optional `switchLocale` prop on `CoreProviderProps`. `useLocale()` keeps its signature and now follows the switch. `MessageKey` gains `language.switch`.
 
 ## Considered options
 
