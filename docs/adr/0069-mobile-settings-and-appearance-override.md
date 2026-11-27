@@ -4,7 +4,7 @@ Amends ADR 0051, ADR 0052 and ADR 0060 on mobile. Feature M6.
 
 The mobile tab header now holds one gear button at the end, in place of the "العربية" text button. The gear pushes a Settings stack screen. Settings is not a third tab, because it is visited rarely and the tab bar stays about prices. The screen has two grouped sections on `color.surface`, each row at least 44 px tall:
 
-- **Appearance:** a segmented control with System, Light and Dark. It reuses the sliding indicator from the range tabs, which jumps with reduced motion.
+- **Appearance:** a segmented control with System, Light and Dark. It copies the range tabs' sliding indicator, which jumps with reduced motion.
 - **Language:** two rows, "English" and "العربية", with a check on the current one. They call the same in-place switch as before (ADR 0051), so the socket stays connected and the saved locale is unchanged.
 
 **The override uses React Native's `Appearance.setColorScheme`.** It lives in `platform/appearance.ts`. The choice is saved in AsyncStorage as `color-scheme:v1`, the key web uses (ADR 0052), and restored at launch from `integrations/`. `theme/palette.ts` is unchanged: `useColorScheme()` already follows the override, so every screen, the chart and the status bar change together. System passes `'auto'`, which removes the override and follows the OS again. Core is unchanged, because core's `ColorSchemeStore` only knows light and dark, and System is a mobile choice.
@@ -19,7 +19,7 @@ The issue asked for a check in Expo Go before relying on this. It ran on iOS Exp
 
 Android was not checked.
 
-The back button in the stack header now shows the chevron only. With a back title it read "(tabs)", the hidden tab group's name, on both Settings and the detail screen. Without it the chevron mirrors in Arabic.
+The back button in the stack header now shows the chevron only. On Settings, the back title read "(tabs)", the hidden tab group's name. The option is set on the root stack, so the detail screen gets it too. Without the title, the chevron mirrors in Arabic.
 
 `language.switch` stays in core's catalogue, but mobile no longer uses it.
 
