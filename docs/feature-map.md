@@ -70,8 +70,8 @@ Terms follow [`glossary.md`](./glossary.md). Decisions are in [`adr/`](./adr), a
 - **Test IDs:** `language-toggle[data-locale]`, `language-option-en`, `language-option-ar`, `html[lang]`, `html[dir]`.
 - **Steps:** open `/`, press "ع", reload, then press "EN".
 - **Expected:**
-  - On web the toggle shows "EN" and "ع" in that order in both languages, with the current one filled (`aria-pressed`). Pressing the other slides the fill across and swipes the labels; with reduced motion it switches at once. On mobile the language rows in Settings read "English" and "العربية", with a check on the current one (M6).
-  - Pressing it switches every string to Arabic and mirrors the layout in place, with no reload. The socket stays connected and prices keep ticking. Where the browser supports view transitions the page cross-fades; with reduced motion it switches at once.
+  - On web the toggle shows "EN" and "ع" in that order in both languages, with the current one filled (`aria-pressed`). Pressing the other slides the fill across and swipes the labels; where the page turns, only the end of the swipe is seen. With reduced motion it switches at once. On mobile the language rows in Settings read "English" and "العربية", with a check on the current one (M6).
+  - Pressing it switches every string to Arabic and mirrors the layout in place, with no reload. The socket stays connected and prices keep ticking. Where the browser supports view transitions the page turns like a card, one way to Arabic and the other way back, and `html[data-locale-turn]` is set while it turns (ADR 0097); with reduced motion it switches at once.
   - `html` has `lang="ar"` and `dir="rtl"`. After a reload the server render already has them, from the `locale` cookie, with no flash of English and no hydration warning.
   - Prices, symbols, percentages, times and the chart stay left to right, with Latin digits. Month names are Arabic ("26 نوفمبر"). The back chevron mirrors; arrows, star and search do not. Range tabs and the view control mirror, and the selected indicator follows the flip.
   - Arabic counts use their plural forms ("سهمان" for 2, "3 أسهم", "11 سهمًا").

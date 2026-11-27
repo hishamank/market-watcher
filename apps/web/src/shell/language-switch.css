@@ -1,6 +1,4 @@
 .language-switch {
-  view-transition-name: language-switch;
-  view-transition-class: morph;
   --swipe: 1;
   --ease-in-quad: cubic-bezier(0.55, 0.085, 0.68, 0.53);
   --ease-in-expo: cubic-bezier(0.95, 0.05, 0.795, 0.035);
@@ -9,15 +7,6 @@
 
 .language-switch[data-swipe="back"] {
   --swipe: -1;
-}
-
-::view-transition-old(language-switch) {
-  animation: none;
-  opacity: 0;
-}
-
-::view-transition-new(language-switch) {
-  animation: none;
 }
 
 .language-option:first-child:not([aria-pressed="true"]) .language-fill {
