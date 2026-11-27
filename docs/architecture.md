@@ -97,7 +97,7 @@ sequenceDiagram
   G->>F: start AAPL, MSFT (watchers 0→1)
   G-->>C: error unknown_symbol {requestId: 7, symbols: [XXXX]}
   G-->>C: snapshot {requestId: 7, quotes: [AAPL, MSFT]}
-  Note over C: request 7 settles on its terminal reply.<br/>Status turns connected once every referenced symbol has a snapshot.
+  Note over C: request 7 settles on its terminal reply.<br/>Status turns connected after welcome once every referenced symbol settles (quote or per-symbol error).
   loop every 250 ms
     G-->>C: quotes {changed symbols only}
   end
@@ -110,7 +110,7 @@ sequenceDiagram
   end
 ```
 
-Every `subscribe` receives exactly one terminal reply—a `snapshot` or a correlated `rate_limited` error—and every requested symbol is accounted for once, either in the snapshot or in an `unknown_symbol`, `subscription_limit`, or `unavailable` error bearing the same `requestId`. `unavailable` indicates the gateway kept the subscription and will deliver the first quote as a tick ([ADR 0038](adr/0038-subscribe-replies-carry-a-request-id.md)).
+Unless the gateway closes the socket first—on an internal subscribe error (code `1011`) or an outbound buffer stalled for 10 seconds under [ADR 0008](adr/0008-per-connection-conflation-in-the-gateway.md)—every parsed `subscribe` receives exactly one terminal reply (a `snapshot` or a correlated `rate_limited` error), and each requested symbol is accounted for once, either in the snapshot or in an `unknown_symbol`, `subscription_limit`, or `unavailable` error bearing the same `requestId`. The client enters `connected` after receiving `welcome` and settling every referenced symbol (which can include per-symbol errors); `unavailable` indicates the gateway kept the subscription and will deliver the first quote as a tick ([ADR 0038](adr/0038-subscribe-replies-carry-a-request-id.md)).
 
 Valid `unsubscribe` frames are always applied even when a connection has exhausted its 20-message rolling one-second budget, preventing leaked server subscriptions after network-stall bursts ([ADR 0066](adr/0066-always-apply-valid-unsubscribes.md)).
 

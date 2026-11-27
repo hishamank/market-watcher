@@ -28,4 +28,16 @@ Use a fresh review context, preferably a different model family when available. 
 
 That is the reusable pattern: the ticket supplies the task context; shared rules supply constraints; the PR carries the evidence and the decisions a reviewer needs. Use those artifacts as examples when writing the next ticket, rather than depending on an undocumented personal prompt.
 
+## What cross-family review caught
+
+Concrete examples where independent review changed the implementation and re-review verified the fix:
+
+| PR | Finding | Outcome and re-check |
+| --- | --- | --- |
+| [#27](https://github.com/hishamank/stocks-watchlist/pull/27), [#28](https://github.com/hishamank/stocks-watchlist/pull/28) | Core matched subscribe replies to requests by arrival order. Three review rounds each reproduced a case where rate limiting, backpressure or an async upstream call broke ordering and left the client waiting. | Replaced order matching with correlated `requestId` values through [#31](https://github.com/hishamank/stocks-watchlist/pull/31) and [ADR 0038](../adr/0038-subscribe-replies-carry-a-request-id.md). |
+| [#38](https://github.com/hishamank/stocks-watchlist/pull/38) | Stock hooks seeded the quote store during render; a suspended transition wrote `101.00` into the shared store while a mounted reader still showed `100.00`. The first fix leaked cache listeners under StrictMode. | `useQuote` reads the cached REST quote as fallback and attaches cache sync in an effect. Re-review measured listener counts `1, 0, 1, 0`. |
+| [#43](https://github.com/hishamank/stocks-watchlist/pull/43) | Resizing the detail page from 360 to 1440 px while the market was closed left the chart's live-point dot at `x ≈ 249 px` while the line ended near `687 px` until the next tick. | Overlays now reposition after the time scale updates. Re-review compared dot coordinates against the canvas line end pixel before and after resize. |
+| [#47](https://github.com/hishamank/stocks-watchlist/pull/47) | During an Alpaca outage, failed snapshot batches fanned out into per-symbol retries: 306 requests in 66 simulated seconds against a 200 req/min limit. | Consolidated all data paths under one shared request budget with coalescing, 4 s deadlines and backoff ([ADR 0021](../adr/0021-alpaca-adapter-streams-30-and-polls-the-rest.md)). |
+| [#61](https://github.com/hishamank/stocks-watchlist/pull/61) | The initial `lastKnown` fix marked a healthy close: a refresh that succeeded with an empty response at 16:00 ET still served the held price marked last-known. | A mark now requires an actual failed refresh tracked per symbol and session ([ADR 0046](../adr/0046-last-known-requires-a-failed-request.md)). Re-review verified zero marks on a healthy close and one marked update per viewer during an outage. |
+
 [Sources and adaptations](SOURCES.md) record provenance and how to maintain the bundled skills.
