@@ -39,10 +39,11 @@ test("D1 server HTML holds the detail header with a price", async ({ request }) 
 });
 
 test("D1 back from a detail page restores the watchlist view", async ({ page }) => {
-  await page.goto("/?view=watchlist");
-  await page.goto("/stocks/AAPL");
-  await page.goBack();
+  await page.goto("/stocks/AAPL?view=watchlist");
+  await page.getByTestId("detail-back").click();
   await expect(page).toHaveURL(/\/\?view=watchlist$/);
+  await expect(page.getByTestId("view-toggle-watchlist")).toHaveAttribute("aria-current", "page");
+  await expect(page.getByTestId("watchlist-empty")).toBeVisible();
 });
 
 test("D1 at 1440 px the list stays beside the detail as a compact pane", async ({ page }) => {

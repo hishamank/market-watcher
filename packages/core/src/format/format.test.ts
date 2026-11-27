@@ -9,7 +9,6 @@ import {
   formatSignedChange,
   formatSignedPercent,
 } from "../index.ts";
-import { MINUS_SIGN } from "./constants.ts";
 
 describe("money formatters", () => {
   it("formats prices with 2 decimals at or above $1 and 4 below per ADR 0037", () => {
@@ -26,26 +25,26 @@ describe("money formatters", () => {
 
   it("formats signed changes and amounts with U+2212 minus and unsigned zero", () => {
     expect(formatSignedChange("2.58")).toBe("+$2.58");
-    expect(formatSignedChange("-2.58")).toBe(`${MINUS_SIGN}$2.58`);
+    expect(formatSignedChange("-2.58")).toBe(`\u2212$2.58`);
     expect(formatSignedChange("0.00")).toBe("$0.00");
     expect(formatSignedChange("-0.00")).toBe("$0.00");
     expect(formatSignedChange("0.0123", "150.00")).toBe("+$0.01");
     expect(formatSignedChange("0.0123", "0.5000")).toBe("+$0.0123");
 
     expect(formatSignedAmount("2.58")).toBe("+2.58");
-    expect(formatSignedAmount("-2.58")).toBe(`${MINUS_SIGN}2.58`);
+    expect(formatSignedAmount("-2.58")).toBe(`\u22122.58`);
     expect(formatSignedAmount("0.00")).toBe("0.00");
     expect(formatSignedAmount("-0.00")).toBe("0.00");
-    expect(formatSignedAmount("-0.0125", "0.4387")).toBe(`${MINUS_SIGN}0.0125`);
+    expect(formatSignedAmount("-0.0125", "0.4387")).toBe(`\u22120.0125`);
   });
 
   it("formats signed percents with 2 decimals and U+2212 minus", () => {
     expect(formatSignedPercent("1.36")).toBe("+1.36%");
-    expect(formatSignedPercent("-1.36")).toBe(`${MINUS_SIGN}1.36%`);
+    expect(formatSignedPercent("-1.36")).toBe(`\u22121.36%`);
     expect(formatSignedPercent("0.00")).toBe("0.00%");
     expect(formatSignedPercent("-0.00")).toBe("0.00%");
     expect(formatSignedPercent("1.235")).toBe("+1.24%");
-    expect(formatSignedPercent("-1.235")).toBe(`${MINUS_SIGN}1.24%`);
+    expect(formatSignedPercent("-1.235")).toBe(`\u22121.24%`);
     expect(formatSignedPercent("1250")).toBe("+1,250.00%");
   });
 

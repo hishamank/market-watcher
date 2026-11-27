@@ -93,7 +93,7 @@ describe("useLiveHistory range change", () => {
     const result = useLiveHistory("PROBE", "1D");
 
     expect(result.baseline).toBe("100.00");
-    expect(result.rangeChange).toEqual({ change: quote.change, changePercent: "1.50" });
+    expect(result.rangeChange).toEqual({ change: "1.50", changePercent: "1.50" });
     expect(result.session).toEqual({ open: 0, close: 86_400_000 });
   });
 
@@ -139,7 +139,6 @@ describe("useLiveHistory range change", () => {
 
     const result = useLiveHistory("PROBE", "1W");
 
-    expect(100.3 - 100.1).not.toBe(0.2);
     expect(result.rangeChange).toEqual({ change: "0.20", changePercent: "0.20" });
   });
 

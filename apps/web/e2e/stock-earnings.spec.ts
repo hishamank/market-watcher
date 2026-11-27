@@ -172,6 +172,7 @@ test("D12 large EPS and an unconfirmed date fit 320px in both languages", async 
         .getByTestId("stock-earnings")
         .evaluate((section) => section.scrollWidth <= section.clientWidth),
     ).toBe(true);
+    await expect(page.getByTestId("earnings-quarter")).not.toHaveCount(0);
     expect(
       await page
         .getByTestId("earnings-quarter")
