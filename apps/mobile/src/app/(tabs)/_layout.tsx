@@ -12,6 +12,7 @@ export default function TabsLayout() {
       screenOptions={{
         headerStyle: { backgroundColor: palette.surface },
         headerTintColor: palette.text,
+        headerTitleAllowFontScaling: false,
         headerRight: () => <TabHeaderActions />,
         tabBarStyle: { backgroundColor: palette.surface, borderTopColor: palette.border },
         tabBarActiveTintColor: palette.text,

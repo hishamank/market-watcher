@@ -1,7 +1,7 @@
 import { useT, useWatchlist, useWatchlistStocks } from "@mini/core";
 import { useRouter } from "expo-router";
 import { duration } from "@mini/tokens";
-import { FlatList, StyleSheet } from "react-native";
+import { FlatList, ScrollView, StyleSheet } from "react-native";
 import Animated, { FadeIn, LayoutAnimationConfig } from "react-native-reanimated";
 import { EmptyState } from "../components/empty-state.tsx";
 import { useReduceMotion } from "../integrations/use-reduce-motion.ts";
@@ -22,16 +22,18 @@ export function WatchlistList() {
     <LayoutAnimationConfig skipEntering>
       {symbols.length === 0 ? (
         <Animated.View key="empty" {...entering} style={styles.fill}>
-          <EmptyState
-            testID="watchlist-empty"
-            icon="☆"
-            title={t("watchlist.empty.title")}
-            help={t("watchlist.empty.help")}
-            actionLabel={t("watchlist.empty.action")}
-            actionTestID="watchlist-empty-action"
-            onAction={() => router.navigate("/")}
-            popIcon
-          />
+          <ScrollView>
+            <EmptyState
+              testID="watchlist-empty"
+              icon="☆"
+              title={t("watchlist.empty.title")}
+              help={t("watchlist.empty.help")}
+              actionLabel={t("watchlist.empty.action")}
+              actionTestID="watchlist-empty-action"
+              onAction={() => router.navigate("/")}
+              popIcon
+            />
+          </ScrollView>
         </Animated.View>
       ) : (
         <Animated.View key="list" {...entering} style={styles.fill}>

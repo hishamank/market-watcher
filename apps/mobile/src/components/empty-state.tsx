@@ -33,7 +33,12 @@ export function EmptyState(props: EmptyStateProps) {
     <View testID={props.testID} style={styles.container}>
       <View style={[styles.icon, { backgroundColor: palette.fill }]}>
         <Animated.View {...(pop ? { entering: iconPop } : {})}>
-          <Text style={[styles.iconGlyph, { color: palette.textSecondary }]}>{props.icon}</Text>
+          <Text
+            allowFontScaling={false}
+            style={[styles.iconGlyph, { color: palette.textSecondary }]}
+          >
+            {props.icon}
+          </Text>
         </Animated.View>
       </View>
       <Text style={[textStyles.headingMd, styles.centred, { color: palette.text }]}>
