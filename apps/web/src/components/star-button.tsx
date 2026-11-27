@@ -1,9 +1,10 @@
 import { useT } from "@mini/core";
 import { useState } from "react";
-import { flyStarToWatchlist } from "../integrations/star-motion.ts";
+import { cancelStarFlight, flyStarToWatchlist } from "../integrations/star-motion.ts";
 import { StarIcon } from "./icons.tsx";
 
 export interface StarButtonProps {
+  symbol: string;
   name: string;
   starred: boolean | undefined;
   onToggle: () => void;
@@ -32,7 +33,7 @@ function StarBurst() {
   );
 }
 
-export function StarButton({ name, starred, onToggle, testId }: StarButtonProps) {
+export function StarButton({ symbol, name, starred, onToggle, testId }: StarButtonProps) {
   const t = useT();
   const [celebrate, setCelebrate] = useState(false);
   const playing = celebrate && starred === true;
@@ -44,7 +45,8 @@ export function StarButton({ name, starred, onToggle, testId }: StarButtonProps)
       aria-label={t("star.label", { name })}
       disabled={starred === undefined}
       onClick={(event) => {
-        if (starred === false) flyStarToWatchlist(event.currentTarget);
+        if (starred === false) flyStarToWatchlist(event.currentTarget, symbol);
+        if (starred === true) cancelStarFlight(symbol);
         setCelebrate(
           starred === false && !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
         );

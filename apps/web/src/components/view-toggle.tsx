@@ -10,14 +10,14 @@ export interface ViewToggleProps {
   view: ListView;
   hrefFor: (view: ListView) => string;
   onSelect: (view: ListView, event: MouseEvent) => void;
-  watchlistCount: number;
+  watchlistSymbols: readonly string[];
   watchlistLoaded: boolean;
 }
 
 const views: readonly ListView[] = ["all", "watchlist"];
 
 export function ViewToggle(props: ViewToggleProps) {
-  const { view, hrefFor, onSelect, watchlistCount, watchlistLoaded } = props;
+  const { view, hrefFor, onSelect, watchlistSymbols, watchlistLoaded } = props;
   const t = useT();
   const selectedIndex = views.indexOf(view);
   return (
@@ -39,7 +39,7 @@ export function ViewToggle(props: ViewToggleProps) {
                 <span className="inline-flex items-center gap-6">
                   {t(option === "all" ? "list.view.all" : "list.view.watchlist")}
                   {option === "watchlist" ? (
-                    <WatchlistCount count={watchlistCount} loaded={watchlistLoaded} />
+                    <WatchlistCount symbols={watchlistSymbols} loaded={watchlistLoaded} />
                   ) : null}
                 </span>
               </Link>

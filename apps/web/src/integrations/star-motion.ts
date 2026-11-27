@@ -8,12 +8,20 @@ const FLIGHT_END_SCALE = 0.6;
 const TARGET_BUMP_SCALE = 1.3;
 
 let current: ViewTransition | undefined;
-let starsInFlight = 0;
+const NO_FLIGHTS: readonly string[] = [];
+const flights = new Map<string, Animation>();
+let flying = NO_FLIGHTS;
 const flightListeners = new Set<() => void>();
 
-function setStarsInFlight(next: number): void {
-  starsInFlight = next;
+function publishFlights(): void {
+  flying = [...flights.keys()];
   for (const listener of flightListeners) listener();
+}
+
+function land(symbol: string, flight: Animation): void {
+  if (flights.get(symbol) !== flight) return;
+  flights.delete(symbol);
+  publishFlights();
 }
 
 function subscribeFlights(listener: () => void): () => void {
@@ -21,12 +29,19 @@ function subscribeFlights(listener: () => void): () => void {
   return () => flightListeners.delete(listener);
 }
 
-export function useStarsInFlight(): number {
+export function useStarsInFlight(): readonly string[] {
   return useSyncExternalStore(
     subscribeFlights,
-    () => starsInFlight,
-    () => 0,
+    () => flying,
+    () => NO_FLIGHTS,
   );
+}
+
+export function cancelStarFlight(symbol: string): void {
+  const flight = flights.get(symbol);
+  if (flight === undefined) return;
+  land(symbol, flight);
+  flight.cancel();
 }
 
 function reducedMotion(): boolean {
@@ -88,7 +103,7 @@ function visibleTarget(): HTMLElement | undefined {
   return hit !== null && target.contains(hit) ? target : undefined;
 }
 
-export function flyStarToWatchlist(source: HTMLElement): void {
+export function flyStarToWatchlist(source: HTMLElement, symbol: string): void {
   const icon = source.querySelector("svg");
   const target = visibleTarget();
   if (icon === null || target === undefined || reducedMotion()) return;
@@ -110,14 +125,16 @@ export function flyStarToWatchlist(source: HTMLElement): void {
   const dx = to.left + to.width / 2 - (from.left + from.width / 2);
   const dy = to.top + to.height / 2 - (from.top + from.height / 2);
   const flight = star.animate(flightKeyframes(dx, dy), { duration: duration.flash, easing: ease });
-  setStarsInFlight(starsInFlight + 1);
+  flights.get(symbol)?.cancel();
+  flights.set(symbol, flight);
+  publishFlights();
   flight.oncancel = () => {
     star.remove();
-    setStarsInFlight(starsInFlight - 1);
+    land(symbol, flight);
   };
   flight.onfinish = () => {
     star.remove();
-    setStarsInFlight(starsInFlight - 1);
+    land(symbol, flight);
     target.animate(
       [
         { transform: "scale(1)" },

@@ -3,7 +3,7 @@ import { useState, type CSSProperties } from "react";
 import { useStarsInFlight } from "../integrations/star-motion.ts";
 
 export interface WatchlistCountProps {
-  count: number;
+  symbols: readonly string[];
   loaded: boolean;
 }
 
@@ -16,9 +16,10 @@ interface Flip {
 
 const digit = "col-start-1 row-start-1 backface-hidden";
 
-export function WatchlistCount({ count, loaded }: WatchlistCountProps) {
+export function WatchlistCount({ symbols, loaded }: WatchlistCountProps) {
   const t = useT();
-  const shown = Math.max(0, count - useStarsInFlight());
+  const landing = useStarsInFlight().filter((symbol) => symbols.includes(symbol));
+  const shown = symbols.length - landing.length;
   const [flip, setFlip] = useState<Flip>({ value: shown, previous: undefined, turn: 0, loaded });
   if (flip.value !== shown || flip.loaded !== loaded) {
     const previous = flip.loaded && flip.value !== shown ? flip.value : undefined;
@@ -34,7 +35,7 @@ export function WatchlistCount({ count, loaded }: WatchlistCountProps) {
         data-testid="watchlist-count"
         data-count={shown}
         style={direction}
-        className="inline-grid h-[20px] min-w-[20px] place-items-center rounded-full bg-accent-tint px-6 text-caption font-semibold text-accent-fill tabular-nums perspective-[60px]"
+        className="inline-grid h-[24px] min-w-[24px] place-items-center rounded-full bg-accent-tint px-4 text-caption font-semibold text-accent-fill tabular-nums perspective-[60px]"
       >
         {flip.previous === undefined ? (
           <span className={digit}>{shown}</span>

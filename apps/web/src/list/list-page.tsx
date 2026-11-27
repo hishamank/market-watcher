@@ -21,7 +21,7 @@ export function ListPage() {
             view={view}
             hrefFor={viewHref}
             onSelect={selectView}
-            watchlistCount={watchlist.symbols.length}
+            watchlistSymbols={watchlist.symbols}
             watchlistLoaded={watchlist.isLoaded}
           />
           <ConnectedColumnMenu />
