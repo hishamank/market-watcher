@@ -12,6 +12,7 @@ import { ChaosPanel } from "./chaos-panel.tsx";
 import { LanguageToggle } from "./language-toggle.tsx";
 import { usePresence } from "../integrations/use-presence.ts";
 import { ConnectionBanner, type BannerStatus } from "./connection-banner.tsx";
+import { WatchlistError } from "./watchlist-error.tsx";
 
 export interface AppShellProps {
   meta: ShellMeta;
@@ -52,6 +53,7 @@ export function AppShell({ meta, children }: AppShellProps) {
         }
       />
       <ConnectionBanner status={banner.value} open={banner.open} onRetry={retryNow} />
+      <WatchlistError />
       <div className="flex flex-1 flex-col">{children}</div>
       {meta.feedMode === "simulated" ? (
         <Suspense fallback={null}>
