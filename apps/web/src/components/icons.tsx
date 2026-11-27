@@ -120,6 +120,15 @@ export function CloseIcon({ className }: IconProps) {
   return <StrokeIcon className={className} path="M6 6l12 12M18 6l-12 12" />;
 }
 
+export function ColumnsIcon({ className }: IconProps) {
+  return (
+    <StrokeIcon
+      className={className}
+      path="M5 4.5h14a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 18V6A1.5 1.5 0 0 1 5 4.5zM9.5 4.5v15M14.5 4.5v15"
+    />
+  );
+}
+
 export function SpinnerIcon({ className }: IconProps) {
   return <StrokeIcon className={className} path="M12 3a9 9 0 1 0 9 9" />;
 }

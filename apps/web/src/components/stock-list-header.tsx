@@ -5,6 +5,7 @@ import {
   type StockSortDirection,
   type StockSortField,
 } from "@mini/core";
+import type { ReactNode } from "react";
 import { DirectionIcon } from "./icons.tsx";
 import { pinnedName, tableColumns, tableWidth } from "./stock-row.tsx";
 
@@ -74,7 +75,7 @@ function HeaderCell({ column, className, sort, fading }: HeaderCellProps) {
   const label = t(`list.column.${column}`);
   if (sort === undefined) {
     return (
-      <span className={className}>
+      <span aria-hidden="true" className={className}>
         {fading?.sort.field === column ? (
           <FadingLabel column={column} label={label} fading={fading} />
         ) : (
@@ -112,16 +113,16 @@ function HeaderCell({ column, className, sort, fading }: HeaderCellProps) {
 export interface StockListHeaderProps {
   readonly sort?: HeaderSort | undefined;
   readonly fading?: FadingSort | undefined;
+  readonly action: ReactNode;
 }
 
-export function StockListHeader({ sort, fading }: StockListHeaderProps) {
+export function StockListHeader({ sort, fading, action }: StockListHeaderProps) {
   const t = useT();
   const cell = (column: StockSortField, className: string) => (
     <HeaderCell column={column} className={className} sort={sort} fading={fading} />
   );
   return (
     <div
-      aria-hidden={sort === undefined ? "true" : undefined}
       role={sort === undefined ? undefined : "group"}
       aria-label={sort === undefined ? undefined : t("list.sort.label")}
       className={`hidden min-h-[44px] items-center border-b border-border text-caption font-medium text-text-secondary ${tableColumns} ${tableWidth}`}
@@ -144,7 +145,9 @@ export function StockListHeader({ sort, fading }: StockListHeaderProps) {
         "lastUpdate",
         "text-end list-compact:hidden list-custom:[display:var(--col-lastUpdate)]",
       )}
-      <span aria-hidden="true" />
+      <div className="grid items-center list-custom:sticky list-custom:end-0 list-custom:self-stretch list-custom:bg-surface">
+        {action}
+      </div>
     </div>
   );
 }

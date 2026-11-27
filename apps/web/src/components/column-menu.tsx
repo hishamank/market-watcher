@@ -1,6 +1,7 @@
 import { useT } from "@mini/core";
 import type { TableColumn } from "../columns/table-columns-store.ts";
-import { buttonClassName } from "./button.tsx";
+import { iconPressMotion } from "./button.tsx";
+import { ColumnsIcon } from "./icons.tsx";
 
 export interface ColumnOption {
   readonly id: TableColumn;
@@ -21,14 +22,16 @@ const MENU_ID = "table-columns";
 export function ColumnMenu({ options, canReset, onToggle, onReset }: ColumnMenuProps) {
   const t = useT();
   return (
-    <div className="hidden md:block">
+    <div className="grid place-items-center">
       <button
         type="button"
         popoverTarget={MENU_ID}
         data-testid="columns-button"
-        className={`${buttonClassName("default", true)} [anchor-name:--table-columns]`}
+        aria-label={t("list.columns.button")}
+        title={t("list.columns.button")}
+        className={`grid size-[36px] place-items-center rounded-md text-text-secondary hover:text-text ${iconPressMotion} [anchor-name:--table-columns]`}
       >
-        {t("list.columns.button")}
+        <ColumnsIcon />
       </button>
       <div
         id={MENU_ID}
