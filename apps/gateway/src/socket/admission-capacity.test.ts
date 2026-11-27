@@ -54,6 +54,27 @@ test("an IPv6 address is budgeted by its /64 and an IPv4 address by itself", () 
   expect(addressKey("203.0.113.7")).toBe("203.0.113.7");
 });
 
+test("every spelling of one address gets one key", () => {
+  for (const mapped of ["::ffff:cb00:7107", "::FFFF:203.0.113.7", "0:0:0:0:0:ffff:cb00:7107"]) {
+    expect(addressKey(mapped)).toBe("203.0.113.7");
+  }
+  const spellings = [
+    "2001:db8::1:2:3:192.0.2.1",
+    "2001:db8:0:1:2:3:c000:201",
+    "2001:0db8:0000:0001:0002:0003:c000:0201",
+    "2001:DB8:0:1:2:3:C000:201",
+  ];
+  expect(new Set(spellings.map(addressKey))).toEqual(new Set(["2001:db8:0:1::/64"]));
+  expect(addressKey("2001:db8::")).toBe("2001:db8:0:0::/64");
+  expect(addressKey("::")).toBe("0:0:0:0::/64");
+});
+
+test("something that is not an address is used as it is and never throws", () => {
+  for (const odd of ["", "not-an-ip", "::ffff:999.1.1.1", "2001:db8:::1", "[::1]", "1.2.3"]) {
+    expect(addressKey(odd)).toBe(odd);
+  }
+});
+
 test("addresses in one /64 share the connection budget and another /64 does not", async () => {
   const port = await start();
   for (let host = 1; host <= CONNECTIONS_PER_IP; host += 1) {
