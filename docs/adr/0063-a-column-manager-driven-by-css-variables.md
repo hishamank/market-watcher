@@ -1,11 +1,11 @@
 # A column manager driven by CSS variables
 
-Amends ADR 0049, ADR 0050 and the Layout section of `docs/DESIGN.md`.
+Amends ADR 0049, ADR 0062 and the Layout section of `docs/DESIGN.md`.
 
 A column manager lets the user choose which columns the stock table shows. From 768 px, a **Columns** button next to the All and Watchlist toggle opens a menu with one checkbox per column.
 
 - **Core owns the choice.** `useTableColumns` returns every column in table order, the saved choice (or `undefined` when there is none), which columns are locked, and `toggle` and `reset`. Name and Price are locked, so a saved choice always contains them. The choice is saved under `table-columns:v1` through the `KeyValueStore`, like the watchlist, so it stays on the device and follows to other tabs. Unknown or corrupt values fall back to the default layout.
-- **Without a saved choice, nothing changes.** Each width keeps the layout from ADRs 0049 and 0050, drawn by CSS alone. The server render, which cannot know the width or the device's storage, therefore stays correct. The menu shows the current width's layout as checked, so the first toggle starts from what is on screen.
+- **Without a saved choice, nothing changes.** Each width keeps the layout from ADRs 0049 and 0062, drawn by CSS alone. The server render, which cannot know the width or the device's storage, therefore stays correct. The menu shows the current width's layout as checked, so the first toggle starts from what is on screen.
 - **With a saved choice, the list reads CSS variables.** The list section sets `data-custom-columns` and a few variables: the grid tracks, the span of the row link, the table's minimum width, and `block` or `none` for each optional column. A `list-custom` Tailwind variant, active from 768 px inside that section, applies them. The header and the rows stay views with no new props, and a toggle re-renders one element instead of every row.
 - **Overflow scrolls sideways.** When the chosen columns are wider than the list, the list scrolls inside its card and Name stays pinned at the start, so the page itself never scrolls sideways. A saved choice applies at every table width, so the narrow table can show everything someone asked for.
 - **The percent in the day change pill** shows whenever the Day change % column is hidden, so the percent never disappears entirely.
