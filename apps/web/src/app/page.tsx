@@ -1,17 +1,18 @@
 import { pageMetadata, readMetadataLocale } from "../metadata/page-metadata.ts";
-import { createRestClient, stockListQueryOptions, stockPagesQueryOptions } from "@mini/core";
+import { stockQueryKeys } from "@mini/core";
 import type { QueryClient } from "@tanstack/react-query";
-import { gatewayUrl } from "../gateway/shell-meta.ts";
+import { readInitialStocks } from "../gateway/initial-stocks.ts";
 import { ListPage } from "../list/list-page.tsx";
 import { PrefetchBoundary } from "../query/prefetch-boundary.tsx";
 
-const rest = createRestClient({ gatewayUrl });
-
-function prefetchViews(client: QueryClient) {
-  return Promise.all([
-    client.prefetchQuery(stockListQueryOptions(rest)),
-    client.prefetchInfiniteQuery(stockPagesQueryOptions(rest)),
-  ]);
+async function prefetchViews(client: QueryClient) {
+  try {
+    const page = await readInitialStocks();
+    client.setQueryData(stockQueryKeys.list(), page);
+    client.setQueryData(stockQueryKeys.pages(), { pages: [page], pageParams: [undefined] });
+  } catch {
+    return;
+  }
 }
 
 export async function generateMetadata() {
