@@ -27,6 +27,7 @@ export interface RestRouteOptions {
   feedMode: FeedMode;
   now: () => number;
   connectionStats: () => ConnectionStats;
+  revision?: string;
   historyFallbacks?: readonly HistorySource[];
   historyCacheMaxEntries?: number;
   historySourceTimeoutMs?: number;
@@ -180,5 +181,7 @@ export async function restRoute(app: FastifyInstance, options: RestRouteOptions)
   app.get("/stocks/search", (request) => handleStockSearch(request, ctx));
   app.get("/stocks/:symbol", (request) => handleStockDetail(request, ctx));
   app.get("/stocks/:symbol/history", (request) => handleStockHistory(request, ctx));
-  app.get("/health", () => healthResponse(options.connectionStats(), historyCache.stats()));
+  app.get("/health", () =>
+    healthResponse(options.connectionStats(), historyCache.stats(), options.revision),
+  );
 }

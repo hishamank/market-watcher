@@ -15,8 +15,6 @@ A design review found that almost nothing in the app moved. Every control snappe
 - **List to detail (web):** the stock's name and price move from the row into the detail header, through React's `ViewTransition` (React 19.3, no Next flag). Only a row's link tags its navigation with the `open-stock` transition type, and only that type morphs, so switching between All and Watchlist never sends rows flying. Without browser support, the page changes as before.
 - **Mobile:** the same sliding range indicator and press feedback, plus haptic feedback on star and range change through `expo-haptics`, which ships in Expo Go (ADR 0033). This dependency is added with the change. Tab and star icons move from text glyphs to SVG on the existing `react-native-svg`.
 
-> **Design note:** "Motion confirms an action or shows a change, nothing else. It is transform and opacity wherever possible, with three named exceptions that run once per click, never per tick, and every piece has a still version under reduced motion. The one new dependency is Expo's own haptics module, which runs in Expo Go."
-
 ## Considered options
 
 - **A motion library (Framer Motion, Motion One):** layout animations and exit presence for free, but a dependency on web for what CSS transitions and one measured indicator already do.

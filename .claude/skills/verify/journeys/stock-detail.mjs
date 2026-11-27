@@ -52,18 +52,18 @@ await step("D2", "press each range tab", async () => {
   const labels = { "1W": "Past week", "1M": "Past month", "3M": "Past 3 months", "1Y": "Past year", "5Y": "Past 5 years", "1D": "Today" };
   for (const [range, label] of Object.entries(labels)) {
     await page.getByTestId(`range-tab-${range}`).click();
-    await expect(page.getByTestId(`range-tab-${range}`)).toHaveAttribute("aria-selected", "true");
+    await expect(page.getByTestId(`range-tab-${range}`)).toHaveAttribute("aria-pressed", "true");
     await expect(page.getByTestId("detail-change-label")).toHaveText(label);
     await expect(page.getByTestId("price-chart")).toHaveAttribute("data-state", "ready", { timeout: 10_000 });
     if (range === "1Y") await shot("D2-1Y");
   }
   await expect(page).toHaveURL(/range=1D|\/stocks\/AAPL$/);
-  return "every tab set aria-selected, its label and a ready chart";
+  return "every range button set aria-pressed, its label and a ready chart";
 });
 
 await step("D2", "open /stocks/AAPL?range=1Y directly", async () => {
   await openConnected("/stocks/AAPL?range=1Y");
-  await expect(page.getByTestId("range-tab-1Y")).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByTestId("range-tab-1Y")).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByTestId("detail-change-label")).toHaveText("Past year");
   return "deep link renders 1Y";
 });

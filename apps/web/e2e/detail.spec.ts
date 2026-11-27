@@ -60,7 +60,7 @@ test("D1 at 1440 px the list stays beside the detail as a compact pane", async (
   expect(headerBox?.x ?? 0).toBeGreaterThan((paneBox?.x ?? 0) + 400);
 });
 
-test("D2 range tabs set the URL, the header change and the chart, with back and forward", async ({
+test("D2 range buttons set the URL, the header change and the chart, with back and forward", async ({
   page,
 }) => {
   const problems = collectConsoleProblems(page);
@@ -73,7 +73,7 @@ test("D2 range tabs set the URL, the header change and the chart, with back and 
     await page.getByTestId(`range-tab-${range}`).click();
     await expect(page).toHaveURL(new RegExp(`[?&]range=${range}`));
     await expect(page).toHaveURL(/[?&]debug=1/);
-    await expect(page.getByTestId(`range-tab-${range}`)).toHaveAttribute("aria-selected", "true");
+    await expect(page.getByTestId(`range-tab-${range}`)).toHaveAttribute("aria-pressed", "true");
     await expect(page.getByTestId("detail-change-label")).toHaveText(label);
     await expect(chart).toHaveAttribute("data-state", "ready");
     const direction = await page.getByTestId("detail-change").getAttribute("data-direction");
@@ -87,10 +87,10 @@ test("D2 range tabs set the URL, the header change and the chart, with back and 
     );
   }
   await page.goBack();
-  await expect(page.getByTestId("range-tab-1W")).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByTestId("range-tab-1W")).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByTestId("detail-change-label")).toHaveText("Past week");
   await page.goForward();
-  await expect(page.getByTestId("range-tab-1Y")).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByTestId("range-tab-1Y")).toHaveAttribute("aria-pressed", "true");
   expect(problems).toEqual([]);
 });
 
@@ -121,7 +121,7 @@ test("D2 returning to a range already viewed draws at once", async ({ page }) =>
 
 test("D2 opening a range from the URL renders it on the server", async ({ request }) => {
   const html = await (await request.get("/stocks/AAPL?range=1Y")).text();
-  expect(html).toMatch(/aria-selected="true"[^>]*data-testid="range-tab-1Y"/);
+  expect(html).toMatch(/aria-pressed="true"[^>]*data-testid="range-tab-1Y"/);
   expect(html).toMatch(/data-testid="detail-change-label"[^>]*>Past year</);
 });
 

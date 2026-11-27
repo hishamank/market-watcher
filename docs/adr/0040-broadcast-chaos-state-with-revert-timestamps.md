@@ -1,6 +1,6 @@
 # Broadcast chaos state with revert timestamps
 
-Amends ADRs 0005 and 0030.
+Amends ADRs 0005 and 0030. Amended by [ADR 0072](./0072-chaos-scope-keeps-shared-controls-off-public-gateways.md): `chaos_state` also carries the gateway's chaos scope, and sending an active control again no longer moves its `revertsAt`.
 
 Global chaos controls (`tick_spike`, `history_latency`, `history_failure_rate` and `force_closed`) affect every connection in simulator mode and revert automatically after 60 seconds. To keep every open debug panel in sync — including newly opened or reconnected panels — the server socket union gains an additive `chaos_state` message carrying:
 

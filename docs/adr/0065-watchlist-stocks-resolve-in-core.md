@@ -6,8 +6,6 @@ Core exports `useWatchlistStocks()`, `WatchlistStocksResult` and `WatchlistStock
 
 Both apps wait for the All list until its first failure. Web can now load starred stocks by symbol when the All list fails. The resolver reuses fresh list, symbol and detail data and in-flight symbol batches. Every requested batch seeds the provider’s quote store, so an overflow batch can mark an equal-timestamp quote as last-known. This removes the overflow caveat in ADR 0046.
 
-> **Design note:** “Both screens need the same stocks in the same order. Core fetches them once and gives each screen the loading and retry information it displays.”
-
 ## Considered options
 
 - Sharing only the planner would leave the apps responsible for starting queries and updating the quote store.
