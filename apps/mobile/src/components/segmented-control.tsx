@@ -69,6 +69,7 @@ export function SegmentedControl<T extends string>(props: SegmentedControlProps<
             key={option.value}
             testID={option.testID}
             accessibilityRole="radio"
+            accessibilityLabel={option.label}
             accessibilityState={{ checked: isSelected }}
             onPress={() => onSelect(option.value)}
             onLayout={(event) => {
@@ -84,6 +85,7 @@ export function SegmentedControl<T extends string>(props: SegmentedControlProps<
           >
             <Text
               numberOfLines={1}
+              maxFontSizeMultiplier={2}
               style={[
                 textStyles.label,
                 { color: isSelected ? palette.text : palette.textSecondary },
