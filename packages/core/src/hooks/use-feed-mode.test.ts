@@ -65,18 +65,24 @@ describe("useFeedMode", () => {
     services.socketClient.stop();
   });
 
-  it("never changes once known, even if a later welcome says otherwise", () => {
-    const gateway = createFakeGateway({ feedMode: "simulated" });
+  it("keeps the first feed mode across a reconnect and a conflicting welcome", () => {
+    const gateway = createFakeGateway({ autoWelcome: false, feedMode: "simulated" });
     const services = servicesFor(gateway);
     vi.mocked(useContext).mockReturnValue(services);
 
     services.socketClient.start();
     vi.advanceTimersByTime(0);
+    gateway.latestConnection().sendWelcome();
     expect(useFeedMode()).toBe("simulated");
 
     const [subscribe] = vi.mocked(useSyncExternalStore).mock.calls[0] ?? [];
     const listener = vi.fn();
     const unsubscribe = subscribe?.(listener);
+
+    gateway.latestConnection().drop();
+    expect(useFeedMode()).toBe("simulated");
+    vi.advanceTimersByTime(10_000);
+    expect(gateway.connections.length).toBe(2);
 
     gateway.latestConnection().sendWelcome({ feedMode: "live" });
     expect(useFeedMode()).toBe("simulated");
