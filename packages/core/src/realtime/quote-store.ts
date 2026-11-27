@@ -126,13 +126,9 @@ export function createQuoteStore(): QuoteStore {
     return (incoming) => {
       for (const quote of incoming) {
         const current = quotes.get(quote.symbol);
-        if (
-          current &&
-          current.timestamp === quote.timestamp &&
-          (revisions.get(quote.symbol) ?? 0) > startedAt
-        )
-          continue;
-        upsert(quote);
+        const superseded = current && (revisions.get(quote.symbol) ?? 0) > startedAt;
+        if (superseded && current.timestamp === quote.timestamp) continue;
+        upsert(superseded ? { ...quote, lastKnown: current.lastKnown } : quote);
       }
     };
   }

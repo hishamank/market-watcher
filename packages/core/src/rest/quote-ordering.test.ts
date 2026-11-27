@@ -1,9 +1,10 @@
 import { QueryClient } from "@tanstack/react-query";
 import { describe, expect, it } from "vitest";
 import { createQuoteStore } from "../realtime/quote-store.ts";
-import { makeQuote } from "../testing/fake-platform.ts";
+import { makeQuote, settle } from "../testing/fake-platform.ts";
 import { stockDetailBody } from "../testing/fake-rest.ts";
 import { createRestClient } from "./rest-client.ts";
+import { syncQuotesFromQueryCache } from "./quote-cache-sync.ts";
 import { stockQueryOptions } from "./stock-queries.ts";
 
 it("a deferred REST response cannot erase newer equal-time reliability metadata", async () => {
@@ -16,16 +17,19 @@ it("a deferred REST response cannot erase newer equal-time reliability metadata"
     fetch: async () => ({ ok: true, status: 200, json: () => response.promise }),
   });
   const client = new QueryClient();
+  const detach = syncQuotesFromQueryCache(client.getQueryCache(), quoteStore);
   try {
     const pending = client.fetchQuery(stockQueryOptions(rest, "AAPL", quoteStore));
     quoteStore.upsert({ ...quote, lastKnown: true });
     response.resolve(stockDetailBody(quote));
     await pending;
+    await settle();
     expect(quoteStore.getQuote("AAPL")?.lastKnown).toBe(true);
     await client.invalidateQueries();
     await client.fetchQuery(stockQueryOptions(rest, "AAPL", quoteStore));
     expect(quoteStore.getQuote("AAPL")?.lastKnown).toBeUndefined();
   } finally {
+    detach();
     client.clear();
   }
 });
@@ -65,14 +69,17 @@ it.each([999, 1001])(
       fetch: async () => ({ ok: true, status: 200, json: () => response.promise }),
     });
     const client = new QueryClient();
+    const detach = syncQuotesFromQueryCache(client.getQueryCache(), store);
     try {
       const request = client.fetchQuery(stockQueryOptions(rest, "AAPL", store));
       store.upsert({ ...quote, lastKnown: true });
       response.resolve(stockDetailBody(makeQuote("AAPL", "101.00", timestamp)));
       await request;
+      await settle();
       expect(store.getQuote("AAPL")?.timestamp).toBe(Math.max(1000, timestamp));
-      expect(store.getQuote("AAPL")?.lastKnown).toBe(timestamp < 1000 ? true : undefined);
+      expect(store.getQuote("AAPL")?.lastKnown).toBe(true);
     } finally {
+      detach();
       client.clear();
     }
   },

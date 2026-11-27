@@ -2,7 +2,7 @@
 
 A trade timestamp orders prices, but does not order changes to reliability metadata. A REST request can begin before a socket marks the held quote last-known and finish afterwards with the same trade timestamp and no warning.
 
-Each provider's quote store maintains a local revision counter and the latest revision per symbol. Stock query functions capture the revision before starting a REST request. A response with an equal trade timestamp cannot replace a symbol changed since that request began. Older trade timestamps remain rejected; strictly newer timestamps remain accepted. A request started after the change can apply equal-time corrections or clear a warning. This is local request precedence, not a new wire revision or a claim about provider event order. Cache hydration retains its strictly-newer rule.
+Each provider's quote store maintains a local revision counter and the latest revision per symbol. Stock query functions capture the revision before starting a REST request. A response with an equal trade timestamp cannot replace a symbol changed since that request began. Older trade timestamps remain rejected. A strictly newer timestamp still updates market values, but preserves the current last-known metadata if the request was superseded locally. A request started after the change can apply equal-time corrections or clear a warning. This is local request precedence, not a new wire revision or a claim about provider event order. Cache hydration retains its strictly-newer rule.
 
 Semantically identical quotes preserve object identity and do not notify quote subscribers. Comparison covers the fixed quote fields, including last-known and both day-range bounds. Equal-time corrections still notify only that symbol.
 
