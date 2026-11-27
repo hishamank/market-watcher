@@ -1,5 +1,7 @@
 # Always apply valid unsubscribes
 
+Amended by [ADR 0076](./0076-bound-socket-control-work-and-close-abusive-connections.md): queued work now has a bound of 256 operations per connection, and a connection that keeps exceeding the message limit is closed.
+
 Amends ADR 0038's rule that messages other than subscribes are dropped over the socket rate limit.
 
 A valid `unsubscribe` is always applied, including when the connection has exhausted its 20-message rolling one-second budget. It still consumes the budget when capacity remains. The gateway sends at most one anonymous `rate_limited` notice per second for over-limit non-subscribe messages, as before. Over-limit subscribes still receive a correlated refusal; chaos messages still do not execute. Malformed frames and oversized frames keep their existing handling.

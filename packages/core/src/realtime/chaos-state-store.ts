@@ -1,8 +1,14 @@
-import type { ChaosFailureRateState, ChaosStateMessage, ChaosToggleState } from "@mini/contracts";
+import type {
+  ChaosFailureRateState,
+  ChaosScope,
+  ChaosStateMessage,
+  ChaosToggleState,
+} from "@mini/contracts";
 
 export interface ChaosSnapshot {
   readonly serverTime: number;
   readonly receivedAt: number;
+  readonly scope: ChaosScope;
   readonly tickSpike: ChaosToggleState;
   readonly historyLatency: ChaosToggleState;
   readonly historyFailureRate: ChaosFailureRateState;
@@ -25,6 +31,7 @@ export function createChaosStateStore(now: () => number = () => Date.now()): Cha
       current = {
         serverTime: message.serverTime,
         receivedAt: now(),
+        scope: message.scope ?? "global",
         tickSpike: message.tickSpike,
         historyLatency: message.historyLatency,
         historyFailureRate: message.historyFailureRate,

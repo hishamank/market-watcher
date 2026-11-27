@@ -8,9 +8,7 @@ Now the flash marks one thing: this price just moved, and which way. Take Apple 
 
 A row flashes only when its price string changes, and at most once a second. Ticks inside that second update the digits without a flash. That keeps a fast stock readable during a tick spike and means a still screen is calm.
 
-The direction comes from the contracts money module (`subtract`, then `directionOf`), inside each app's `integrations/use-tick-flash.ts`. Core is unchanged, so the frozen API (ADR 0041) holds. `data-flash` keeps its name and values and now carries the tick's direction. Reduced motion shows no tint and no roll, and still sets `data-flash`.
-
-> **Design note:** "A flash should mean 'this price just moved'. When every row flashed all the time it meant nothing, so I colour it by the tick, throttle it to once a second per row, and put it on the price instead of the pill. The cost was a spec change and one rewritten test."
+The direction comes from the contracts money module (`subtract`, then `directionOf`), inside each app's `integrations/use-tick-flash.ts`. Core is unchanged, so the frozen API (ADR 0041) holds. `data-flash` keeps its name and values and now carries the tick's direction. Reduced motion shows no tint and no roll, and still sets `data-flash`. Changing the flash semantics required updating the spec and rewriting the corresponding flash-direction test.
 
 ## Considered options
 

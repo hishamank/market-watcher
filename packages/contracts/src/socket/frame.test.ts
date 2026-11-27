@@ -23,6 +23,7 @@ const serverMessages: ServerMessage[] = [
   {
     type: "chaos_state",
     serverTime: 1_764_000_000_000,
+    scope: "connection",
     tickSpike: { enabled: false, revertsAt: null },
     historyLatency: { enabled: true, revertsAt: 1_764_000_060_000 },
     historyFailureRate: { rate: 50, revertsAt: 1_764_000_060_000 },

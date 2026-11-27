@@ -23,8 +23,6 @@ The back button in the stack header now shows the chevron only. On Settings, the
 
 `language.switch` stays in core's catalogue, but mobile no longer uses it.
 
-> **Design note:** "Settings is a pushed screen behind a gear, not a tab, because people rarely visit it. For appearance I used React Native's own override instead of threading a theme through every component. I checked in Expo Go that it overrides the theme and that System hands control back to the OS, and I saved the choice under the same key as web."
-
 ## Considered options
 
 - **A single Dark mode switch through `CoreProviderProps.colorScheme`:** the fallback in the issue. It reuses web's core store, but it can't express System, and every palette read would move to core's hook.

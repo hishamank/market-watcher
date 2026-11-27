@@ -1,26 +1,19 @@
 {
   "permissions": {
     "deny": [
-      "Bash(git push origin main*)",
-      "Bash(git push origin HEAD:main*)",
-      "Bash(git push -u origin main*)",
-      "Bash(git push --force*)",
-      "Bash(git push -f*)",
-      "Bash(git push * --force*)",
-      "Bash(git push * -f*)",
+      "Bash(git push* main)",
+      "Bash(git push* main *)",
+      "Bash(git push*:main*)",
+      "Bash(git push*/main*)",
+      "Bash(git push*+*)",
+      "Bash(git push*--force*)",
+      "Bash(git push* -f*)",
+      "Bash(git -C * push*)",
+      "Bash(git -c * push*)",
       "Bash(gh pr merge*)",
-      "Read(.env)",
-      "Read(.env.local)",
-      "Read(.env.*.local)",
-      "Read(.env.development)",
-      "Read(.env.production)",
-      "Read(.env.test)",
-      "Read(**/.env)",
-      "Read(**/.env.local)",
-      "Read(**/.env.*.local)",
-      "Read(**/.env.development)",
-      "Read(**/.env.production)",
-      "Read(**/.env.test)"
+      "Bash(gh api*merge*)",
+      "Read(**/.env*)",
+      "Read(!**/.env.example)"
     ]
   },
   "enabledPlugins": {

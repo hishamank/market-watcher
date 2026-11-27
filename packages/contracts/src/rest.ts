@@ -140,6 +140,7 @@ export const HealthResponseSchema = z.object({
   connections: z.int().nonnegative(),
   upstreamSymbols: z.int().nonnegative(),
   historyCacheHitRate: z.number().min(0).max(1),
+  revision: z.string().min(1).max(40).optional(),
 });
 
 export type Stock = z.infer<typeof StockSchema>;

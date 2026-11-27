@@ -25,7 +25,7 @@ async function page(gw: RestGateway, query: string) {
 
 describe("REST stock pages", () => {
   it("walks the whole catalogue once, default list first, then by symbol", async () => {
-    const gw = await launch();
+    const gw = await launch({ initialNow: Date.UTC(2026, 10, 25) });
     const seen: string[] = [];
     let cursor: string | null = null;
     let requests = 0;
