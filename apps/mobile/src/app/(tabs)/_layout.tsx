@@ -1,9 +1,8 @@
 import { useT } from "@mini/core";
-import { space } from "@mini/tokens";
 import { Tabs } from "expo-router";
 import { StyleSheet, View } from "react-native";
-import { LanguageToggle } from "../../shell/language-toggle.tsx";
 import { SearchButton } from "../../shell/search-button.tsx";
+import { SettingsButton } from "../../shell/settings-button.tsx";
 import { usePalette } from "../../theme/palette.ts";
 import { TabIcon } from "../../theme/tab-icon.tsx";
 
@@ -18,7 +17,7 @@ export default function TabsLayout() {
         headerRight: () => (
           <View style={styles.actions}>
             <SearchButton />
-            <LanguageToggle />
+            <SettingsButton />
           </View>
         ),
         tabBarStyle: { backgroundColor: palette.surface, borderTopColor: palette.border },
@@ -48,5 +47,5 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create({
-  actions: { flexDirection: "row", alignItems: "center", paddingEnd: space[6] },
+  actions: { flexDirection: "row", alignItems: "center" },
 });
