@@ -7,7 +7,7 @@ import { simulatorProfileSource } from "../../../gateway/src/profiles/simulator.
 import { simulatorStatisticsSource } from "../../../gateway/src/statistics/simulator.ts";
 import { simulatorNewsSource } from "../../../gateway/src/news/simulator.ts";
 import { simulatorEarningsSource } from "../../../gateway/src/earnings/simulator.ts";
-import { gatewayPidFile, gatewayPort, webPort } from "./gateway-process.ts";
+import { gatewayPidFile, gatewayPort, gatewayControlPort, webPort } from "./gateway-process.ts";
 
 function fixtureApp(feedMode: FeedMode) {
   const feed = createSimulatorFeed({ seed: "42" });
@@ -46,4 +46,4 @@ const control = createServer(async (request, response) => {
   }
   response.writeHead(204).end();
 });
-control.listen(gatewayPort + 1, "localhost");
+control.listen(gatewayControlPort, "localhost");
