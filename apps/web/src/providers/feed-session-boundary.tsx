@@ -2,6 +2,9 @@
 
 import { useFeedSession, useT } from "@mini/core";
 import type { ReactNode } from "react";
+import { Button } from "../components/button.tsx";
+import { FeedChangedIllustration } from "../components/feed-changed-illustration.tsx";
+import { ReconnectIcon } from "../components/icons.tsx";
 
 export function FeedSessionBoundary({
   children,
@@ -17,18 +20,17 @@ export function FeedSessionBoundary({
     <main
       data-testid="feed-reload-required"
       role="alert"
-      className="flex min-h-dvh flex-col items-center justify-center gap-4 px-6 text-center"
+      className="flex min-h-dvh flex-col items-center justify-center px-24 py-48 text-center"
     >
-      <h1 className="text-xl font-semibold">{t("feedChanged.title")}</h1>
-      <p>{t("feedChanged.help")}</p>
-      <button
-        type="button"
-        data-testid="feed-reload"
-        onClick={() => window.location.reload()}
-        className="rounded border px-4 py-2"
-      >
-        {t("feedChanged.reload")}
-      </button>
+      <FeedChangedIllustration />
+      <h1 className="mt-32 text-heading-lg">{t("feedChanged.title")}</h1>
+      <p className="mt-10 max-w-[360px] text-body text-text-secondary">{t("feedChanged.help")}</p>
+      <div className="mt-32">
+        <Button testId="feed-reload" variant="solid" onClick={() => window.location.reload()}>
+          <ReconnectIcon />
+          {t("feedChanged.reload")}
+        </Button>
+      </div>
     </main>
   );
 }
