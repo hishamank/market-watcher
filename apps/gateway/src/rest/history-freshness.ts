@@ -54,14 +54,11 @@ export function classifyEntry(
   now: number,
   status: MarketStatus,
   openEpoch: number,
-  lastClosedAt: number | undefined,
   sessionOpen: number,
 ): EntryState {
   if (status === "closed") {
     if (entry.openEpoch !== openEpoch) return "expired";
     if (entry.fetchedWhileClosed) return "fresh";
-    if (lastClosedAt !== undefined && entry.expiresAt > lastClosedAt) return "fresh";
-    if (now < entry.expiresAt) return "fresh";
     return "expired";
   }
   if (

@@ -6,6 +6,7 @@ export const WATCHLIST_STORAGE_KEY = "watchlist:v1";
 export interface WatchlistSnapshot {
   readonly symbols: readonly string[];
   readonly loaded: boolean;
+  readonly saveFailed?: boolean;
 }
 
 export type WatchlistListener = () => void;
@@ -14,6 +15,7 @@ export interface WatchlistStore {
   getSnapshot(): WatchlistSnapshot;
   subscribe(listener: WatchlistListener): () => void;
   toggle(symbol: string): void;
+  dismissError(): void;
 }
 
 interface ToggleIntent {
@@ -54,6 +56,7 @@ export function createWatchlistStore(storage: KeyValueStore): WatchlistStore {
   const pending: ToggleIntent[] = [];
   let committed: readonly string[] = [];
   let loaded = false;
+  let saveFailed = false;
   let loadStarted = false;
   let snapshot = EMPTY_WATCHLIST;
   let queue: Promise<void> = Promise.resolve();
@@ -61,8 +64,13 @@ export function createWatchlistStore(storage: KeyValueStore): WatchlistStore {
 
   function publish(): void {
     const symbols = pending.reduce(applyIntent, committed);
-    if (loaded === snapshot.loaded && sameSymbols(symbols, snapshot.symbols)) return;
-    snapshot = { symbols, loaded };
+    if (
+      loaded === snapshot.loaded &&
+      saveFailed === Boolean(snapshot.saveFailed) &&
+      sameSymbols(symbols, snapshot.symbols)
+    )
+      return;
+    snapshot = { symbols, loaded, ...(saveFailed ? { saveFailed } : {}) };
     for (const listener of Array.from(listeners)) listener();
   }
 
@@ -87,15 +95,24 @@ export function createWatchlistStore(storage: KeyValueStore): WatchlistStore {
 
   function write(intent: ToggleIntent): void {
     enqueue(async () => {
-      committed = applyIntent(committed, intent);
+      const next = applyIntent(committed, intent);
+      try {
+        await storage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(next));
+        committed = next;
+      } catch {
+        saveFailed = true;
+      }
       pending.shift();
       publish();
-      await storage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(committed));
     });
   }
 
   return {
     getSnapshot: () => snapshot,
+    dismissError() {
+      saveFailed = false;
+      publish();
+    },
     subscribe(listener) {
       listeners.add(listener);
       if (stopStorage === null) {
@@ -114,6 +131,7 @@ export function createWatchlistStore(storage: KeyValueStore): WatchlistStore {
       };
     },
     toggle(symbol) {
+      saveFailed = false;
       ensureLoaded();
       const intent = { symbol, starred: !snapshot.symbols.includes(symbol) };
       pending.push(intent);

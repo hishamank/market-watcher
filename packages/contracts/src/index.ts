@@ -1,3 +1,4 @@
+import "./browser-config.ts";
 export * from "./primitives.ts";
 export * from "./quote.ts";
 export * from "./range.ts";

@@ -11,6 +11,7 @@ function ConnectedChaosPanel({ onClose }: { onClose: () => void }) {
   const { offline, setOffline } = useOfflineControl();
   return (
     <ChaosPanelView
+      sharedControls={chaos.sharedControls}
       offline={offline}
       tickSpike={chaos.tickSpike}
       historyLatency={chaos.historyLatency}

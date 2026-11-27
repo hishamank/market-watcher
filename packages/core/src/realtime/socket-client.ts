@@ -1,3 +1,5 @@
+/* oxlint-disable max-lines -- Keep feed quarantine beside connection lifecycle; ADR 0077. */
+import { createFeedSession } from "./feed-session.ts";
 import type { MarketStatus } from "@mini/contracts";
 import { createChaosStateStore } from "./chaos-state-store.ts";
 import { createFeedModeStore } from "./feed-mode-store.ts";
@@ -28,6 +30,7 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
   const chaosStore = createChaosStateStore();
   const feedModeStore = createFeedModeStore();
   const gate = createRecoveryGate();
+  const session = options.session ?? createFeedSession();
 
   let status: ConnectionStatus = "connecting";
   let started = false;
@@ -48,7 +51,12 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
   }
 
   function checkConnected(): void {
-    if (status === "offline" || !gate.isOpen(subscriptions.getReferencedSymbols())) return;
+    if (
+      session.isBlocked() ||
+      status === "offline" ||
+      !gate.isOpen(subscriptions.getReferencedSymbols())
+    )
+      return;
     const wasReconnect = hasEverConnected && status !== "connected";
     hasEverConnected = true;
     connection.resetBackoff();
@@ -78,7 +86,7 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
 
   function handleLinkLost(): void {
     clearSession();
-    if (!started || platform.isPausedInBackground()) return;
+    if (session.isBlocked() || !started || platform.isPausedInBackground()) return;
     if (platform.isOffline()) {
       setStatus("offline");
       return;
@@ -93,10 +101,12 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
     gate.reset();
   };
   const openFreshSocket = (): void => {
+    if (session.isBlocked()) return;
     gate.reset();
     connection.open();
   };
   const resumeOnline = (): void => {
+    if (session.isBlocked()) return;
     connection.resetBackoff();
     setStatus(hasEverWelcomed ? "stale" : "connecting");
     openFreshSocket();
@@ -136,6 +146,7 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
     gate,
     onValidFrame: () => connection.resetSilenceTimer(),
     onWelcome: (info: WelcomeInfo) => {
+      if (!session.accept(info.feedMode)) return false;
       gate.welcome();
       hasEverWelcomed = true;
       feedModeStore.learn(info.feedMode);
@@ -152,14 +163,21 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
     url: options.url,
     socketFactory: options.socketFactory ?? createDefaultSocket,
     random: options.random ?? Math.random,
-    isActive: () => started && !platform.isPausedInBackground() && !platform.isOffline(),
+    isActive: () =>
+      !session.isBlocked() && started && !platform.isPausedInBackground() && !platform.isOffline(),
     onRawFrame: (data) => processRawServerFrame(data, frameContext),
     onLinkLost: handleLinkLost,
   });
 
+  session.subscribe(() => {
+    connection.cancelReconnect();
+    clearSession();
+    setStatus("stale");
+  });
+
   return {
     start() {
-      if (started) return;
+      if (started || session.isBlocked()) return;
       started = true;
       platform.start();
       if (platform.isOffline()) {
@@ -179,7 +197,13 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
     subscribeStatus: (listener) => addListener(statusListeners, listener),
     acquireSymbol: subscriptions.acquire,
     retryNow() {
-      if (!started || platform.isPausedInBackground() || platform.isOffline()) return;
+      if (
+        session.isBlocked() ||
+        !started ||
+        platform.isPausedInBackground() ||
+        platform.isOffline()
+      )
+        return;
       if (status === "connected") return;
       connection.resetBackoff();
       connection.cancelReconnect();

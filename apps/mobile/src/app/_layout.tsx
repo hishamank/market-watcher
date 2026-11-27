@@ -6,6 +6,7 @@ import { StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { duration } from "@mini/tokens";
 import { useReduceMotion } from "../integrations/use-reduce-motion.ts";
+import { useAnnounceWatchlistError } from "../integrations/use-announce-watchlist-error.ts";
 import { useAnnounceMarketClosed } from "../integrations/use-announce-market-closed.ts";
 import { useSavedAppearance } from "../integrations/use-saved-appearance.ts";
 import { useSavedDebugTools } from "../integrations/use-saved-debug-tools.ts";
@@ -62,6 +63,7 @@ function DirectionRoot({ children }: { children: ReactNode }) {
   const { direction } = useLanguage();
   useSavedLocale();
   useAnnounceMarketClosed();
+  useAnnounceWatchlistError();
   useSavedAppearance();
   useSavedDebugTools();
   return (
