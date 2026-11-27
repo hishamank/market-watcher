@@ -1,6 +1,6 @@
 # Web
 
-Next.js App Router. Views and connected components only, with logic coming from core.
+Next.js App Router. Shared financial, connection and query logic comes from core. Web owns platform-specific presentation state, including table column choices in `src/columns/`; components may derive local presentation values.
 
 - Routes are `/` (`?view=watchlist`) and `/stocks/[symbol]` (`?range=`). View state lives in the URL.
 - Server components prefetch through TanStack Query and `HydrationBoundary`. The socket starts after hydration.

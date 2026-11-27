@@ -28,8 +28,6 @@ export { useWatchlist } from "./hooks/use-watchlist.ts";
 export type { WatchlistResult } from "./hooks/use-watchlist.ts";
 export { useWatchlistStocks } from "./hooks/use-watchlist-stocks.ts";
 export type { WatchlistStockRow, WatchlistStocksResult } from "./hooks/use-watchlist-stocks.ts";
-export { useTableColumns } from "./hooks/use-table-columns.ts";
-export type { TableColumn, TableColumnsResult } from "./hooks/use-table-columns.ts";
 
 export {
   historyQueryOptions,

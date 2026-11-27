@@ -93,7 +93,7 @@ The lowest and highest price so far in the session a quote prices, as `low` and 
 _Avoid_: day's range, high-low, daily range
 
 **Column choice**:
-The table columns one device has chosen to show, saved on that device. Name and Price are always in it. With no choice saved, each width shows its usual layout.
+The web table columns one device has chosen to show, saved on that device and owned by the web app. Name and Price are always in it. With no choice saved, each width shows its usual layout.
 _Avoid_: column settings, table preferences, view config
 
 **Day change**:
