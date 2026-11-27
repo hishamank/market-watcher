@@ -344,6 +344,7 @@ Each component lists its anatomy, states, spacing, motion and test IDs.
 - **Countdown.** An active control shows a pill with a clock icon and the seconds left ("48 s") on `color.staleTint`.
 - **Switch.** 44 by 26 px track in a 52 by 44 px target. Off: `color.fill` track with a `color.textSecondary` knob. On: `color.text` track with a `color.bg` knob.
 - **Test IDs.** `chaos-panel`, `chaos-drop`, `chaos-freeze`, `chaos-offline`, `chaos-tick-spike`, `chaos-force-closed`, `health-reconnects`, `health-fps`, `health-latency`, `health-skipped`.
+- **Mobile.** Settings has a Debug section in Simulated mode only, with a "Chaos controls" switch (`debug-toggle`) and its help line. While it is on, a 44 px bolt button (`chaos-open`, `color.textSecondary`, 22 px icon) sits before the gear in the tab header and at the end of the detail header. It opens the panel as a native sheet with a grabber, on `color.surface`, at half height over an undimmed screen, and it can be pulled to full height, which dims. Same sections, controls and test IDs, without "Go offline". Switches are the platform's own, tinted with the tokens above; iOS draws its own knob. Buttons are the solid mobile button (ADR 0071).
 
 ## Screens on the canvas
 

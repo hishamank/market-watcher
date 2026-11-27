@@ -8,8 +8,10 @@ import { duration } from "@mini/tokens";
 import { useReduceMotion } from "../integrations/use-reduce-motion.ts";
 import { useAnnounceMarketClosed } from "../integrations/use-announce-market-closed.ts";
 import { useSavedAppearance } from "../integrations/use-saved-appearance.ts";
+import { useSavedDebugTools } from "../integrations/use-saved-debug-tools.ts";
 import { useSavedLocale } from "../integrations/use-saved-locale.ts";
 import { Providers } from "../providers/providers.tsx";
+import { ChaosButton } from "../shell/chaos-button.tsx";
 import { usePalette } from "../theme/palette.ts";
 
 function AppStack() {
@@ -35,6 +37,19 @@ function AppStack() {
         }}
       />
       <Stack.Screen name="settings" options={{ title: t("settings.title") }} />
+      <Stack.Screen name="stocks/[symbol]" options={{ headerRight: () => <ChaosButton /> }} />
+      <Stack.Screen
+        name="debug"
+        dangerouslySingular
+        options={{
+          presentation: "formSheet",
+          headerShown: false,
+          sheetAllowedDetents: [0.5, 1],
+          sheetLargestUndimmedDetentIndex: 0,
+          sheetGrabberVisible: true,
+          contentStyle: { backgroundColor: palette.surface },
+        }}
+      />
     </Stack>
   );
 }
@@ -44,6 +59,7 @@ function DirectionRoot({ children }: { children: ReactNode }) {
   useSavedLocale();
   useAnnounceMarketClosed();
   useSavedAppearance();
+  useSavedDebugTools();
   return (
     <LocaleProvider direction={direction}>
       <View style={[styles.root, { direction }]}>{children}</View>

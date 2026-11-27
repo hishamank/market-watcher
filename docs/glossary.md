@@ -139,7 +139,7 @@ _Avoid_: correlation ID, sequence number
 ## Demo
 
 **Chaos controls**:
-The debug panel, available only in Simulated mode, that triggers dropped connections, frozen feeds, offline, tick spikes, slow or failing history, and a closed market on demand.
+The debug panel, available only in Simulated mode, that triggers dropped connections, frozen feeds, offline, tick spikes, slow or failing history, and a closed market on demand. On mobile it opens from a bolt button that a Settings switch turns on, and it has no offline control.
 _Avoid_: debug menu, dev tools
 
 ## Last-known quote

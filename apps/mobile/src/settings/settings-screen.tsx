@@ -5,6 +5,7 @@ import { ChoiceRow } from "../components/choice-row.tsx";
 import { SegmentedControl } from "../components/segmented-control.tsx";
 import { SettingsGroup } from "../components/settings-group.tsx";
 import { APPEARANCES, chooseAppearance, useAppearance } from "../platform/appearance.ts";
+import { DebugSection } from "./debug-section.tsx";
 
 const LANGUAGES = [
   { locale: "en-US", key: "language.english", testID: "language-option-en" },
@@ -45,6 +46,7 @@ export function SettingsScreen() {
           />
         ))}
       </SettingsGroup>
+      <DebugSection />
     </ScrollView>
   );
 }
