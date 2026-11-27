@@ -4,12 +4,12 @@ import { useRef } from "react";
 import { useServerInsertedHTML } from "next/navigation";
 import { colorSchemeScript } from "../platform/color-scheme.ts";
 
-export function ThemeScript() {
+export function ThemeScript({ nonce }: { nonce?: string | undefined }) {
   const inserted = useRef(false);
   useServerInsertedHTML(() => {
     if (inserted.current) return null;
     inserted.current = true;
-    return <script dangerouslySetInnerHTML={{ __html: colorSchemeScript }} />;
+    return <script nonce={nonce} dangerouslySetInnerHTML={{ __html: colorSchemeScript }} />;
   });
   return null;
 }
