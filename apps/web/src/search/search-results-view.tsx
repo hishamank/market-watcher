@@ -6,7 +6,6 @@ import { AlertIcon, SearchIcon } from "../components/icons.tsx";
 import { Skeleton } from "../components/skeleton.tsx";
 import { StarButton } from "../components/star-button.tsx";
 import { splitHighlight } from "./highlight-match.ts";
-
 export interface SearchResultsViewProps {
   listboxId: string;
   optionId: (symbol: string) => string;
@@ -117,6 +116,7 @@ function SearchResultRow({
       className={`flex min-h-[56px] items-center pe-6 transition-colors duration-(--duration-fast) ease-standard ${highlighted ? "bg-fill" : "hover:bg-hover"}`}
     >
       <Link
+        prefetch={false}
         href={href}
         onClick={onSelect}
         className="flex min-w-0 flex-1 items-center gap-12 self-stretch ps-16 pe-8 focus-visible:outline-offset-[-2px]"
