@@ -6,6 +6,7 @@ import { useTextStyles } from "../theme/text-styles.ts";
 import { Button } from "./button.tsx";
 import { ChaosGlobalSection, type ChaosGlobalSectionProps } from "./chaos-global-section.tsx";
 import { ChaosSection } from "./chaos-section.tsx";
+import { HealthDiagnostics } from "./health-diagnostics.tsx";
 import { HealthTiles } from "./health-tiles.tsx";
 import { Icon } from "./icon.tsx";
 
@@ -66,13 +67,7 @@ function HealthSection({ health }: { health: ConnectionHealth }) {
       <Text accessibilityRole="header" style={[textStyles.label, { color: palette.text }]}>
         {t("chaos.health.diagnostics")}
       </Text>
-      <Text
-        testID="health-diagnostics"
-        selectable
-        style={[textStyles.caption, { color: palette.text, writingDirection: "ltr" }]}
-      >
-        {JSON.stringify(health.diagnostics, null, 2)}
-      </Text>
+      <HealthDiagnostics diagnostics={health.diagnostics} />
     </ChaosSection>
   );
 }
