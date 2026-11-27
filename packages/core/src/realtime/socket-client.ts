@@ -1,5 +1,7 @@
-import type { FeedMode, MarketStatus } from "@mini/contracts";
+import type { MarketStatus } from "@mini/contracts";
 import { createChaosStateStore } from "./chaos-state-store.ts";
+import { createFeedModeStore } from "./feed-mode-store.ts";
+import { addListener, notifyAll } from "./listeners.ts";
 import { createManagedConnection } from "./socket-connection.ts";
 import { createPlatformBridge } from "./socket-lifecycle.ts";
 import { createRecoveryGate } from "./recovery-gate.ts";
@@ -18,26 +20,18 @@ import { createDefaultSocket } from "./transport.ts";
 
 const DEFAULT_BACKGROUND_GRACE_MS = 10_000;
 
-const notifyAll = (listeners: ReadonlySet<() => void>): void =>
-  Array.from(listeners).forEach((listener) => listener());
-
-const addListener = (listeners: Set<() => void>, listener: () => void): (() => void) => {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-};
-
 export function createSocketClient(options: SocketClientOptions): SocketClient {
   const statusListeners = new Set<StatusListener>();
   const marketStatusListeners = new Set<MarketStatusListener>();
   const reconnectListeners = new Set<ReconnectListener>();
   const chaosStore = createChaosStateStore();
+  const feedModeStore = createFeedModeStore();
   const gate = createRecoveryGate();
 
   let status: ConnectionStatus = "connecting";
   let started = false;
   let hasEverWelcomed = false;
   let hasEverConnected = false;
-  let feedMode: FeedMode | null = null;
   let marketStatus: MarketStatus | null = null;
 
   function setStatus(next: ConnectionStatus): void {
@@ -141,7 +135,7 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
     onWelcome: (info: WelcomeInfo) => {
       gate.welcome();
       hasEverWelcomed = true;
-      feedMode = info.feedMode;
+      feedModeStore.learn(info.feedMode);
       setMarketStatus(info.marketStatus);
       connection.setHeartbeatInterval(info.heartbeatIntervalMs);
     },
@@ -194,7 +188,8 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
     subscribeMarketStatus: (listener) => addListener(marketStatusListeners, listener),
     getChaosState: chaosStore.get,
     subscribeChaosState: chaosStore.subscribe,
-    getFeedMode: () => feedMode,
+    getFeedMode: feedModeStore.get,
+    subscribeFeedMode: feedModeStore.subscribe,
     subscribeReconnect: (listener) => addListener(reconnectListeners, listener),
   };
 }

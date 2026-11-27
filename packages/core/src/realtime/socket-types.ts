@@ -42,5 +42,6 @@ export interface SocketClient {
   getChaosState(): ChaosSnapshot | null;
   subscribeChaosState(listener: ChaosStateListener): () => void;
   getFeedMode(): FeedMode | null;
+  subscribeFeedMode(listener: () => void): () => void;
   subscribeReconnect(listener: ReconnectListener): () => void;
 }

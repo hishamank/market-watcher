@@ -7,6 +7,7 @@ import { arChaosStrings } from "./chaos.ts";
 import { arDetailStrings } from "./detail.ts";
 import { arListStrings } from "./list.ts";
 import { arSearchStrings } from "./search.ts";
+import { arSettingsStrings } from "./settings.ts";
 import { arShellStrings } from "./shell.ts";
 import { arWatchlistStrings } from "./watchlist.ts";
 
@@ -22,4 +23,5 @@ export const ar = {
   ...arDetailStrings,
   ...arSearchStrings,
   ...arChaosStrings,
+  ...arSettingsStrings,
 };

@@ -4,6 +4,7 @@ import type { Translation } from "../en/index.ts";
 export const arChaosStrings = {
   "chaos.title": "أدوات الفوضى",
   "chaos.subtitle": "في وضع المحاكاة فقط",
+  "chaos.open": "فتح أدوات الفوضى",
   "chaos.close": "إغلاق",
   "chaos.section.connection": "اتصالك",
   "chaos.section.global": "للجميع، تعود بعد 60 ثانية",

@@ -17,8 +17,8 @@ export default function TabsLayout() {
         headerTintColor: palette.text,
         headerRight: () => (
           <View style={styles.actions}>
-            <LanguageToggle />
             <SearchButton />
+            <LanguageToggle />
           </View>
         ),
         tabBarStyle: { backgroundColor: palette.surface, borderTopColor: palette.border },
