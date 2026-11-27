@@ -12,6 +12,8 @@ export type {
   HttpResponse,
 } from "./rest/rest-client.ts";
 
+export { useQuoteAvailability } from "./hooks/use-quote-availability.ts";
+export type { QuoteAvailability } from "./realtime/quote-store.ts";
 export { useQuote } from "./hooks/use-quote.ts";
 export { useConnectionStatus } from "./hooks/use-connection-status.ts";
 export type { ConnectionStatusResult } from "./hooks/use-connection-status.ts";

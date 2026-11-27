@@ -5,24 +5,8 @@ import { createUnsubscribeScheduler } from "./unsubscribe-scheduler.ts";
 
 export const UNSUBSCRIBE_DELAY_MS = 2_000;
 
-export interface SubscriptionManagerOptions {
-  canSend(): boolean;
-  sendSubscribe(requestId: RequestId, symbols: readonly string[]): void;
-  sendUnsubscribe(symbols: readonly string[]): void;
-  onSymbolReleased?: ((symbol: string) => void) | undefined;
-  onUnanswered(): void;
-  unsubscribeDelayMs?: number | undefined;
-}
-
-export interface SubscriptionManager {
-  acquire(symbol: string): () => void;
-  getReferencedSymbols(): string[];
-  resubscribeAll(): string[];
-  settleSnapshot(requestId: RequestId): string[];
-  recordSymbolError(code: SymbolErrorCode, requestId: RequestId, symbols: readonly string[]): void;
-  settleRateLimited(requestId: RequestId | undefined): void;
-  resetSession(): void;
-}
+export type { SubscriptionManager, SubscriptionManagerOptions } from "./subscription-types.ts";
+import type { SubscriptionManager, SubscriptionManagerOptions } from "./subscription-types.ts";
 
 export function createSubscriptionManager(
   options: SubscriptionManagerOptions,
@@ -178,11 +162,13 @@ export function createSubscriptionManager(
       pacer.runNow();
       return symbols;
     },
-    settleSnapshot(requestId) {
+    settleSnapshot(requestId, confirm) {
       const request = requests.close(requestId);
-      return request === undefined
-        ? []
-        : applyOutcomes(request, requests.claim(request, request.symbols));
+      if (request === undefined) return [];
+      const claimed = requests.claim(request, request.symbols);
+      confirm?.(claimed.filter((symbol) => !request.outcomes.has(symbol)));
+      options.onSettled?.(claimed, request.outcomes);
+      return applyOutcomes(request, claimed);
     },
     recordSymbolError,
     settleRateLimited(requestId) {

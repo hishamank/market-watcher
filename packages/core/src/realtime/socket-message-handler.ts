@@ -47,12 +47,18 @@ function handleParsedMessage(message: ServerMessage, ctx: FrameHandlerContext): 
       return;
     case "snapshot":
       ctx.quoteStore.upsertMany(message.quotes);
-      ctx.gate.settle(ctx.subscriptions.settleSnapshot(message.requestId));
+      ctx.gate.settle(
+        ctx.subscriptions.settleSnapshot(message.requestId, (symbols) => {
+          const confirmed = message.quotes.filter((quote) => symbols.includes(quote.symbol));
+          ctx.quoteStore.receiveQuotes(confirmed);
+          for (const quote of confirmed) ctx.quoteStore.setAvailability(quote.symbol, "available");
+        }),
+      );
       ctx.onSnapshotsSettled();
       return;
     case "quotes":
       ctx.health?.quotes(message.quotes);
-      ctx.quoteStore.upsertMany(message.quotes);
+      ctx.quoteStore.receiveQuotes(message.quotes);
       return;
     case "heartbeat":
       ctx.health?.heartbeat(message.serverTime, message.skippedFrames);
