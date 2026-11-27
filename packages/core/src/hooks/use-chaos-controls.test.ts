@@ -66,6 +66,7 @@ describe("useChaosControls", () => {
     const initial = useChaosControls();
     expect(initial.tickSpike).toEqual({ enabled: false, secondsLeft: null });
     expect(initial.historyFailureRate).toEqual({ rate: 0, secondsLeft: null });
+    expect(initial.sharedControls).toBe(false);
 
     const serverClock = 1_764_000_500_000;
     gateway.latestConnection().sendServerMessage({
@@ -80,6 +81,7 @@ describe("useChaosControls", () => {
     const active = useChaosControls();
     expect(active.tickSpike).toEqual({ enabled: true, secondsLeft: 60 });
     expect(active.historyFailureRate).toEqual({ rate: 50, secondsLeft: 30 });
+    expect(active.sharedControls).toBe(true);
 
     vi.advanceTimersByTime(12_000);
     const later = useChaosControls();
@@ -103,6 +105,39 @@ describe("useChaosControls", () => {
     ]);
 
     cleanups.forEach((cleanup) => cleanup());
+    services.socketClient.stop();
+  });
+
+  it("reports shared controls only for a global-scope gateway", () => {
+    const gateway = createFakeGateway();
+    const services = createCoreServices({
+      gatewayUrl: "http://localhost:4000",
+      storage: createFakeStorage(),
+      network: createFakeNetwork("online"),
+      lifecycle: createFakeLifecycle("foreground"),
+      socketFactory: gateway.socketFactory,
+    });
+    vi.mocked(useContext).mockReturnValue(services);
+    vi.mocked(useState).mockImplementation(() => [0, () => {}]);
+    vi.mocked(useEffect).mockImplementation(() => {});
+    vi.mocked(useSyncExternalStore).mockImplementation((_subscribe, getSnapshot) => getSnapshot());
+    services.socketClient.start();
+    vi.advanceTimersByTime(0);
+
+    const idle = {
+      type: "chaos_state" as const,
+      serverTime: 1_764_000_500_000,
+      tickSpike: { enabled: false, revertsAt: null },
+      historyLatency: { enabled: false, revertsAt: null },
+      historyFailureRate: { rate: 0 as const, revertsAt: null },
+      forceClosed: { enabled: false, revertsAt: null },
+    };
+    gateway.latestConnection().sendServerMessage({ ...idle, scope: "connection" });
+    expect(useChaosControls().sharedControls).toBe(false);
+
+    gateway.latestConnection().sendServerMessage({ ...idle, scope: "global" });
+    expect(useChaosControls().sharedControls).toBe(true);
+
     services.socketClient.stop();
   });
 

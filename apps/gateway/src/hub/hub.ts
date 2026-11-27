@@ -3,6 +3,7 @@ import type { Feed } from "../feeds/types.ts";
 import { flushAll, sendHeartbeats } from "./conflation.ts";
 import {
   CLOSE_INTERNAL_ERROR,
+  CLOSE_POLICY_VIOLATION,
   CLOSE_SLOW_CONSUMER,
   FLUSH_INTERVAL_MS,
   HEARTBEAT_INTERVAL_MS,
@@ -18,6 +19,7 @@ import {
   wakeWritable,
   whenWritable,
 } from "./member.ts";
+import { bounded, refuseSubscribe } from "./pending.ts";
 import { createQuoteBook, type QuoteBook, type Warn } from "./quote-book.ts";
 import { adopt, changed, expire, trackUnquoted } from "./quote-watchers.ts";
 import { planSubscribe } from "./subscribe-plan.ts";
@@ -78,7 +80,7 @@ async function answerSubscribe(
     })
     .then((quotes) => adopt(quotes, watchers));
   await withDeadline(ready, REPLY_DEADLINE_MS);
-  await whenWritable(member);
+  if (isOpen()) await whenWritable(member);
   if (isOpen()) {
     expire(book, watchers);
     const unavailable = sendAnswer(member.peer, request.requestId, plan, book.latest);
@@ -94,16 +96,6 @@ function failSubscribe(member: Member, request: SubscribeRequest, parts: Parts, 
   }
 }
 
-async function refuseSubscribe(peer: Peer, requestId: RequestId, parts: Parts): Promise<void> {
-  const member = parts.members.get(peer);
-  if (member) {
-    await whenWritable(member);
-    if (parts.members.get(peer) === member) {
-      peer.reply({ type: "error", code: "rate_limited", message: "Too many messages", requestId });
-    }
-  }
-}
-
 function retryUpstream(parts: Parts): void {
   expire(parts.book, parts.watchers);
   parts.upstream.retry();
@@ -113,6 +105,15 @@ function retryUpstream(parts: Parts): void {
     parts.watchers,
   );
   void parts.book.refresh(unquoted).then((quotes) => adopt(quotes, parts.watchers));
+}
+
+function pending(peer: Peer, parts: Parts, work: (member: Member) => Promise<void>): Promise<void> {
+  const member = parts.members.get(peer);
+  const overload = (): void => {
+    void parts.leave(peer);
+    peer.close(CLOSE_POLICY_VIOLATION, "Too much pending work");
+  };
+  return member ? bounded(member, overload, () => work(member)) : Promise.resolve();
 }
 
 export function createHub({ feed, now, warn }: HubOptions): Hub {
@@ -141,8 +142,7 @@ export function createHub({ feed, now, warn }: HubOptions): Hub {
   }
 
   function inOrder(peer: Peer, task: (member: Member) => Promise<void> | void): Promise<void> {
-    const member = members.get(peer);
-    return member ? member.inOrder(async () => task(member)) : Promise.resolve();
+    return pending(peer, parts, (member) => member.inOrder(async () => task(member)));
   }
 
   function flush(): void {
@@ -178,7 +178,8 @@ export function createHub({ feed, now, warn }: HubOptions): Hub {
           failSubscribe(member, request, parts, err),
         ),
       ),
-    refuse: (peer, requestId) => refuseSubscribe(peer, requestId, parts),
+    refuse: (peer, requestId) =>
+      pending(peer, parts, () => refuseSubscribe(members, peer, requestId)),
     unsubscribe: (peer, symbols) =>
       inOrder(peer, (member) => release(watchers.remove(member, symbols), parts)),
     broadcast,

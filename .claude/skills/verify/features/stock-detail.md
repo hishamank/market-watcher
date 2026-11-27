@@ -5,7 +5,7 @@ A stock's page shows its name, live price and change, and a price chart with six
 ## Sub-features
 
 - `D1` open a stock: from a row or by URL, with a live header, the "Today" label on 1D, and back to the list.
-- `D2` range switching: each tab sets `aria-selected`, its label and a ready chart, and `?range=` deep links work.
+- `D2` range switching: each range button sets `aria-pressed`, its label and a ready chart, and `?range=` deep links work.
 - `D3` live point: `chart-last-price[data-price]` equals `detail-price` after every tick.
 - `D4` scrubbing: `chart-readout` shows the time in ET, the price and the change, and the header returns to live when the pointer leaves.
 - `D5` loading skeleton without layout shift, and `D6` history error with retry.
@@ -27,7 +27,7 @@ Preconditions:
 - **Open (D1).** On `/`, click `stock-row-name-AAPL`. Run `bin/journey stock-detail`. The URL is `/stocks/AAPL`, `detail-name` reads "Apple Inc.", `detail-change-label` reads "Today", and `detail-price` changes within 10 s. Evidence: `D1-detail.png`.
 - **Live point (D3).** With `price-chart[data-state="ready"]`, wait for four ticks. After each one, `chart-last-price[data-price]` equals the number in `detail-price`.
 - **Scrub (D4).** Move the pointer to 30% of the chart's width. `chart-readout` is visible and `detail-change-label` ends in " ET". Move the pointer above the chart: the label returns to "Today". Evidence: `D4-scrub.png`.
-- **Ranges (D2).** Press `range-tab-1W`, `1M`, `3M`, `1Y`, `5Y` and `1D` in turn. Each gets `aria-selected="true"`, the label reads "Past week", "Past month", "Past 3 months", "Past year", "Past 5 years" or "Today", and the chart reaches `ready`. Then open `/stocks/AAPL?range=1Y`: 1Y is selected and the label reads "Past year". Evidence: `D2-1Y.png`.
+- **Ranges (D2).** Press `range-tab-1W`, `1M`, `3M`, `1Y`, `5Y` and `1D` in turn. Each gets `aria-pressed="true"`, the label reads "Past week", "Past month", "Past 3 months", "Past year", "Past 5 years" or "Today", and the chart reaches `ready`. Then open `/stocks/AAPL?range=1Y`: 1Y is selected and the label reads "Past year". Evidence: `D2-1Y.png`.
 - **Unknown symbol (D7).** Open `/stocks/NOPE123`. The response status is 404 and `not-found` is visible. Evidence: `D7-not-found.png`.
 - **From search (D1).** On `/`, type `msft` into `search-input` and click the link inside `search-result-MSFT`. The URL is `/stocks/MSFT` and `detail-name` reads "Microsoft Corporation".
 - **From the list pane (D1).** At 1440 px on `/stocks/AAPL`, click `stock-row-name-NVDA` inside `list-pane`. The URL is `/stocks/NVDA`. Evidence: `D1-list-pane-1440.png`.

@@ -8,6 +8,7 @@
         "PORT",
         "FEED",
         "SIM_SEED",
+        "CHAOS_SCOPE",
         "NEXT_PUBLIC_GATEWAY_URL",
         "SITE_URL",
         "VERCEL_ENV",
