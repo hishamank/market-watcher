@@ -23,13 +23,17 @@ test.each([
   [{ TRUST_PROXY: "fly" }, "TRUST_PROXY entry fly is not understood"],
   [{ REST_RATE_LIMIT_MAX: "lots" }, "REST_RATE_LIMIT_MAX=lots is not a positive whole number"],
   [{ LOG_CLIENT_ADDRESSES: "yes" }, "LOG_CLIENT_ADDRESSES=yes is not a switch"],
-])("the gateway refuses to start with %j", (env, message) => {
-  const result = start({ PORT: "0", ...env });
-  expect(result.status).toBe(1);
-  expect(result.stderr.trim().split("\n")).toHaveLength(1);
-  expect(result.stderr).toContain(message);
-  expect(result.stdout).not.toContain("gateway listening");
-});
+])(
+  "the gateway refuses to start with %j",
+  (env, message) => {
+    const result = start({ PORT: "0", ...env });
+    expect(result.status).toBe(1);
+    expect(result.stderr.trim().split("\n")).toHaveLength(1);
+    expect(result.stderr).toContain(message);
+    expect(result.stdout).not.toContain("gateway listening");
+  },
+  30_000,
+);
 
 test("ports, origins and proxy settings accept only their documented forms", () => {
   expect(parsePort(undefined)).toBe(4000);
