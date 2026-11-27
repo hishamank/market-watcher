@@ -1,4 +1,3 @@
-import { createSocketDiagnostics, type RecoveryReason } from "./socket-diagnostics.ts";
 import type { MarketStatus } from "@mini/contracts";
 import { createChaosStateStore } from "./chaos-state-store.ts";
 import { createFeedModeStore } from "./feed-mode-store.ts";
@@ -19,9 +18,8 @@ import type {
 import { createSubscriptionManager } from "./subscription-manager.ts";
 import { logWarning } from "./timers.ts";
 import { createDefaultSocket } from "./transport.ts";
-
+import { createSocketDiagnostics, type RecoveryReason } from "./socket-diagnostics.ts";
 const DEFAULT_BACKGROUND_GRACE_MS = 10_000;
-
 export function createSocketClient(options: SocketClientOptions): SocketClient {
   const statusListeners = new Set<StatusListener>();
   const marketStatusListeners = new Set<MarketStatusListener>();
@@ -29,6 +27,7 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
   const chaosStore = createChaosStateStore();
   const feedModeStore = createFeedModeStore();
   const gate = createRecoveryGate();
+
   let status: ConnectionStatus = "connecting";
   let started = false;
   let hasEverWelcomed = false;
@@ -158,6 +157,7 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
     onRawFrame: (data) => processRawServerFrame(data, frameContext),
     onLinkLost: handleLinkLost,
   });
+
   return {
     getDiagnostics: diagnostics.snapshot,
     start() {
