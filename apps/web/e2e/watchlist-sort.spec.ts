@@ -58,3 +58,33 @@ test("W8 watchlist sorts by a column, cycles back to starred order and keeps the
   expect(await watchlistRowSymbols(page)).toEqual(["AAPL", "NVDA"]);
   expect(problems).toEqual([]);
 });
+
+test("W8 a numeric sort holds its order while prices tick, and narrow screens and bad params keep starred order", async ({
+  page,
+}) => {
+  const problems = collectConsoleProblems(page);
+  await page.goto("/");
+  await expect(page.getByTestId("star-MSFT")).toBeEnabled();
+  for (const symbol of ["MSFT", "NVDA", "AAPL"]) await page.getByTestId(`star-${symbol}`).click();
+  await page.getByTestId("view-toggle-watchlist").click();
+  await page.getByTestId("watchlist-sort-change").click();
+  const sorted = await watchlistRowSymbols(page);
+  const prices = page.locator('[data-testid^="stock-row-price-"]');
+  const before = (await prices.allTextContents()).join();
+  await expect
+    .poll(async () => (await prices.allTextContents()).join() !== before, { timeout: 10_000 })
+    .toBe(true);
+  expect(await watchlistRowSymbols(page)).toEqual(sorted);
+
+  await page.setViewportSize({ width: 767, height: 800 });
+  await page.goto("/?view=watchlist&sort=symbol-asc");
+  await expect(page.getByTestId("watchlist")).toBeVisible();
+  expect(await watchlistRowSymbols(page)).toEqual(["AAPL", "NVDA", "MSFT"]);
+
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/?view=watchlist&sort=symbol-asc-extra");
+  await expect(page.getByTestId("watchlist")).toBeVisible();
+  await expect(page.getByTestId("watchlist-sort-symbol")).toHaveAttribute("data-sort", "none");
+  expect(await watchlistRowSymbols(page)).toEqual(["AAPL", "NVDA", "MSFT"]);
+  expect(problems).toEqual([]);
+});

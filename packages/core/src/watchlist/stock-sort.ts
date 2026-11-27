@@ -68,3 +68,41 @@ export function sortStocks(
     (first, second) => primary(first, second) || collator.compare(first.symbol, second.symbol),
   );
 }
+
+export interface SortSnapshot {
+  readonly key: string;
+  readonly order: readonly string[];
+}
+
+export interface HeldOrder {
+  readonly stocks: readonly Stock[];
+  readonly snapshot: SortSnapshot | undefined;
+}
+
+function keepOrder(
+  order: readonly string[],
+  stocks: readonly Stock[],
+): readonly Stock[] | undefined {
+  const position = new Map(order.map((symbol, index) => [symbol, index]));
+  if (stocks.some((stock) => !position.has(stock.symbol))) return undefined;
+  return [...stocks].sort(
+    (first, second) => (position.get(first.symbol) ?? 0) - (position.get(second.symbol) ?? 0),
+  );
+}
+
+export function holdSortOrder(
+  snapshot: SortSnapshot | undefined,
+  key: string | undefined,
+  stocks: readonly Stock[],
+  sortNow: () => readonly Stock[],
+): HeldOrder {
+  if (key === undefined) return { stocks, snapshot: undefined };
+  const kept = snapshot?.key === key ? keepOrder(snapshot.order, stocks) : undefined;
+  if (kept !== undefined && snapshot !== undefined) {
+    const unchanged = kept.length === snapshot.order.length;
+    const order = kept.map((stock) => stock.symbol);
+    return { stocks: kept, snapshot: unchanged ? snapshot : { key, order } };
+  }
+  const sorted = sortNow();
+  return { stocks: sorted, snapshot: { key, order: sorted.map((stock) => stock.symbol) } };
+}

@@ -94,7 +94,7 @@ function HeaderCell({ column, className, sort, fading }: HeaderCellProps) {
         <SortArrow
           column={column}
           direction={direction ?? firstStockSortDirection(column)}
-          visibility={`${direction === undefined ? "opacity-0 group-hover:opacity-40" : "opacity-100"} group-focus-visible:opacity-100 motion-safe:transition-opacity`}
+          visibility={`${direction === undefined ? "opacity-0 group-hover:opacity-40 group-focus-visible:opacity-40" : "opacity-100"} motion-safe:transition-opacity`}
         />
       </button>
     </span>

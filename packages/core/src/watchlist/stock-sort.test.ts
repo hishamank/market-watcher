@@ -1,7 +1,7 @@
 import type { Stock } from "@mini/contracts";
 import { describe, expect, it } from "vitest";
 import { makeQuote } from "../testing/fake-platform.ts";
-import { nextStockSort, sortStocks } from "./stock-sort.ts";
+import { holdSortOrder, nextStockSort, sortStocks } from "./stock-sort.ts";
 
 const stock = (symbol: string, name: string, price: string): Stock => ({
   symbol,
@@ -58,6 +58,39 @@ describe("watchlist sorting", () => {
     expect(nextStockSort({ field: "symbol", direction: "asc" }, "change")).toEqual({
       field: "change",
       direction: "desc",
+    });
+  });
+
+  describe("held order", () => {
+    const byPrice = (items: readonly Stock[]) =>
+      sortStocks(items, { field: "price", direction: "desc" }, fromStock, "en-US");
+    const [msft, aapl, nvda] = stocks as [Stock, Stock, Stock];
+
+    it("keeps the order while quotes change, and drops a removed symbol from it", () => {
+      const first = holdSortOrder(undefined, "price", stocks, () => byPrice(stocks));
+      expect(symbols(first.stocks)).toEqual(["NVDA", "AAPL", "MSFT"]);
+      const ticked = [{ ...msft, quote: makeQuote("MSFT", "900.00", 2000) }, aapl, nvda];
+      const held = holdSortOrder(first.snapshot, "price", ticked, () => byPrice(ticked));
+      expect(symbols(held.stocks)).toEqual(["NVDA", "AAPL", "MSFT"]);
+      expect(held.snapshot).toBe(first.snapshot);
+      const removed = holdSortOrder(first.snapshot, "price", [msft, nvda], () =>
+        byPrice([msft, nvda]),
+      );
+      expect(removed.snapshot?.order).toEqual(["NVDA", "MSFT"]);
+    });
+
+    it("sorts afresh when a removed symbol comes back or the sort is turned off and on", () => {
+      const first = holdSortOrder(undefined, "price", stocks, () => byPrice(stocks));
+      const removed = holdSortOrder(first.snapshot, "price", [msft, nvda], () =>
+        byPrice([msft, nvda]),
+      );
+      const risen = [msft, { ...aapl, quote: makeQuote("AAPL", "999.00", 2000) }, nvda];
+      const back = holdSortOrder(removed.snapshot, "price", risen, () => byPrice(risen));
+      expect(symbols(back.stocks)).toEqual(["AAPL", "NVDA", "MSFT"]);
+      const off = holdSortOrder(first.snapshot, undefined, risen, () => risen);
+      expect(off.snapshot).toBeUndefined();
+      const on = holdSortOrder(off.snapshot, "price", risen, () => byPrice(risen));
+      expect(symbols(on.stocks)).toEqual(["AAPL", "NVDA", "MSFT"]);
     });
   });
 });

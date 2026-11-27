@@ -1,6 +1,7 @@
 "use client";
 
 import type { StockSort } from "@mini/core";
+import { useSearchParams } from "next/navigation";
 import { useState, type MouseEvent } from "react";
 import { useTableColumns } from "../columns/use-table-columns.ts";
 import { ViewToggle, type ListView } from "../components/view-toggle.tsx";
@@ -11,13 +12,23 @@ import { useSortParam } from "./use-sort-param.ts";
 import { useViewParam, viewHref } from "./use-view-param.ts";
 import { WatchlistView } from "./watchlist-view.tsx";
 
+interface LeavingSort {
+  readonly sort: StockSort;
+  readonly from: string;
+}
+
 export function ListPage() {
   const { view, selectView } = useViewParam();
   const { sort } = useSortParam();
-  const [leavingSort, setLeavingSort] = useState<StockSort | undefined>(undefined);
+  const search = useSearchParams().toString();
+  const [leaving, setLeaving] = useState<LeavingSort | undefined>(undefined);
   const { chosen } = useTableColumns();
+  if (view === "watchlist" && leaving !== undefined && leaving.from !== search) {
+    setLeaving(undefined);
+  }
   const switchView = (next: ListView, event: MouseEvent) => {
-    setLeavingSort(view === "watchlist" && next === "all" ? sort : undefined);
+    const fading = view === "watchlist" && next === "all" ? sort : undefined;
+    setLeaving(fading === undefined ? undefined : { sort: fading, from: search });
     selectView(next, event);
   };
   return (
@@ -35,7 +46,7 @@ export function ListPage() {
           {view === "watchlist" ? (
             <WatchlistView onShowAll={switchView} />
           ) : (
-            <StockList fadingSort={leavingSort} />
+            <StockList fadingSort={leaving?.sort} />
           )}
         </section>
       </div>

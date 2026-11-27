@@ -6,6 +6,7 @@ import type { MouseEvent } from "react";
 import { buttonClassName } from "../components/button.tsx";
 import { EmptyState } from "../components/empty-state.tsx";
 import { StarIcon } from "../components/icons.tsx";
+import { useMediaQuery } from "../integrations/use-media-query.ts";
 import { useStarTransition } from "../integrations/star-motion.ts";
 import { ListError } from "../components/list-error.tsx";
 import { ListSkeleton } from "../components/list-skeleton.tsx";
@@ -24,7 +25,11 @@ export function WatchlistView({ onShowAll }: WatchlistViewProps) {
   const reflowStar = useStarTransition(symbols, toggle);
   const state = useWatchlistStocks();
   const { sort, selectSort } = useSortParam();
-  const stocks = useSortedStocks(state.status === "ready" ? state.stocks : [], sort);
+  const sortable = useMediaQuery("(width >= 48rem)");
+  const stocks = useSortedStocks(
+    state.status === "ready" ? state.stocks : [],
+    sortable ? sort : undefined,
+  );
   if (state.status === "loading") {
     return <ListSkeleton testId="watchlist-skeleton" />;
   }
