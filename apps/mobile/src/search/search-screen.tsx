@@ -1,7 +1,7 @@
 import { useLanguage, useSearch, useWatchlist } from "@mini/core";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SearchField } from "../components/search-field.tsx";
 import { SearchResults } from "../components/search-results.tsx";
@@ -17,8 +17,9 @@ export function SearchScreen() {
   const palette = usePalette();
   const insets = useSafeAreaInsets();
   return (
-    <View
+    <KeyboardAvoidingView
       testID="search-screen"
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={[styles.screen, { paddingBlockStart: insets.top, backgroundColor: palette.surface }]}
     >
       <SearchField
@@ -39,7 +40,7 @@ export function SearchScreen() {
         onToggleStar={watchlist.toggle}
         onRetry={search.retry}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

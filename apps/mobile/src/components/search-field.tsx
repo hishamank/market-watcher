@@ -1,6 +1,7 @@
 import { MAX_SEARCH_QUERY_LENGTH } from "@mini/contracts";
 import { useT } from "@mini/core";
 import { radius, space } from "@mini/tokens";
+import { useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from "react-native";
 import { usePalette } from "../theme/palette.ts";
 import { useTextStyles } from "../theme/text-styles.ts";
@@ -58,16 +59,20 @@ export function SearchField(props: SearchFieldProps) {
   const t = useT();
   const palette = usePalette();
   const textStyles = useTextStyles();
+  const [focused, setFocused] = useState(false);
+  const fieldStyle = focused
+    ? { borderColor: palette.focus, outlineColor: palette.focus, outlineWidth: 1 }
+    : { borderColor: palette.fill, outlineWidth: 0 };
   return (
     <View style={[styles.bar, { borderColor: palette.border }]}>
       <IconButton
         testID="search-back"
-        label={t("detail.back")}
+        label={t("chaos.close")}
         icon="chevronStart"
         mirrored={props.rtl}
         onPress={props.onBack}
       />
-      <View style={[styles.field, { backgroundColor: palette.fill }]}>
+      <View style={[styles.field, { backgroundColor: palette.fill }, fieldStyle]}>
         <Icon name="search" color={palette.textSecondary} />
         <TextInput
           testID="search-input"
@@ -82,6 +87,8 @@ export function SearchField(props: SearchFieldProps) {
           placeholderTextColor={palette.textSecondary}
           value={props.query}
           onChangeText={props.onChangeQuery}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           style={[textStyles.body, styles.input, { color: palette.text }]}
         />
         <FieldEnd {...props} />
@@ -108,6 +115,8 @@ const styles = StyleSheet.create({
     paddingStart: 14,
     paddingEnd: space[4],
     borderRadius: radius.lg,
+    borderWidth: 1,
+    outlineStyle: "solid",
   },
   input: { flex: 1, minWidth: 0, paddingBlock: space[10] },
   iconButton: {
