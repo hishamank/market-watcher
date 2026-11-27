@@ -126,7 +126,7 @@ Four independent endpoints supply optional context on the stock detail screen wi
 
 ## Decisions and trade-offs reference
 
-Summary of core architectural decisions across the codebase; see [`docs/adrs.md`](adrs.md) for the complete index of all 87 ADRs (`0001`–`0096`).
+Summary of core architectural decisions across the codebase; see [`docs/adrs.md`](adrs.md) for the complete index of all 91 ADRs (`0001`–`0100`).
 
 | Decision | Rationale and trade-off | ADR |
 | --- | --- | --- |

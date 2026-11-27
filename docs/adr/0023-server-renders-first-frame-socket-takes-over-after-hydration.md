@@ -1,6 +1,6 @@
 # The server renders the first frame, and the socket takes over after hydration
 
-Amended by [ADR 0099](./0099-an-empty-stored-watchlist-paints-before-hydration.md): when the stored watchlist is empty, the watchlist view paints its empty state before hydration instead of a skeleton.
+Amended by [ADR 0101](./0101-an-empty-stored-watchlist-paints-before-hydration.md): when the stored watchlist is empty, the watchlist view paints its empty state before hydration instead of a skeleton.
 
 The URL holds view state: `/` for the list (with `?view=watchlist`) and `/stocks/[symbol]` for detail (with `?range=`), so links are shareable, the back button works, and the server knows what to render. Server components prefetch the list, the detail quote and the default range's history through TanStack Query, and hand them to the browser through `HydrationBoundary`. Every REST response carries `feedMode` and `marketStatus`, so the badge renders on the server.
 

@@ -124,11 +124,11 @@ Terms follow [`glossary.md`](./glossary.md). Decisions are in [`adr/`](./adr), a
 
 ### L5. All and Watchlist toggle (R, E2E)
 
-- **Test IDs:** `view-toggle-all`, `view-toggle-watchlist`.
+- **Test IDs:** `view-toggle-all`, `view-toggle-watchlist`, `watchlist-count[data-count]` (the starred count on the Watchlist tab).
 - **Expected:**
   - Selecting Watchlist sets `?view=watchlist`, and selecting All removes it. The switch is instant, with no server render (ADR 0050).
   - The back button restores the previous view.
-  - Loading `/?view=watchlist` directly shows a skeleton (`watchlist-skeleton`) on the server render, then the watchlist after hydration. When the stored watchlist is empty, the empty state (`watchlist-empty`) shows from the first paint instead (ADR 0099).
+  - Loading `/?view=watchlist` directly shows a skeleton (`watchlist-skeleton`) on the server render, then the watchlist after hydration. When the stored watchlist is empty, the empty state (`watchlist-empty`) shows from the first paint instead (ADR 0101).
   - The selected option's indicator slides to the new option (Walk). With reduced motion it jumps.
 
 ### L6. Column manager (N, Walk)
@@ -179,11 +179,11 @@ Terms follow [`glossary.md`](./glossary.md). Decisions are in [`adr/`](./adr), a
 - **Test IDs:** `price-chart` (focusable), `chart-readout`, `detail-change-label`.
 - **Expected:** the readout shows the price at the point, its time in ET, and the change from the start of the range. On 1D, moving into the shaded future part keeps the crosshair and readout on the live point. Leaving the chart returns the header to the live price.
 
-### D5. Chart loading without layout shift (R, E2E + Walk)
+### D5. Range switch keeps the chart without layout shift (R, E2E + Walk)
 
 - **Steps:** open `/stocks/AAPL?debug=1`, set **History latency** on, then switch to a range not yet viewed.
-- **Test IDs:** `price-chart[data-state]`, `chaos-history-latency`.
-- **Expected:** `price-chart[data-state="loading"]` shows a skeleton of the same size for about 2 s, then `ready`. Nothing else on the page moves (layout shift is about 0).
+- **Test IDs:** `price-chart[data-state]`, `price-chart[aria-busy]`, `chart-updating`, `detail-change-label`, `chaos-history-latency`.
+- **Expected:** the previous range stays drawn with `price-chart[data-state="ready"][aria-busy="true"]` for about 2 s, with no skeleton. After 150 ms the chart and the header's change row dim and `chart-updating` shows a spinner over the plot. The header label keeps the previous range until the new one arrives, then the chart, change and label switch together and `aria-busy` turns `false`. Nothing on the page moves (layout shift is about 0).
 
 ### D6. History error and retry (R, E2E)
 
@@ -282,6 +282,17 @@ Terms follow [`glossary.md`](./glossary.md). Decisions are in [`adr/`](./adr), a
 - **Steps:** open `/stocks/ABNB`, star it, then open the watchlist view.
 - **Expected:** ABNB appears with its name and a live price, even though it is not one of the 50 list symbols.
 
+### W8. Watchlist sorting (N, E2E + Walk)
+
+- **Reach:** from 768 px, star MSFT, NVDA and AAPL, then open the watchlist.
+- **Test IDs:** `watchlist-sort-{column}` (`name`, `symbol`, `price`, `change`, `changePercent`, `previousClose`, `dayHigh`, `dayLow`, `lastUpdate`), each with `data-sort` (`asc`, `desc`, `none`).
+- **Expected:**
+  - Only the watchlist header has sort buttons; All keeps its fixed order. Below 768 px there is no header and no sorting: a `sort` in the URL is ignored there. A malformed `sort` is ignored at every width.
+  - Hovering or focusing a label shows a faint arrow beside it, in the gap between columns, without moving any label (Walk). The sorted column's arrow is solid. Pressing `view-toggle-all` from a sorted watchlist fades that arrow out in place instead of removing it at once, and with reduced motion it goes at once (Walk).
+  - Pressing a button sorts the rows and sets `?sort={column}-{direction}`. Name and Symbol start ascending; the others start descending. Rows without a day range sort last on Day high and Day low. The second press reverses, and the third returns to newest-starred order and removes `sort`.
+  - The order stays still while prices tick. Unstarring a row keeps the others in place.
+  - Reloading, or opening a stock and coming back, keeps the sort (ADR 0100).
+
 ## Chaos controls (`?debug=1`)
 
 ### C1. Panel availability (R, E2E)
@@ -373,7 +384,7 @@ The app runs in Expo Go against the walk gateway on the LAN, and the owner walks
 
 - **Reach:** tap `stock-row-AAPL` on the Markets tab.
 - **Persistence failure:** a failed star change rolls back and announces a localized error, as in W3. `watchlist-error-dismiss` dismisses the error; later toggles remain usable. The same error is available in Markets, Watchlist and Search.
-- **Test IDs:** `detail-header`, `detail-name`, `detail-price`, `detail-change`, `detail-change-label`, `detail-star`, `range-tab-1D`, `range-tab-1W`, `range-tab-1M`, `range-tab-3M`, `range-tab-1Y`, `range-tab-5Y`, `price-chart` (its accessibility value is `loading`, `ready` or `error`), `chart-skeleton`, `chart-error`, `chart-retry`, `chart-as-of`, `chart-readout`, `detail-day-change`, `detail-previous-close`, `detail-day-high`, `detail-day-low`, `detail-last-update`, `detail-skeleton`, `detail-error`, `detail-retry`, `not-found`.
+- **Test IDs:** `detail-header`, `detail-name`, `detail-price`, `detail-change`, `detail-change-label`, `detail-star`, `range-tab-1D`, `range-tab-1W`, `range-tab-1M`, `range-tab-3M`, `range-tab-1Y`, `range-tab-5Y`, `price-chart` (its accessibility value is `loading`, `ready` or `error`), `chart-skeleton`, `chart-updating`, `chart-error`, `chart-retry`, `chart-as-of`, `chart-readout`, `detail-day-change`, `detail-previous-close`, `detail-day-high`, `detail-day-low`, `detail-last-update`, `detail-skeleton`, `detail-error`, `detail-retry`, `not-found`.
 - **Expected:**
   - The header shows the symbol, name, live price and the range change with its label ("Today" on 1D), and below the tabs the day change, previous close, day high, day low and last update in ET. A range that has never loaded shows a dash in place of its change.
   - Each range tab redraws the chart and changes the header's change and label (for example "Past year" on 1Y). A range already viewed draws at once. The line is green or coral by the range's direction, and the header pill keeps its sign and arrow.

@@ -129,7 +129,7 @@ function SearchResultRow({
         </bdi>
       </Link>
       <StarButton
-        name={item.name}
+        {...item}
         starred={starred}
         onToggle={onToggleStar}
         testId={`search-result-star-${item.symbol}`}

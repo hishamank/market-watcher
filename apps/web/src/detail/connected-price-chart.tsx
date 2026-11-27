@@ -59,27 +59,29 @@ function readoutOf(
 export function ConnectedPriceChart({ symbol, range, scrub, onScrub }: ConnectedPriceChartProps) {
   const t = useT();
   const locale = useLocale();
-  const history = useLiveHistory(symbol, range);
+  const history = useLiveHistory(symbol, range, { keepPrevious: true });
+  const shownRange = history.range ?? range;
   const direction =
     history.rangeChange === undefined ? "flat" : directionOf(history.rangeChange.change);
-  const previousClose = range === "1D" ? history.previousClose : undefined;
+  const previousClose = shownRange === "1D" ? history.previousClose : undefined;
   const chart = usePriceChart({
-    datasetKey: `${symbol}:${range}`,
+    datasetKey: `${symbol}:${shownRange}`,
     bars: history.bars,
-    range,
+    range: shownRange,
     session: history.session,
     previousClose,
     direction,
     muted: history.ageMs !== undefined,
     formatters: chartFormatters(locale),
-    onScrub,
+    onScrub: (point) => onScrub(history.updating ? undefined : point),
   });
   return (
     <PriceChart
       state={chartStateOf(history)}
+      updating={history.updating}
       direction={direction}
       drawn={chart.drawn}
-      label={t("detail.chart.label", { range: t(`detail.range.${range}`) })}
+      label={t("detail.chart.label", { range: t(`detail.range.${shownRange}`) })}
       previousCloseLabel={
         previousClose === undefined
           ? undefined
@@ -92,7 +94,7 @@ export function ConnectedPriceChart({ symbol, range, scrub, onScrub }: Connected
           ? undefined
           : t("detail.chart.asOf", { time: formatMarketTime(history.asOf, { locale }) })
       }
-      readout={readoutOf(range, history.baseline, scrub, locale)}
+      readout={history.updating ? undefined : readoutOf(range, history.baseline, scrub, locale)}
       onRetry={() => void history.refetch()}
       onKeyDown={chart.scrub.onKeyDown}
       onBlur={chart.scrub.onBlur}

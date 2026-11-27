@@ -177,13 +177,13 @@ In React Native, `elevation.1` and `elevation.2` map to shadow properties, and t
 | Selected segment (view control, range tabs, chaos failure rate) | Indicator slides to the new option, 200 ms | Jumps |
 | Star | On a user star only: pops past 100% and settles, thin amber ring expands and fades with six tiny dots, 400 ms; transform and opacity only | Fills at once, no animation |
 | Chart first draw | Line reveals from left to right, 450 ms | Appears at once |
-| Range change | New line fades in, 200 ms | Swaps at once |
+| Range change | After 150 ms of waiting, the old line dims to 40% and a spinner fades in; the new line then brightens from 40%, 200 ms | The old line dims after 150 ms and the spinner does not turn; the new line swaps at once |
 | Live point | Halo pulses, 2 s loop | Static halo |
 | Search dropdown (from 768 px) | Drops 6 px and fades in, 200 ms | Fades in, 120 ms |
 | Language switch (web) | The page turns like a card: the old layout rotates away until it is edge-on, then the mirrored one rotates in from the other side, 320 ms + 320 ms. It shrinks to 82% and dims at the midpoint over `color.fill`. To Arabic turns one way, back to English the other (ADR 0097) | Switches at once |
 | List to detail (web) | Name and price move from the row into the detail header, 320 ms (only when opening from a row) | Page changes at once |
 | Empty watchlist to list (web) | Starred suggestion moves into the watchlist's first slot; the empty state's star fills, then the empty state shrinks and fades, 320 ms. Unstarring the last row reverses it, and the star pops (ADR 0062) | Swaps at once |
-| Star to Watchlist control (web) | A star copy flies along a curve into the Watchlist option, which bumps to 106%, 400 ms + 320 ms. Only when that option is on screen and not current | Nothing flies |
+| Star to Watchlist control (web) | A star copy flies along a curve into the count badge on the Watchlist option, which bumps to 130%, 400 ms + 320 ms. The count holds until the star lands, then its digits flip, 320 ms; up when it grows, down when it shrinks. Only when that option is on screen and not current (ADR 0099) | Nothing flies; the count changes at once |
 | Empty watchlist to list (mobile) | The new content fades in, 200 ms; the empty state's star pops on return. Not on the first render after load | Swaps at once |
 | Haptics (mobile) | Light tap on star; selection tick on range change | Unchanged |
 | Skeleton | Pulses between 100% and 55% opacity, 1.2 s loop | Static fill |
@@ -296,9 +296,9 @@ Each component lists its anatomy, states, spacing, motion and test IDs.
 - **Future (1D).** The part of the session after the live point is shaded with `color.fill` at 35% opacity, so the empty half reads as time still to come.
 - **Scrubbing.** A 1 px `chart.crosshair` line and a 10 px hollow dot. The readout shows time in ET, price, and change from the start of the range with arrow and sign. It sits in the strip above the plot, follows the crosshair and stops at the chart edges. The crosshair never goes past the last bar: in the future part of 1D it rests on the live point. The chart is focusable, and the arrow keys move the crosshair one bar.
 - **Attribution.** The TradingView mark keeps the bottom left corner of the plot. Keep about 72 by 20 px clear there.
-- **States.** Loading: a skeleton at the exact final size (`radius.lg`) and an axis skeleton. Error: a dashed-border box with an alert icon, "Couldn't load this chart" and Retry, while the header keeps ticking. Older copy: the line in `color.textMuted`, no fill and no live point, with a note "As of 13:40 ET" on `color.staleTint` in the strip.
-- **Motion.** The first draw reveals the line from left to right. A range change fades the new line in.
-- **Test IDs.** `price-chart[data-state]`, `chart-last-price`, `chart-readout`, `chart-retry`.
+- **States.** Loading (no range drawn yet): a skeleton at the exact final size (`radius.lg`) and an axis skeleton. Updating (a range switch on the same stock): the previous range stays drawn; after 150 ms it dims to 40% and a 40 px spinner on `color.raised` fades in over the plot. Scrubbing pauses until the new range arrives. Error: a dashed-border box with an alert icon, "Couldn't load this chart" and Retry, while the header keeps ticking. Older copy: the line in `color.textMuted`, no fill and no live point, with a note "As of 13:40 ET" on `color.staleTint` in the strip.
+- **Motion.** The first draw reveals the line from left to right. A range change brightens the new line from 40%.
+- **Test IDs.** `price-chart[data-state]`, `price-chart[aria-busy]`, `chart-updating`, `chart-last-price`, `chart-readout`, `chart-retry`.
 
 ### Detail header
 
@@ -308,6 +308,7 @@ Each component lists its anatomy, states, spacing, motion and test IDs.
   - Ticking: the flash tint behind the price.
   - Scrubbing: the price and change show the scrubbed point, and the label shows its time in ET.
   - Chart loading: a skeleton pill of the final size.
+  - Range switching: the previous range's change and label stay, dimmed to 40% after 150 ms, until the new range arrives.
   - Chart error on a range never loaded: a neutral pill with a dash, because the range change is unknown.
   - Last-known quote: always-visible `detail-price-as-of` note below the change, with the ChartAsOf staleTint pill, stale clock, text label and textSecondary help. Last update includes date and time. No animation or “Last close” caption; chart fallback remains visible independently.
   - Market closed (separate pending ticket): a line under the change with the moon icon, "Market closed" and "Last close {time} ET", where the time is the session close the gateway reports.

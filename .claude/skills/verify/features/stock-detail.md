@@ -8,7 +8,7 @@ A stock's page shows its name, live price and change, and a price chart with six
 - `D2` range switching: each range button sets `aria-pressed`, its label and a ready chart, and `?range=` deep links work.
 - `D3` live point: `chart-last-price[data-price]` equals `detail-price` after every tick.
 - `D4` scrubbing: `chart-readout` shows the time in ET, the price and the change, and the header returns to live when the pointer leaves.
-- `D5` loading skeleton without layout shift, and `D6` history error with retry.
+- `D5` range switch keeps the dimmed chart with a spinner, without layout shift, and `D6` history error with retry.
 - `D7` unknown symbol: HTTP 404 with `not-found`.
 
 ## How to get to it (user POV)

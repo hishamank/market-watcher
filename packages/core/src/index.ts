@@ -26,12 +26,19 @@ export { useHistory, useStock, useStockList, useStocks } from "./hooks/use-stock
 export { useStockPages } from "./hooks/use-stock-pages.ts";
 export type { StockPagesResult } from "./hooks/use-stock-pages.ts";
 export { useLiveHistory } from "./hooks/use-live-history.ts";
-export type { LiveHistoryResult } from "./hooks/use-live-history.ts";
+export type { LiveHistoryOptions, LiveHistoryResult } from "./hooks/use-live-history.ts";
 export { useWatchlist } from "./hooks/use-watchlist.ts";
 export { WATCHLIST_STORAGE_KEY } from "./watchlist/watchlist-store.ts";
 export type { WatchlistResult } from "./hooks/use-watchlist.ts";
 export { useWatchlistStocks } from "./hooks/use-watchlist-stocks.ts";
 export type { WatchlistStockRow, WatchlistStocksResult } from "./hooks/use-watchlist-stocks.ts";
+export { useSortedStocks } from "./hooks/use-sorted-stocks.ts";
+export {
+  STOCK_SORT_FIELDS,
+  firstStockSortDirection,
+  nextStockSort,
+} from "./watchlist/stock-sort.ts";
+export type { StockSort, StockSortDirection, StockSortField } from "./watchlist/stock-sort.ts";
 
 export {
   historyQueryOptions,

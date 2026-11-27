@@ -6,6 +6,7 @@ import { Morph } from "./morph.tsx";
 import { PriceCell } from "./price-cell.tsx";
 import { QuoteAsOf } from "./quote-as-of.tsx";
 import { Skeleton } from "./skeleton.tsx";
+import { updatingFade } from "./updating-fade.ts";
 import { StarButton } from "./star-button.tsx";
 
 export interface DetailHeaderProps {
@@ -15,6 +16,7 @@ export interface DetailHeaderProps {
   change: string;
   rangeChange: Change | undefined;
   changeLoading: boolean;
+  changeUpdating?: boolean;
   rangeLabel: string;
   asOf?: string | undefined;
   asOfHelp: string;
@@ -59,6 +61,7 @@ export function DetailHeader(props: DetailHeaderProps) {
           </Morph>
         </div>
         <StarButton
+          symbol={symbol}
           name={name}
           starred={props.starred}
           onToggle={props.onToggleStar}
@@ -80,7 +83,9 @@ export function DetailHeader(props: DetailHeaderProps) {
           />
         </Morph>
       </div>
-      <div className="mt-6 flex flex-wrap items-center gap-8 text-label font-normal text-text-secondary">
+      <div
+        className={`mt-6 flex flex-wrap items-center gap-8 text-label font-normal text-text-secondary ${updatingFade(props.changeUpdating === true)}`}
+      >
         {props.changeLoading ? (
           <Skeleton className="h-[24px] w-[132px]" pill />
         ) : rangeChange === undefined ? (
