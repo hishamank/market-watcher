@@ -22,8 +22,6 @@ The issue asked for a check in Expo Go before relying on the sheet. It ran on iO
 
 The sheet worked, so the fallback the issue allows (a pushed screen with the connection banner) was not needed. Android was not checked.
 
-> **Design note:** "On mobile the chaos controls hide behind a switch in Settings, because a phone has no query string. The panel is a native half-height sheet that doesn't dim the screen, so you can drop the connection or spike the ticks and watch the prices react behind it. I left out Go offline: airplane mode is the real thing."
-
 ## Considered options
 
 - **A pushed screen with the connection banner:** the fallback in the issue. It works everywhere, but it hides the prices the controls are meant to disturb.
