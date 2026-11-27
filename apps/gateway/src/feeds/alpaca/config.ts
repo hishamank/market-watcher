@@ -9,6 +9,7 @@ export const RECONNECT_BASE_MS = 1_000;
 export const RECONNECT_MAX_MS = 30_000;
 export const MAX_BAR_PAGES = 10;
 export const REQUEST_BUDGET = 180;
+export const HISTORY_REQUEST_BUDGET = 60;
 export const BUDGET_WINDOW_MS = 60_000;
 export const BACKOFF_BASE_MS = 5_000;
 export const BACKOFF_MAX_MS = 60_000;
