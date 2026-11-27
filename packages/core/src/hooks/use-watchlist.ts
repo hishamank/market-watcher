@@ -9,6 +9,8 @@ export interface WatchlistResult {
   readonly isLoaded: boolean;
   readonly isStarred: (symbol: string) => boolean;
   readonly toggle: (symbol: string) => void;
+  readonly saveFailed: boolean;
+  readonly dismissError: () => void;
 }
 
 function getServerSnapshot(): WatchlistSnapshot {
@@ -30,6 +32,8 @@ export function useWatchlist(): WatchlistResult {
   return {
     symbols: snapshot.symbols,
     isLoaded: snapshot.loaded,
+    saveFailed: Boolean(snapshot.saveFailed),
+    dismissError: () => watchlistStore.dismissError(),
     isStarred: (symbol) => snapshot.symbols.includes(symbol),
     toggle: (symbol) => {
       const starred = !watchlistStore.getSnapshot().symbols.includes(symbol);
