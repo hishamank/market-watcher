@@ -4,6 +4,7 @@ import { createFeedModeStore } from "./feed-mode-store.ts";
 import { addListener, notifyAll } from "./listeners.ts";
 import { createManagedConnection } from "./socket-connection.ts";
 import { createPlatformBridge } from "./socket-lifecycle.ts";
+import { settleAvailability } from "./settle-availability.ts";
 import { createRecoveryGate } from "./recovery-gate.ts";
 import { processRawServerFrame, type WelcomeInfo } from "./socket-message-handler.ts";
 import type {
@@ -59,6 +60,7 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
     canSend: () => gate.isWelcomed() && connection.isOpen(),
     sendSubscribe: (requestId, symbols) => {
       gate.unsettle(symbols);
+      symbols.forEach((symbol) => options.quoteStore.setAvailability(symbol, "recovering"));
       connection.send({ type: "subscribe", requestId, symbols: [...symbols] });
     },
     sendUnsubscribe: (symbols) => {
@@ -66,6 +68,7 @@ export function createSocketClient(options: SocketClientOptions): SocketClient {
       connection.send({ type: "unsubscribe", symbols: [...symbols] });
     },
     onSymbolReleased: checkConnected,
+    onSettled: (symbols, outcomes) => settleAvailability(options.quoteStore, symbols, outcomes),
     onUnanswered: () => {
       connection.close();
       handleLinkLost();

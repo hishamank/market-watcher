@@ -165,3 +165,7 @@ _Avoid_: theme mode, night mode
 **Company news**: A ticker-focused batch of headlines and article links obtained by the gateway, independently of prices. A destination site identifies the linked host when the feed does not supply the original publisher.
 
 **Earnings**: Fiscal-quarter earnings per share (EPS), their analyst estimates and upcoming reporting dates. GAAP and non-GAAP identify the accounting basis supplied by the provider; fiscal quarter labels may differ from calendar quarters.
+
+**Quote availability**:
+Whether a symbol has a confirmed live subscription, is recovering its subscription, or is unavailable. It is independent of transport health and the provider last-known warning.
+_Avoid_: connection status, market status
