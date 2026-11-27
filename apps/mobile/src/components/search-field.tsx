@@ -1,10 +1,9 @@
 import { MAX_SEARCH_QUERY_LENGTH } from "@mini/contracts";
 import { useT } from "@mini/core";
-import { radius, space } from "@mini/tokens";
+import { radius, space, type } from "@mini/tokens";
 import { useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from "react-native";
 import { usePalette } from "../theme/palette.ts";
-import { useTextStyles } from "../theme/text-styles.ts";
 import { Icon, type IconName } from "./icon.tsx";
 
 export interface SearchFieldProps {
@@ -58,7 +57,6 @@ function FieldEnd({ query, isFetching, onClear }: SearchFieldProps) {
 export function SearchField(props: SearchFieldProps) {
   const t = useT();
   const palette = usePalette();
-  const textStyles = useTextStyles();
   const [focused, setFocused] = useState(false);
   const fieldStyle = focused
     ? { borderColor: palette.focus, outlineColor: palette.focus, outlineWidth: 1 }
@@ -81,6 +79,7 @@ export function SearchField(props: SearchFieldProps) {
           autoCapitalize="none"
           autoComplete="off"
           returnKeyType="search"
+          maxFontSizeMultiplier={1.6}
           maxLength={MAX_SEARCH_QUERY_LENGTH}
           accessibilityLabel={t("search.placeholder")}
           placeholder={t("search.placeholder")}
@@ -89,7 +88,7 @@ export function SearchField(props: SearchFieldProps) {
           onChangeText={props.onChangeQuery}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          style={[textStyles.body, styles.input, { color: palette.text }]}
+          style={[styles.input, { color: palette.text }]}
         />
         <FieldEnd {...props} />
       </View>
@@ -118,7 +117,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     outlineStyle: "solid",
   },
-  input: { flex: 1, minWidth: 0, paddingBlock: space[10] },
+  input: { flex: 1, minWidth: 0, paddingBlock: space[10], fontSize: type.body.size },
   iconButton: {
     width: 44,
     height: 44,
