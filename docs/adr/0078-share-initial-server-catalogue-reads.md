@@ -1,4 +1,4 @@
-# 0073 Share initial server catalogue reads
+# 0078 Share initial server catalogue reads
 
 Status: accepted
 
