@@ -61,6 +61,7 @@ export function DetailHeader(props: DetailHeaderProps) {
           </Morph>
         </div>
         <StarButton
+          symbol={symbol}
           name={name}
           starred={props.starred}
           onToggle={props.onToggleStar}

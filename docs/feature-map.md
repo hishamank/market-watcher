@@ -124,7 +124,7 @@ Terms follow [`glossary.md`](./glossary.md). Decisions are in [`adr/`](./adr), a
 
 ### L5. All and Watchlist toggle (R, E2E)
 
-- **Test IDs:** `view-toggle-all`, `view-toggle-watchlist`.
+- **Test IDs:** `view-toggle-all`, `view-toggle-watchlist`, `watchlist-count[data-count]` (the starred count on the Watchlist tab).
 - **Expected:**
   - Selecting Watchlist sets `?view=watchlist`, and selecting All removes it. The switch is instant, with no server render (ADR 0050).
   - The back button restores the previous view.

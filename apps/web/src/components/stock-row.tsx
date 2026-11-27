@@ -170,6 +170,7 @@ export function StockRow(props: StockRowProps) {
         </span>
       </Link>
       <StarButton
+        symbol={symbol}
         name={name}
         starred={props.starred}
         onToggle={props.onToggleStar}

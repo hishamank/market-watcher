@@ -183,7 +183,7 @@ In React Native, `elevation.1` and `elevation.2` map to shadow properties, and t
 | Language switch (web) | The page turns like a card: the old layout rotates away until it is edge-on, then the mirrored one rotates in from the other side, 320 ms + 320 ms. It shrinks to 82% and dims at the midpoint over `color.fill`. To Arabic turns one way, back to English the other (ADR 0097) | Switches at once |
 | List to detail (web) | Name and price move from the row into the detail header, 320 ms (only when opening from a row) | Page changes at once |
 | Empty watchlist to list (web) | Starred suggestion moves into the watchlist's first slot; the empty state's star fills, then the empty state shrinks and fades, 320 ms. Unstarring the last row reverses it, and the star pops (ADR 0062) | Swaps at once |
-| Star to Watchlist control (web) | A star copy flies along a curve into the Watchlist option, which bumps to 106%, 400 ms + 320 ms. Only when that option is on screen and not current | Nothing flies |
+| Star to Watchlist control (web) | A star copy flies along a curve into the count badge on the Watchlist option, which bumps to 130%, 400 ms + 320 ms. The count holds until the star lands, then its digits flip, 320 ms; up when it grows, down when it shrinks. Only when that option is on screen and not current (ADR 0099) | Nothing flies; the count changes at once |
 | Empty watchlist to list (mobile) | The new content fades in, 200 ms; the empty state's star pops on return. Not on the first render after load | Swaps at once |
 | Haptics (mobile) | Light tap on star; selection tick on range change | Unchanged |
 | Skeleton | Pulses between 100% and 55% opacity, 1.2 s loop | Static fill |
