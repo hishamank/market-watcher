@@ -4,7 +4,7 @@ Amends ADRs 0041 and 0053, and feature W2.
 
 From 768 px, every label in the watchlist header is a sort button. The All list keeps its fixed order (ADR 0053). Each button cycles through three states: first direction, reverse, then the watchlist's own order (most recently starred first). Name and Symbol start ascending; prices, changes and Last update start descending. Rows without a day range sort last on Day high and Day low in both directions.
 
-The arrow sits outside the label, in the gap between columns, so showing it never moves a label. It is hidden until the pointer is over the label or the button has keyboard focus, when it shows faintly in the direction a click would sort. The sorted column shows it solid.
+The arrow sits outside the label, in the gap between columns, so showing it never moves a label. It is hidden until the pointer is over the label or the button has keyboard focus, when it shows faintly in the direction a click would sort. The sorted column shows it solid. Pressing All from a sorted watchlist draws that arrow once more in the All header and fades it out over `duration.fast`, so it does not vanish in a frame. The list page keeps the leaving sort from the click, because the All header is a new element and has nothing to transition from. With reduced motion it disappears at once.
 
 The order is worked out once, when the sort changes, from each row's quote in the quote store at that moment. It then stays still while prices tick. Unstarring keeps the order of the rest. Starring a new symbol or changing language sorts again. Prices compare through `compareDecimal` in the contracts money module, so `9.99` sorts below `10.00`.
 
