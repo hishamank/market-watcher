@@ -99,16 +99,16 @@ test("rate limit enforces a rolling one-second window across the reset boundary"
     client.send({ type: "unsubscribe", symbols: ["AAPL"] });
   }
   client.send({ type: "unsubscribe", symbols: ["AAPL"] });
-  await client.settle();
-  expect(client.all("error")).toEqual([
-    { type: "error", code: "rate_limited", message: "Too many messages" },
-  ]);
+  await expect(client.next("error")).resolves.toEqual({
+    type: "error",
+    code: "rate_limited",
+    message: "Too many messages",
+  });
 
   vi.advanceTimersByTime(599);
   client.send({ type: "subscribe", requestId: 1, symbols: ["AAPL"] });
-  await client.settle();
+  await expect(client.next("error")).resolves.toMatchObject({ code: "rate_limited", requestId: 1 });
   expect(client.all("snapshot")).toEqual([]);
-  expect(client.all("error").at(-1)).toMatchObject({ code: "rate_limited", requestId: 1 });
 
   vi.advanceTimersByTime(1);
   client.send({ type: "subscribe", requestId: 2, symbols: ["AAPL"] });
