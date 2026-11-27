@@ -1,14 +1,13 @@
-import { buildApp, parseRateLimitMax, parseTrustProxy } from "./app.ts";
+import { buildApp } from "./app.ts";
+import { ConfigError, type GatewayConfig, loadConfig } from "./config.ts";
 import {
   AlpacaStartupError,
   createSimulatorFeed,
   type Feed,
   loadAlpacaFeed,
 } from "./feeds/index.ts";
-import { parseRevision } from "./revision.ts";
 import { createShutdown } from "./shutdown.ts";
-import { parseAllowedOrigins } from "./socket/admission.ts";
-import { ChaosScopeError, parseChaosScope } from "./socket/chaos-scope.ts";
+import { ChaosScopeError } from "./socket/chaos-scope.ts";
 
 async function selectFeed(
   feedName: string,
@@ -25,32 +24,30 @@ async function selectFeed(
   );
 }
 
-function readChaosScope(): ReturnType<typeof parseChaosScope> {
+function readConfig(): GatewayConfig {
   try {
-    return parseChaosScope(process.env["CHAOS_SCOPE"]);
+    return loadConfig(process.env);
   } catch (err: unknown) {
-    console.error(err instanceof ChaosScopeError ? err.message : err);
+    console.error(err instanceof ConfigError || err instanceof ChaosScopeError ? err.message : err);
     process.exit(1);
   }
 }
 
-const chaosScope = readChaosScope();
-const revision = parseRevision(process.env["GATEWAY_REVISION"]);
+const config = readConfig();
 const selected = await selectFeed(process.env["FEED"] ?? "simulator").catch((err: unknown) => {
   console.error(err instanceof AlpacaStartupError ? err.message : err);
   process.exit(1);
 });
 const { feed } = selected;
-const port = Number(process.env["PORT"] ?? 4000);
-const host = process.env["HOST"] ?? "localhost";
-const rateLimit = parseRateLimitMax(process.env["REST_RATE_LIMIT_MAX"]);
+const { port, host, chaosScope, revision, rateLimit } = config;
 const app = buildApp({
   feed,
   feedMode: selected.live ? "live" : "simulated",
-  allowedOrigins: parseAllowedOrigins(process.env["ALLOWED_ORIGINS"]),
+  allowedOrigins: config.allowedOrigins,
   chaosScope,
   revision,
-  trustProxy: parseTrustProxy(process.env["TRUST_PROXY"]),
+  trustProxy: config.trustProxy,
+  logger: config.logger,
   ...(rateLimit !== undefined ? { rateLimit } : {}),
 });
 app.addHook("onClose", async () => feed.close());

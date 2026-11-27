@@ -6,6 +6,8 @@ The gateway had cleanup hooks (the hub, the history cache, the feed) that only r
 
 **Revision.** The Docker build takes `--build-arg GATEWAY_REVISION=<commit>` and stores it in the image's environment. The gateway prints `gateway revision: <commit>` at startup and returns it as an optional `revision` field on `GET /health`. A value that is not 7 to 40 hexadecimal characters is reported as `unknown`, so the field can never echo arbitrary configuration. The steps to deploy and check are in [`docs/deploy.md`](../deploy.md).
 
+**Configuration.** `PORT`, `ALLOWED_ORIGINS`, `TRUST_PROXY`, `REST_RATE_LIMIT_MAX` and `LOG_CLIENT_ADDRESSES` are now checked at startup, the way `FEED` and `CHAOS_SCOPE` already were. A bad value stops the gateway with one line naming the variable and the accepted forms; before, `PORT=abc` crashed with a stack trace and a mistyped origin silently refused every socket. Request logs leave out the client's address unless `LOG_CLIENT_ADDRESSES=true`, which exists for checking the proxy hop count after a deploy.
+
 ## Considered options
 
 - **Close code 1012 (service restart):** closer in meaning, but 1001 is what browsers and proxies already expect from a server going away, and core treats every close the same.

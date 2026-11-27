@@ -27,7 +27,7 @@ fly logs | grep -E "gateway revision|chaos scope"
 
 ### Checking the proxy hop count
 
-`TRUST_PROXY = "2"` assumes Fly adds two addresses to `X-Forwarded-For`: the client, then the app's own address. If the gateway moves to another host or behind a CDN, confirm it again: make one request, read `remoteAddress` for it in `fly logs`, and compare it with your public address. If they differ, every visitor shares one rate limit or a client can choose its own address.
+`TRUST_PROXY = "2"` assumes Fly adds two addresses to `X-Forwarded-For`: the client, then the app's own address. If the gateway moves to another host or behind a CDN, confirm it again: deploy once with `LOG_CLIENT_ADDRESSES = "true"` in `fly.toml`, make one request, read `remoteAddress` for it in `fly logs`, and compare it with your public address. Then remove the setting, because request logs leave client addresses out by default. If they differ, every visitor shares one rate limit or a client can choose its own address.
 
 ## Web (Vercel)
 
