@@ -42,7 +42,7 @@ export function ChartUpdating() {
     <div
       aria-hidden="true"
       data-testid="chart-updating"
-      className="pointer-events-none absolute inset-0 grid animate-delayed-fade-in place-items-center"
+      className="pointer-events-none absolute start-0 end-0 top-0 grid h-[176px] md:h-[320px] animate-delayed-fade-in place-items-center"
     >
       <span className="grid size-[40px] place-items-center rounded-full border border-border bg-raised text-text-secondary shadow-2">
         <SpinnerIcon className="motion-safe:animate-spin" />
