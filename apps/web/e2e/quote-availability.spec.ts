@@ -16,11 +16,19 @@ for (const [path, width] of [
     const control = await interceptAvailability(page);
     await page.goto(path);
     const warning = page.getByTestId(path === "/" ? "stock-row-as-of-AAPL" : "detail-price-as-of");
-    await expect(warning).toContainText("Refreshing price");
+    await expect.poll(control.pendingSnapshots).toBeGreaterThan(0);
+    await page.waitForTimeout(350);
+    await expect(warning).toHaveCount(0);
     control.unavailable();
     await expect(warning).toContainText("Current price unavailable");
     await expect(page.getByTestId("app-root")).toHaveAttribute("data-connection", "connected");
-    if (path === "/") await expect(page.getByTestId("stock-row-as-of-MSFT")).toHaveCount(0);
+    await expect(
+      page.getByTestId(path === "/" ? "stock-row-price-AAPL" : "detail-price"),
+    ).toHaveClass(/text-text-muted/);
+    if (path === "/") {
+      await expect(page.getByTestId("stock-row-as-of-MSFT")).toHaveCount(0);
+      await expect(page.getByTestId("stock-row-price-MSFT")).not.toHaveClass(/text-text-muted/);
+    }
     await page.screenshot({ path: test.info().outputPath("symbol-unavailable.png") });
     control.lastKnown();
     await expect(warning).toContainText("Price as of");

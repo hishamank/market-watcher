@@ -48,6 +48,7 @@ export async function interceptAvailability(page: Page) {
     },
   );
   return {
+    pendingSnapshots: () => terminals.length,
     unavailable() {
       phase = "unavailable";
       terminals.splice(0).forEach((settle) => settle());

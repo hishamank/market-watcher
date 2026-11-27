@@ -9,9 +9,9 @@ export function useQuoteWarning(quote: Quote) {
   const availability = useQuoteAvailability(quote.symbol);
   const locale = useLocale();
   const t = useT();
-  const degraded = availability !== "available";
+  const degraded = availability === "unavailable";
   const labels = [
-    availability === "available" ? undefined : t(`quote.${availability}.label`),
+    degraded ? t("quote.unavailable.label") : undefined,
     quote.lastKnown
       ? t("quote.lastKnown.label", { time: formatMarketDateTime(quote.timestamp, { locale }) })
       : undefined,
@@ -19,7 +19,6 @@ export function useQuoteWarning(quote: Quote) {
   return {
     degraded,
     label: labels.length > 0 ? labels.join(" · ") : undefined,
-    help:
-      availability === "available" ? t("quote.lastKnown.help") : t(`quote.${availability}.help`),
+    help: degraded ? t("quote.unavailable.help") : t("quote.lastKnown.help"),
   };
 }
