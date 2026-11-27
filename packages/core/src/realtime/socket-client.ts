@@ -1,4 +1,4 @@
-/* oxlint-disable max-lines -- Keep feed quarantine beside connection lifecycle; ADR 0073. */
+/* oxlint-disable max-lines -- Keep feed quarantine beside connection lifecycle; ADR 0077. */
 import { createFeedSession } from "./feed-session.ts";
 import type { MarketStatus } from "@mini/contracts";
 import { createChaosStateStore } from "./chaos-state-store.ts";
