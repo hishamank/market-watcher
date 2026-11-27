@@ -6,6 +6,7 @@ const FROZEN_RUNTIME_EXPORTS = [
   "MARKET_TIME_ZONE_LABEL",
   "RestClientError",
   "STOCK_SORT_FIELDS",
+  "WATCHLIST_STORAGE_KEY",
   "buildRestBaseUrl",
   "createI18n",
   "createRestClient",

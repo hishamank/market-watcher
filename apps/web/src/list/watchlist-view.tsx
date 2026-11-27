@@ -33,40 +33,47 @@ function listedStocks(state: WatchlistStocksResult): readonly Stock[] | undefine
 
 export function WatchlistView({ onShowAll }: WatchlistViewProps) {
   const t = useT();
-  const { symbols, toggle } = useWatchlist();
+  const { symbols, toggle, isLoaded } = useWatchlist();
   const reflowStar = useStarTransition(symbols, toggle);
   const state = useWatchlistStocks();
   const { sort, selectSort } = useSortParam();
   const sortable = useMediaQuery("(width >= 48rem)");
   const stocks = useSortedStocks(listedStocks(state), sortable ? sort : undefined);
+  if (!isLoaded || state.status === "empty") {
+    return (
+      <>
+        {isLoaded ? null : (
+          <div className="stored-watchlist-empty:hidden">
+            <ListSkeleton testId="watchlist-skeleton" />
+          </div>
+        )}
+        <div className={isLoaded ? undefined : "hidden stored-watchlist-empty:block"}>
+          <EmptyState
+            testId="watchlist-empty"
+            starMotion
+            icon={<StarIcon />}
+            title={t("watchlist.empty.title")}
+            help={t("watchlist.empty.help")}
+            action={
+              <Link
+                href="/"
+                onClick={(event) => onShowAll("all", event)}
+                className={buttonClassName()}
+              >
+                {t("watchlist.empty.action")}
+              </Link>
+            }
+          />
+          <WatchlistSuggestions onStar={reflowStar} />
+        </div>
+      </>
+    );
+  }
   if (state.status === "loading") {
     return <ListSkeleton testId="watchlist-skeleton" />;
   }
   if (state.status === "error") {
     return <ListError onRetry={state.retry} />;
-  }
-  if (state.status === "empty") {
-    return (
-      <>
-        <EmptyState
-          testId="watchlist-empty"
-          starMotion
-          icon={<StarIcon />}
-          title={t("watchlist.empty.title")}
-          help={t("watchlist.empty.help")}
-          action={
-            <Link
-              href="/"
-              onClick={(event) => onShowAll("all", event)}
-              className={buttonClassName()}
-            >
-              {t("watchlist.empty.action")}
-            </Link>
-          }
-        />
-        <WatchlistSuggestions onStar={reflowStar} />
-      </>
-    );
   }
   return (
     <VirtualStockList
