@@ -146,7 +146,11 @@ Everything goes to the run folder `.verify/<YYYYMMDD-HHMM>-<branch>/` at the rep
 
 ## 6. Report
 
-End every run with this table, in your reply and in the PR description:
+Record the tested commit SHA (`git rev-parse HEAD`), whether the worktree was dirty and which changes were included, the date, platform, feed mode, URLs/ports, and exact commands with exit codes. Record documentation-only changes made after the run; rerun affected checks after code changes.
+
+Local `.verify/` paths preserve raw evidence but are not accessible to a PR reviewer. Paste sanitized command summaries and step results into the PR and attach relevant screenshots or link retained artifacts the reviewer can access. Inspect evidence for credentials or personal data before publishing. Keep the local paths in the full report as well.
+
+End every run with this table, in your reply and in the PR description. The example filenames below must be accompanied by pasted results or accessible artifact links:
 
 ```markdown
 | Feature | Check | Result | Evidence |
@@ -160,7 +164,7 @@ End every run with this table, in your reply and in the PR description:
 - **FAIL:** something else was observed. Say what you saw.
 - **BLOCKED:** it cannot be checked yet, because the feature, a dependency or a prerequisite is missing. Name the blocker.
 
-The ticket is done only when every feature it touched is PASS. A FAIL means fix and re-run. A ticket with a remaining FAIL opens as a draft PR with the table.
+The ticket is done only when every feature it touched is PASS. A FAIL means fix and re-run. A ticket with a required FAIL or BLOCKED result opens or remains as a draft PR with the table and the action needed to unblock it.
 
 ## 7. Cleanup
 
