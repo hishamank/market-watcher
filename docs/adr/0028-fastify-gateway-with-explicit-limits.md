@@ -1,5 +1,7 @@
 # Fastify gateway with explicit limits
 
+Amended by [ADR 0076](./0076-bound-socket-control-work-and-close-abusive-connections.md): a connection that keeps exceeding the message limit is closed with 1008, and its address waits 30 seconds before it can connect again.
+
 Amended by [ADR 0042](./0042-native-sockets-send-an-origin.md): React Native's WebSocket does send an `Origin`, so `ALLOWED_ORIGINS` must list the gateway's own origin for phones.
 
 The gateway runs on Fastify with `@fastify/websocket`, which exposes the raw `ws` socket, so conflation can read its send buffer (ADR 0008). It uses `@fastify/rate-limit`, `@fastify/cors` and Fastify's structured logging, and validates REST input and output with the Zod schemas from `packages/contracts`.
