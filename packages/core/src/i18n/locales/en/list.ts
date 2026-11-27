@@ -21,4 +21,8 @@ export const listStrings = {
   "list.columns.button": "Columns",
   "list.columns.title": "Show columns",
   "list.columns.reset": "Reset to default",
+  "list.sort.label": "Sort watchlist",
+  "list.sort.button": "Sort by {{column}}",
+  "list.sort.ascending": "{{column}}, sorted ascending",
+  "list.sort.descending": "{{column}}, sorted descending",
 } as const;

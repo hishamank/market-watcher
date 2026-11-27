@@ -46,6 +46,7 @@
   --animate-sheet-in: sheet-in var(--duration-slow) var(--ease-standard) both;
   --animate-fade-in: fade-in var(--duration-fast) var(--ease-standard) both;
   --animate-delayed-fade-in: fade-in var(--duration-base) var(--ease-standard) 150ms both;
+  --animate-fade-out: fade-out var(--duration-fast) var(--ease-exit) both;
   --animate-digit-roll: digit-roll var(--duration-base) var(--ease-standard) both;
   --animate-count-out: count-out var(--duration-slow) var(--ease-standard) both;
   --animate-count-in: count-in var(--duration-slow) var(--ease-standard) both;
@@ -113,6 +114,15 @@
 
   @keyframes fade-in {
     from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
       opacity: 0;
     }
   }

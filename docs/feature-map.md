@@ -282,6 +282,17 @@ Terms follow [`glossary.md`](./glossary.md). Decisions are in [`adr/`](./adr), a
 - **Steps:** open `/stocks/ABNB`, star it, then open the watchlist view.
 - **Expected:** ABNB appears with its name and a live price, even though it is not one of the 50 list symbols.
 
+### W8. Watchlist sorting (N, E2E + Walk)
+
+- **Reach:** from 768 px, star MSFT, NVDA and AAPL, then open the watchlist.
+- **Test IDs:** `watchlist-sort-{column}` (`name`, `symbol`, `price`, `change`, `changePercent`, `previousClose`, `dayHigh`, `dayLow`, `lastUpdate`), each with `data-sort` (`asc`, `desc`, `none`).
+- **Expected:**
+  - Only the watchlist header has sort buttons; All keeps its fixed order. Below 768 px there is no header and no sorting: a `sort` in the URL is ignored there. A malformed `sort` is ignored at every width.
+  - Hovering or focusing a label shows a faint arrow beside it, in the gap between columns, without moving any label (Walk). The sorted column's arrow is solid. Pressing `view-toggle-all` from a sorted watchlist fades that arrow out in place instead of removing it at once, and with reduced motion it goes at once (Walk).
+  - Pressing a button sorts the rows and sets `?sort={column}-{direction}`. Name and Symbol start ascending; the others start descending. Rows without a day range sort last on Day high and Day low. The second press reverses, and the third returns to newest-starred order and removes `sort`.
+  - The order stays still while prices tick. Unstarring a row keeps the others in place.
+  - Reloading, or opening a stock and coming back, keeps the sort (ADR 0100).
+
 ## Chaos controls (`?debug=1`)
 
 ### C1. Panel availability (R, E2E)

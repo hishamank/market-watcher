@@ -31,6 +31,13 @@ export { useWatchlist } from "./hooks/use-watchlist.ts";
 export type { WatchlistResult } from "./hooks/use-watchlist.ts";
 export { useWatchlistStocks } from "./hooks/use-watchlist-stocks.ts";
 export type { WatchlistStockRow, WatchlistStocksResult } from "./hooks/use-watchlist-stocks.ts";
+export { useSortedStocks } from "./hooks/use-sorted-stocks.ts";
+export {
+  STOCK_SORT_FIELDS,
+  firstStockSortDirection,
+  nextStockSort,
+} from "./watchlist/stock-sort.ts";
+export type { StockSort, StockSortDirection, StockSortField } from "./watchlist/stock-sort.ts";
 
 export {
   historyQueryOptions,
