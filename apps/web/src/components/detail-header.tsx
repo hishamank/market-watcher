@@ -1,5 +1,5 @@
 import type { Change } from "@mini/contracts";
-import type { FlashDirection } from "@mini/core";
+import { useT, type FlashDirection } from "@mini/core";
 import type { FlashRoll } from "../integrations/use-tick-flash.ts";
 import { ChangePill } from "./change-pill.tsx";
 import { Morph } from "./morph.tsx";
@@ -41,6 +41,7 @@ function UnknownChange() {
 
 export function DetailHeader(props: DetailHeaderProps) {
   const { symbol, name, rangeChange, stale } = props;
+  const t = useT();
   return (
     <header data-testid="detail-header" className="flex flex-col">
       <div className="flex items-start justify-between gap-12">
@@ -65,6 +66,7 @@ export function DetailHeader(props: DetailHeaderProps) {
         />
       </div>
       <div className="mt-8">
+        <span className="sr-only">{t("list.column.price")}: </span>
         <Morph name={`stock-price-${symbol}`}>
           <PriceCell
             price={props.price}

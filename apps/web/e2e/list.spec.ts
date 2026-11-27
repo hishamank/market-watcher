@@ -146,7 +146,7 @@ test("L1 at 1440 px day change and day change % are separate columns", async ({ 
   const pill = page.getByTestId("stock-row-change-AAPL");
   const percent = page.getByTestId("stock-row-percent-AAPL");
   await expect(percent).toBeVisible();
-  await expect(percent).toHaveText(/^([+−]\d+\.\d{2}%|0\.00%)$/);
+  await expect(percent).toHaveText(/^Day change %: ([+−]\d+\.\d{2}%|0\.00%)$/);
   await expect(pill).toHaveText(/^([+−]\d[\d,]*\.\d{2}|0\.00)$/, { useInnerText: true });
   const [pillBox, percentBox] = [await pill.boundingBox(), await percent.boundingBox()];
   expect(percentBox?.x ?? 0).toBeGreaterThan((pillBox?.x ?? 0) + (pillBox?.width ?? 0));

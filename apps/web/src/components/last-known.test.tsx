@@ -4,6 +4,11 @@ import { expect, test, vi } from "vitest";
 import { StockRow } from "./stock-row.tsx";
 import { DetailHeader } from "./detail-header.tsx";
 
+vi.mock("@mini/core", async (importOriginal) => {
+  const core = await importOriginal<typeof import("@mini/core")>();
+  return { ...core, useT: () => core.createI18n("en").translator("en-US") };
+});
+
 vi.mock("./star-button.tsx", () => ({ StarButton: () => null }));
 vi.mock("next/link", () => ({
   default: ({ children }: { children: React.ReactNode }) => createElement("a", {}, children),
