@@ -3,6 +3,7 @@ import rateLimit from "@fastify/rate-limit";
 import type { FeedMode } from "@mini/contracts";
 import type { FastifyInstance, FastifyServerOptions } from "fastify";
 import type { Feed } from "../feeds/types.ts";
+import { addressKey } from "../socket/address-key.ts";
 import { registerErrorHandlers, RestError } from "./errors.ts";
 import { REST_RATE_LIMIT_MAX, REST_RATE_LIMIT_WINDOW_MS } from "./limits.ts";
 
@@ -65,6 +66,7 @@ export function registerRestPlugins(app: FastifyInstance, options: RestPluginsOp
     max: options.rateLimit?.max ?? REST_RATE_LIMIT_MAX,
     timeWindow: options.rateLimit?.timeWindow ?? REST_RATE_LIMIT_WINDOW_MS,
     allowList: (request) => request.routeOptions.url === "/ws",
+    keyGenerator: (request) => addressKey(request.ip),
     errorResponseBuilder: (_request, context) =>
       new RestError(429, "rate_limited", `Rate limit exceeded, retry in ${context.after}`),
   });

@@ -1,5 +1,5 @@
 import websocket from "@fastify/websocket";
-import type { FeedMode } from "@mini/contracts";
+import type { ChaosScope, FeedMode } from "@mini/contracts";
 import Fastify, { type FastifyInstance, type FastifyServerOptions } from "fastify";
 import type { Feed, HistorySource } from "./feeds/types.ts";
 import { createHub } from "./hub/hub.ts";
@@ -26,6 +26,9 @@ export interface AppOptions {
   feed: Feed;
   feedMode: FeedMode;
   allowedOrigins: ReadonlySet<string>;
+  chaosScope?: ChaosScope;
+  maxConnections?: number;
+  revision?: string;
   now?: () => number;
   logger?: FastifyServerOptions["logger"];
   trustProxy?: FastifyServerOptions["trustProxy"];
@@ -72,6 +75,7 @@ export function buildApp({
     feedMode: options.feedMode,
     now,
     connectionStats: hub.stats,
+    ...(options.revision !== undefined ? { revision: options.revision } : {}),
     ...(historyFallbacks !== undefined ? { historyFallbacks } : {}),
     ...(historyCacheMaxEntries !== undefined ? { historyCacheMaxEntries } : {}),
     ...(historySourceTimeoutMs !== undefined ? { historySourceTimeoutMs } : {}),

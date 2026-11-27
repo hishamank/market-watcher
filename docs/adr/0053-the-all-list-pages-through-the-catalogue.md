@@ -13,8 +13,6 @@ The All list now scrolls through the whole catalogue: the default list first, th
 - **Core API additions:** `useStockPages`, `StockPagesResult`, `stockPagesQueryOptions`, `stockQueryKeys.pages`, `RestClient.listStockPage` and the `list.more.error` message key. `useStockList` keeps its shape for the watchlist.
 - **Sorting is out of scope.** The order is fixed, so paging stays a simple cursor. Sorting belongs on the watchlist, where the client holds a price for every row. Sorting All would need the gateway to rank the whole catalogue on live fields.
 
-> **Design note:** "All is a browse list in one fixed order, so paging is a cursor over the catalogue, and because subscribed already meant visible, scrolling through 10,000 stocks costs no more live data than 50."
-
 ## Considered options
 
 - **Send the whole catalogue index to the client and virtualise over it:** fine at 500 symbols and workable at 10,000, but every row still needs a quote, so it ends up as paging by another name.
