@@ -53,7 +53,7 @@ The simulator has no database and no seed step. Prices come from `SIM_SEED=42` a
 
 Other targets have their own launch:
 
-- **Expo app (M1 to M5):** [`mobile.md`](mobile.md).
+- **Expo app (M1 to M5, M9):** [`mobile.md`](mobile.md).
 - **Live mode rows (G1, G2, C1) and G5:** [`live-mode.md`](live-mode.md).
 
 If a command here fails because a script was renamed, the root `package.json` and the workspace `package.json` files are the source of truth. Use what they define, then fix this skill in the same PR.

@@ -4,12 +4,15 @@ import type { ReactNode } from "react";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { duration } from "@mini/tokens";
+import { useReduceMotion } from "../integrations/use-reduce-motion.ts";
 import { useSavedLocale } from "../integrations/use-saved-locale.ts";
 import { Providers } from "../providers/providers.tsx";
 import { usePalette } from "../theme/palette.ts";
 
 function AppStack() {
   const palette = usePalette();
+  const reduceMotion = useReduceMotion();
   return (
     <Stack
       screenOptions={{
@@ -19,6 +22,14 @@ function AppStack() {
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="search"
+        options={{
+          headerShown: false,
+          animation: reduceMotion ? "fade" : "slide_from_bottom",
+          animationDuration: reduceMotion ? duration.fast : duration.slow,
+        }}
+      />
     </Stack>
   );
 }
