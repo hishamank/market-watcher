@@ -40,7 +40,6 @@ export function createQuoteStore(): QuoteStore {
   function setAvailability(symbol: string, next: QuoteAvailability): void {
     if (getAvailability(symbol) === next) return;
     availability.set(symbol, next);
-    revisions.set(symbol, ++revision);
     notify(symbol, availabilityListeners);
   }
   const availabilityListeners = new Map<string, Set<QuoteListener>>();
@@ -128,7 +127,7 @@ export function createQuoteStore(): QuoteStore {
         const current = quotes.get(quote.symbol);
         const superseded = current && (revisions.get(quote.symbol) ?? 0) > startedAt;
         if (superseded && current.timestamp === quote.timestamp) continue;
-        upsert(superseded ? { ...quote, lastKnown: current.lastKnown } : quote);
+        upsert(superseded ? { ...quote, lastKnown: current.lastKnown ?? quote.lastKnown } : quote);
       }
     };
   }

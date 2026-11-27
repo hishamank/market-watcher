@@ -47,9 +47,9 @@ function handleParsedMessage(message: ServerMessage, ctx: FrameHandlerContext): 
       ctx.quoteStore.upsertMany(message.quotes);
       ctx.gate.settle(
         ctx.subscriptions.settleSnapshot(message.requestId, (symbols) => {
-          ctx.quoteStore.receiveQuotes(
-            message.quotes.filter((quote) => symbols.includes(quote.symbol)),
-          );
+          const confirmed = message.quotes.filter((quote) => symbols.includes(quote.symbol));
+          ctx.quoteStore.receiveQuotes(confirmed);
+          for (const quote of confirmed) ctx.quoteStore.setAvailability(quote.symbol, "available");
         }),
       );
       ctx.onSnapshotsSettled();

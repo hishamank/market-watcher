@@ -96,12 +96,19 @@ it("REST and cache writes cannot hide a refused live subscription", () => {
   }
 });
 
-it("an outdated snapshot cannot confirm freshness and a tick ahead of its reply remains healthy", () => {
+it("an accepted older snapshot confirms a quiet subscription without replacing newer REST prices", () => {
   const { client, store, conn } = setup();
   try {
+    const current = store.getQuote("AAPL");
     conn.sendQuotes([makeQuote("MSFT", "201.00", 2000)]);
     conn.sendSnapshot([makeQuote("AAPL", "99.00", 999)], 1);
-    expect(store.getAvailability("AAPL")).toBe("unavailable");
+    expect(store.getAvailability("AAPL")).toBe("available");
+    expect(store.getQuote("AAPL")).toBe(current);
+    for (let i = 0; i < 20; i++) {
+      vi.advanceTimersByTime(5000);
+      conn.sendHeartbeat();
+    }
+    expect(store.getAvailability("AAPL")).toBe("available");
     expect(store.getAvailability("MSFT")).toBe("available");
   } finally {
     client.stop();
