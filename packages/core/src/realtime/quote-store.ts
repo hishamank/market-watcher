@@ -38,7 +38,8 @@ export function createQuoteStore(): QuoteStore {
   const getAvailability = (symbol: string): QuoteAvailability =>
     availability.get(symbol) ?? "available";
   function setAvailability(symbol: string, next: QuoteAvailability): void {
-    if (getAvailability(symbol) === next) return;
+    const current = getAvailability(symbol);
+    if (current === next || (current === "unavailable" && next === "recovering")) return;
     availability.set(symbol, next);
     notify(symbol, availabilityListeners);
   }

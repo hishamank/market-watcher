@@ -126,3 +126,21 @@ it("a snapshot for an unknown request cannot hide an unavailable subscription", 
     client.stop();
   }
 });
+
+it("retains an unavailable symbol through retry until a valid recovery quote arrives", () => {
+  const { client, store, gateway, conn } = setup();
+  try {
+    conn.sendSymbolError("unavailable", ["AAPL"], 1);
+    conn.sendSnapshot([makeQuote("MSFT", "200.00", 1000)], 1);
+    conn.drop();
+    vi.advanceTimersByTime(501);
+    expect(store.getAvailability("AAPL")).toBe("unavailable");
+    expect(store.getAvailability("MSFT")).toBe("recovering");
+    const next = gateway.latestConnection();
+    next.sendSnapshot([makeQuote("AAPL", "100.00", 1000), makeQuote("MSFT", "200.00", 1000)], 1);
+    expect(store.getAvailability("AAPL")).toBe("available");
+    expect(store.getAvailability("MSFT")).toBe("available");
+  } finally {
+    client.stop();
+  }
+});
