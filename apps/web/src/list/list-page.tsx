@@ -5,7 +5,6 @@ import { useState, type MouseEvent } from "react";
 import { useTableColumns } from "../columns/use-table-columns.ts";
 import { ViewToggle, type ListView } from "../components/view-toggle.tsx";
 import { useMediaQuery } from "../integrations/use-media-query.ts";
-import { ConnectedColumnMenu } from "./connected-column-menu.tsx";
 import { StockList } from "./stock-list.tsx";
 import { customColumnStyle } from "./table-layout.ts";
 import { useSortParam } from "./use-sort-param.ts";
@@ -46,7 +45,6 @@ export function ListPage() {
             watchlistSymbols={watchlist.symbols}
             watchlistLoaded={watchlist.isLoaded}
           />
-          <ConnectedColumnMenu />
         </div>
         <section
           data-custom-columns={chosen === undefined ? undefined : ""}

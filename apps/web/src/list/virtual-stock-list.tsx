@@ -10,6 +10,7 @@ import {
 import { tableScroll, tableWidth } from "../components/stock-row.tsx";
 import { starRowName } from "../integrations/star-motion.ts";
 import { useWindowRows } from "../integrations/use-window-rows.ts";
+import { ConnectedColumnMenu } from "./connected-column-menu.tsx";
 import { ConnectedStockRow } from "./connected-stock-row.tsx";
 
 export interface VirtualStockListProps {
@@ -40,7 +41,7 @@ export function VirtualStockList(props: VirtualStockListProps) {
   );
   return (
     <div className={tableScroll}>
-      <StockListHeader sort={sort} fading={fading} />
+      <StockListHeader sort={sort} fading={fading} action={<ConnectedColumnMenu />} />
       <ul
         ref={listRef}
         data-testid={listTestId}

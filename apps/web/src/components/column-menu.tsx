@@ -1,6 +1,7 @@
 import { useT } from "@mini/core";
 import type { TableColumn } from "../columns/table-columns-store.ts";
-import { buttonClassName } from "./button.tsx";
+import { iconPressMotion } from "./button.tsx";
+import { ColumnsIcon } from "./icons.tsx";
 
 export interface ColumnOption {
   readonly id: TableColumn;
@@ -21,20 +22,22 @@ const MENU_ID = "table-columns";
 export function ColumnMenu({ options, canReset, onToggle, onReset }: ColumnMenuProps) {
   const t = useT();
   return (
-    <div className="hidden md:block">
+    <div className="grid place-items-center">
       <button
         type="button"
         popoverTarget={MENU_ID}
         data-testid="columns-button"
-        className={`${buttonClassName("default", true)} [anchor-name:--table-columns]`}
+        aria-label={t("list.columns.button")}
+        title={t("list.columns.button")}
+        className={`grid size-[44px] place-items-center rounded-md text-text-secondary hover:text-text ${iconPressMotion} [anchor-name:--table-columns]`}
       >
-        {t("list.columns.button")}
+        <ColumnsIcon />
       </button>
       <div
         id={MENU_ID}
         popover="auto"
         data-testid="columns-menu"
-        className="inset-auto m-0 mt-8 max-h-[calc(100%-16px)] w-[240px] overflow-y-auto rounded-lg border border-border bg-raised p-8 text-text shadow-2 [position-anchor:--table-columns] [position-area:block-end_span-inline-start] motion-safe:animate-dropdown-in motion-reduce:animate-fade-in"
+        className="inset-auto m-0 mt-8 max-h-[calc(100%-16px)] w-[240px] overflow-y-auto rounded-lg border border-border bg-raised p-8 text-text shadow-2 [position-anchor:--table-columns] [position-area:block-end_span-inline-start] [position-try-fallbacks:flip-block] motion-safe:animate-dropdown-in motion-reduce:animate-fade-in"
       >
         <fieldset>
           <legend className="px-8 pt-4 pb-8 text-caption font-medium text-text-secondary">

@@ -18,7 +18,7 @@ export const tableColumns =
 export const pinnedName =
   "list-custom:sticky list-custom:start-0 list-custom:z-1 list-custom:self-stretch list-custom:bg-surface list-custom:ps-20";
 
-export const tableScroll = "list-custom:overflow-x-auto";
+export const tableScroll = "list-custom:relative list-custom:overflow-x-auto";
 export const tableWidth = "list-custom:min-w-(--table-min)";
 
 export interface StockRowProps {
