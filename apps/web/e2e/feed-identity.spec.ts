@@ -38,3 +38,31 @@ test("G1 incompatible history response quarantines the page before chart update"
   await expect(page.getByTestId("app-root")).toHaveCount(0);
   expect(problems).toEqual([]);
 });
+
+for (const first of ["live", "simulated"] as const) {
+  test(`G1 ${first} client navigation rejects incompatible hydration`, async ({
+    page,
+    useLiveFeed,
+  }) => {
+    await useLiveFeed();
+    await replaceFeed(first);
+    const problems = collectConsoleProblems(page);
+    await page.goto("/");
+    await expect(page.getByTestId("app-root")).toHaveAttribute("data-connection", "connected");
+    let injected = 0;
+    await page.route("**/stocks/MSFT*", async (route) => {
+      if (route.request().headers()["rsc"] !== "1") return route.continue();
+      const response = await route.fetch();
+      const body = await response.text();
+      const original = `"feedMode":"${first}"`;
+      const replacement = `"feedMode":"${first === "live" ? "simulated" : "live"}"`;
+      injected += body.split(original).length - 1;
+      await route.fulfill({ response, body: body.replaceAll(original, replacement) });
+    });
+    await page.locator('a[href="/stocks/MSFT"]').first().click();
+    await expect(page.getByTestId("feed-reload-required")).toBeVisible();
+    expect(injected).toBeGreaterThan(0);
+    await expect(page.getByTestId("app-root")).toHaveCount(0);
+    expect(problems).toEqual([]);
+  });
+}
