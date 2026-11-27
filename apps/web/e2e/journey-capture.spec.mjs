@@ -34,11 +34,18 @@ test("D1 journey evidence rejects an aborted view transition", async ({ page }) 
   await page.evaluate(() => {
     const transition = document.startViewTransition(() => {
       document.querySelector("p").textContent = "After";
-      transition.skipTransition();
+      return new Promise((resolve) => (window.finishUpdate = resolve));
     });
+    window.testTransition = transition;
     void transition.ready.catch(() => {});
   });
-  await expect(capture(page, { fullPage: true })).rejects.toThrow();
+  await expect.poll(() => page.evaluate(() => typeof window.finishUpdate)).toBe("function");
+  const rejected = expect(capture(page, { fullPage: true })).rejects.toThrow();
+  await page.evaluate(() => {
+    window.testTransition.skipTransition();
+    window.finishUpdate();
+  });
+  await rejected;
 });
 
 for (const reducedMotion of ["no-preference", "reduce"]) {
@@ -66,10 +73,15 @@ for (const reducedMotion of ["no-preference", "reduce"]) {
         return transition;
       };
     });
-    for (const path of ["/stocks/AAPL", "/"]) {
+    for (const path of ["/stocks/AAPL", "/?debug=1"]) {
       await page.goto(path);
       await expect(page.getByTestId("app-root")).toHaveAttribute("data-connection", "connected");
+      if (path === "/stocks/AAPL") {
+        await expect(page.getByTestId("price-chart")).toHaveAttribute("data-state", "ready");
+      }
     }
+    await page.getByTestId("chaos-freeze").click();
+    await page.getByTestId("chaos-close").click();
     await page.getByTestId("stock-row-name-AAPL").click();
     await expect(page.getByTestId("detail-price")).toHaveText(/^\$/);
     await capture(page, { fullPage: true });
