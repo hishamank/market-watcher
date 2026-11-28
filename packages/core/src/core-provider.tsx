@@ -5,10 +5,16 @@ import type { FeedMode } from "@mini/contracts";
 import { type QueryCache, type QueryClient, useQueryClient } from "@tanstack/react-query";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import {
-  attachConnectionAnalytics,
+  AnalyticsProvider,
   createNoopAnalytics,
   type AnalyticsAdapter,
-  type AnalyticsEvent,
+  type Track,
+} from "@mini/analytics";
+import {
+  attachConnectionAnalytics,
+  attachRequestAnalytics,
+  attachSessionAnalytics,
+  createTrack,
 } from "./analytics/analytics.ts";
 import { createI18n, type I18nService } from "./i18n/create-i18n.ts";
 import type { LocaleSwitch } from "./i18n/locale.ts";
@@ -70,9 +76,8 @@ export interface CoreContextValue {
   watchlistStore: WatchlistStore;
   i18n: I18nService;
   switchLocale: LocaleSwitch;
-  analytics: AnalyticsAdapter;
   colorScheme: ColorSchemeStore | undefined;
-  track: (event: AnalyticsEvent) => void;
+  track: Track;
 }
 
 export function createCoreServices(
@@ -99,6 +104,7 @@ export function createCoreServices(
   socketClient.subscribeReconnect(health.reconnect);
   const i18n = createI18n(platform.locale);
   const analytics = platform.analytics ?? createNoopAnalytics();
+  const track = createTrack(analytics, i18n.getLocale, feedSession);
   return {
     feedSession,
     gatewayUrl: platform.gatewayUrl,
@@ -118,9 +124,8 @@ export function createCoreServices(
     watchlistStore: createWatchlistStore(platform.storage),
     i18n,
     switchLocale: platform.switchLocale ?? ((_next, apply) => apply()),
-    analytics,
     colorScheme: platform.colorScheme,
-    track: (event) => analytics.track(event),
+    track,
   };
 }
 
@@ -135,9 +140,11 @@ export function CoreProvider({ children, ...platform }: CoreProviderProps) {
     const stopFeed = value.feedSession.subscribe(() => {
       void queryClient.cancelQueries();
     });
-    const unsubscribe = attachConnectionAnalytics(value.socketClient, value.analytics);
+    const stopSession = attachSessionAnalytics(value, value.socketClient, value.track);
+    const unsubscribe = attachConnectionAnalytics(value.socketClient, value.track);
     value.socketClient.start();
     return () => {
+      stopSession();
       unsubscribe();
       stopFeedCache();
       stopFeed();
@@ -155,8 +162,16 @@ export function CoreProvider({ children, ...platform }: CoreProviderProps) {
   }, [value]);
 
   useEffect(() => refetchHistoryOnReconnect(value.socketClient, queryClient), [value, queryClient]);
+  useEffect(
+    () => attachRequestAnalytics(queryClient.getQueryCache(), value.track),
+    [value, queryClient],
+  );
 
-  return <CoreContext value={value}>{children}</CoreContext>;
+  return (
+    <CoreContext value={value}>
+      <AnalyticsProvider track={value.track}>{children}</AnalyticsProvider>
+    </CoreContext>
+  );
 }
 
 export function useCore(): CoreContextValue {

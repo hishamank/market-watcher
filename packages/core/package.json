@@ -11,6 +11,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@mini/analytics": "workspace:*",
     "@mini/contracts": "workspace:*",
     "i18next": "27.2.9",
     "intl-pluralrules": "2.0.1"

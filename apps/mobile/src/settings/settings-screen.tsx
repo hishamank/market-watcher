@@ -1,3 +1,4 @@
+import { useTrack } from "@mini/analytics";
 import { useLanguage, useT, type Locale } from "@mini/core";
 import { space } from "@mini/tokens";
 import { ScrollView, StyleSheet, View } from "react-native";
@@ -14,6 +15,7 @@ const LANGUAGES = [
 
 export function SettingsScreen() {
   const t = useT();
+  const track = useTrack();
   const appearance = useAppearance();
   const { locale, direction, setLocale } = useLanguage();
   const themeOptions = APPEARANCES.map((value) => ({
@@ -30,7 +32,11 @@ export function SettingsScreen() {
             options={themeOptions}
             value={appearance}
             direction={direction}
-            onSelect={chooseAppearance}
+            onSelect={(next) => {
+              if (next === appearance) return;
+              chooseAppearance(next);
+              track({ name: "theme_changed", to: next });
+            }}
           />
         </View>
       </SettingsGroup>
@@ -42,7 +48,11 @@ export function SettingsScreen() {
             testID={language.testID}
             selected={locale === language.locale}
             divider={index < LANGUAGES.length - 1}
-            onPress={() => setLocale(language.locale)}
+            onPress={() => {
+              if (language.locale === locale) return;
+              track({ name: "language_changed", from: locale, to: language.locale });
+              setLocale(language.locale);
+            }}
           />
         ))}
       </SettingsGroup>

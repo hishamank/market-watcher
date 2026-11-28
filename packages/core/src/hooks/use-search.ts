@@ -2,7 +2,7 @@
 
 import type { SearchMatch } from "@mini/contracts";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCore } from "../core-provider.tsx";
 import { cancelTimeout, scheduleTimeout } from "../realtime/timers.ts";
 import { SEARCH_DEBOUNCE_MS, searchQueryOptions } from "../rest/search-query.ts";
@@ -48,13 +48,20 @@ export function useSearch(query: string): SearchResult {
   const activeQuery = trimmed.length === 0 ? "" : debouncedQuery;
 
   const { data, error, isPending, isError, isFetching, refetch } = useQuery(
-    searchQueryOptions(searchStocks, activeQuery, (resolvedQuery, resultCount) => {
-      track({ name: "search_performed", queryLength: resolvedQuery.length, resultCount });
-    }),
+    searchQueryOptions(searchStocks, activeQuery),
   );
 
   const status = deriveStatus(trimmed, activeQuery, isPending, isError, isFetching);
   const results = status === "success" ? (data?.results ?? NO_RESULTS) : NO_RESULTS;
+  const settledCount = status === "success" && !isFetching ? results.length : -1;
+  const countedQuery = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (activeQuery.length === 0) countedQuery.current = null;
+    if (settledCount < 0 || countedQuery.current === activeQuery) return;
+    countedQuery.current = activeQuery;
+    track({ name: "search_performed", queryLength: activeQuery.length, resultCount: settledCount });
+  }, [activeQuery, settledCount, track]);
   const activeFetching = activeQuery.length > 0 && isFetching;
   const activeError = status === "error" ? error : null;
 

@@ -1,4 +1,5 @@
-import { RestClientError, useStock, useT, useTrack } from "@mini/core";
+import { useTrack, useTrackOnce } from "@mini/analytics";
+import { RestClientError, useStock, useT } from "@mini/core";
 import type { Range, Stock } from "@mini/contracts";
 import { radius, space } from "@mini/tokens";
 import { Stack, useRouter } from "expo-router";
@@ -7,7 +8,6 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { EmptyState } from "../components/empty-state.tsx";
 import { RangeTabs } from "../components/range-tabs.tsx";
 import { SkeletonBlock } from "../components/skeleton.tsx";
-import { useTrackStockOpened } from "../integrations/use-track-stock-opened.ts";
 import { selectionHaptic } from "../platform/haptics.ts";
 import { ConnectedStockStatistics } from "./connected-stock-statistics.tsx";
 import { ConnectedStockNews } from "./connected-stock-news.tsx";
@@ -22,6 +22,7 @@ function DetailContent({ stock }: { stock: Stock }) {
   const [range, setRange] = useState<Range>("1D");
   const [selection, setSelection] = useState<ScrubSelection | undefined>(undefined);
   const track = useTrack();
+  useTrackOnce({ name: "stock_opened", symbol: stock.symbol }, stock.symbol);
   const selectRange = (next: Range) => {
     if (next === range) return;
     selectionHaptic();
@@ -96,7 +97,6 @@ function DetailFailure({
 
 export function DetailScreen({ symbol }: { symbol: string }) {
   const query = useStock(symbol);
-  useTrackStockOpened(symbol);
   const stock = query.data?.stock;
   return (
     <>

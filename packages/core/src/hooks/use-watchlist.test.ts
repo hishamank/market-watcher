@@ -1,6 +1,7 @@
 import { useContext, useSyncExternalStore } from "react";
 import { describe, expect, it, vi } from "vitest";
-import { type AnalyticsAdapter, useWatchlist } from "../index.ts";
+import type { AnalyticsAdapter } from "@mini/analytics";
+import { useWatchlist } from "../index.ts";
 import { createCoreServices } from "../core-provider.tsx";
 import { WATCHLIST_STORAGE_KEY } from "../watchlist/watchlist-store.ts";
 import { createFakeGateway } from "../testing/fake-gateway.ts";
@@ -90,8 +91,14 @@ describe("watchlist hook", () => {
     useWatchlist().toggle("PLTR");
 
     expect(track.mock.calls).toEqual([
-      [{ name: "watchlist_toggled", symbol: "PLTR", starred: true }],
-      [{ name: "watchlist_toggled", symbol: "PLTR", starred: false }],
+      [
+        { name: "watchlist_toggled", symbol: "PLTR", starred: true, watchlistSize: 1 },
+        { locale: "en-US", feedMode: null },
+      ],
+      [
+        { name: "watchlist_toggled", symbol: "PLTR", starred: false, watchlistSize: 0 },
+        { locale: "en-US", feedMode: null },
+      ],
     ]);
   });
 });

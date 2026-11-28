@@ -1,5 +1,6 @@
 "use client";
 
+import { useTrack } from "@mini/analytics";
 import { useLanguage, useT, type Locale } from "@mini/core";
 import { useState } from "react";
 
@@ -23,10 +24,12 @@ const options = [
 export function LanguageToggle() {
   const t = useT();
   const { locale, setLocale } = useLanguage();
+  const track = useTrack();
   const [movedTo, setMovedTo] = useState<Locale | null>(null);
   const swipe = movedTo === locale ? (locale === "ar" ? "forward" : "back") : undefined;
   const select = (next: Locale) => {
     if (next === locale) return;
+    track({ name: "language_changed", from: locale, to: next });
     setMovedTo(next);
     setLocale(next);
   };

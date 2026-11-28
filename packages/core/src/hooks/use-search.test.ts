@@ -1,9 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
-import { useContext, useEffect, useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useSearch } from "../index.ts";
 import { SEARCH_DEBOUNCE_MS } from "../rest/search-query.ts";
-import { createDeferredSearchFetch, createHookRuntime } from "../testing/search-harness.ts";
+import { createDeferredSearchFetch } from "../testing/search-harness.ts";
+import { flushQuery, mountRuntime } from "../testing/search-mount.ts";
 
 vi.mock("react", async (importOriginal) => {
   const actual = await importOriginal<typeof import("react")>();
@@ -13,6 +12,7 @@ vi.mock("react", async (importOriginal) => {
     useContext: vi.fn(),
     useEffect: vi.fn(),
     useMemo: <T>(factory: () => T) => factory(),
+    useRef: vi.fn(),
     useState: vi.fn(),
   };
 });
@@ -24,24 +24,6 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
     useQuery: vi.fn(),
   };
 });
-
-function mountRuntime(fetch: ReturnType<typeof createDeferredSearchFetch>["fetch"]) {
-  const runtime = createHookRuntime(fetch);
-  vi.mocked(useContext).mockReturnValue(runtime.services);
-  vi.mocked(useState).mockImplementation(runtime.useStateImpl as typeof useState);
-  vi.mocked(useEffect).mockImplementation(runtime.useEffectImpl);
-  vi.mocked(useQuery).mockImplementation(
-    (options) =>
-      runtime.useQueryImpl(options as Parameters<typeof runtime.useQueryImpl>[0]) as ReturnType<
-        typeof useQuery
-      >,
-  );
-  return runtime;
-}
-
-async function flushQuery(): Promise<void> {
-  await vi.advanceTimersByTimeAsync(0);
-}
 
 describe("useSearch", () => {
   beforeEach(() => {

@@ -10,6 +10,7 @@
     "typecheck": "tsc -p ."
   },
   "dependencies": {
+    "@mini/analytics": "workspace:*",
     "@mini/contracts": "workspace:*",
     "@mini/core": "workspace:*",
     "@mini/tokens": "workspace:*",

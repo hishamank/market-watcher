@@ -1,3 +1,4 @@
+import { type ListViewName, useTrack } from "@mini/analytics";
 import { useT } from "@mini/core";
 import { Tabs } from "expo-router";
 import { TabHeaderActions } from "../../shell/tab-header-actions.tsx";
@@ -7,6 +8,14 @@ import { TabIcon } from "../../theme/tab-icon.tsx";
 export default function TabsLayout() {
   const t = useT();
   const palette = usePalette();
+  const track = useTrack();
+  const trackView =
+    (view: ListViewName) =>
+    ({ navigation }: { navigation: { isFocused(): boolean } }) => ({
+      tabPress: () => {
+        if (!navigation.isFocused()) track({ name: "list_view_changed", view });
+      },
+    });
   return (
     <Tabs
       screenOptions={{
@@ -22,6 +31,7 @@ export default function TabsLayout() {
     >
       <Tabs.Screen
         name="index"
+        listeners={trackView("all")}
         options={{
           title: t("header.title"),
           tabBarButtonTestID: "tab-markets",
@@ -30,6 +40,7 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="watchlist"
+        listeners={trackView("watchlist")}
         options={{
           title: t("list.view.watchlist"),
           tabBarButtonTestID: "tab-watchlist",

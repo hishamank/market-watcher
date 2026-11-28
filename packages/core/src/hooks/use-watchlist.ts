@@ -38,7 +38,8 @@ export function useWatchlist(): WatchlistResult {
     toggle: (symbol) => {
       const starred = !watchlistStore.getSnapshot().symbols.includes(symbol);
       watchlistStore.toggle(symbol);
-      track({ name: "watchlist_toggled", symbol, starred });
+      const watchlistSize = watchlistStore.getSnapshot().symbols.length;
+      track({ name: "watchlist_toggled", symbol, starred, watchlistSize });
     },
   };
 }

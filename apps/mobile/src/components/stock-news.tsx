@@ -5,7 +5,12 @@ import { usePalette } from "../theme/palette.ts";
 import { useTextStyles } from "../theme/text-styles.ts";
 import { NewsContent } from "./news-content.tsx";
 
-export function StockNews({ view }: { view: StockNewsView }) {
+export interface StockNewsProps {
+  view: StockNewsView;
+  onOpen: (position: number) => void;
+}
+
+export function StockNews({ view, onOpen }: StockNewsProps) {
   const t = useT();
   const palette = usePalette();
   const text = useTextStyles();
@@ -16,7 +21,7 @@ export function StockNews({ view }: { view: StockNewsView }) {
         {t("news.title")}
       </Text>
       {view.status === "ready" ? (
-        <NewsContent view={view} />
+        <NewsContent view={view} onOpen={onOpen} />
       ) : (
         <>
           <Text style={[text.body, { color: palette.textSecondary }]}>

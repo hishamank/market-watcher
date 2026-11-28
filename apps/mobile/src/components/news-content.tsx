@@ -35,14 +35,20 @@ function Headline({ article }: { article: ArticleView }) {
   );
 }
 
-export function NewsContent({ view }: { view: ReadyNews }) {
+export function NewsContent({
+  view,
+  onOpen,
+}: {
+  view: ReadyNews;
+  onOpen: (position: number) => void;
+}) {
   const palette = usePalette();
   const text = useTextStyles();
   const t = useT();
   return (
     <>
       <View>
-        {view.articles.map((article) => (
+        {view.articles.map((article, position) => (
           <View
             key={article.id}
             testID="news-story"
@@ -53,6 +59,7 @@ export function NewsContent({ view }: { view: ReadyNews }) {
                 accessibilityRole="link"
                 accessibilityLabel={article.title}
                 onPress={() => {
+                  onOpen(position);
                   if (article.href) void Linking.openURL(article.href);
                 }}
                 style={styles.row}

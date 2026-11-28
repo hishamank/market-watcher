@@ -8,11 +8,17 @@ const serverSnapshot = (): ColorScheme => "light";
 const subscribe = () => () => {};
 
 export function useColorScheme() {
-  const store = useCore().colorScheme;
+  const { colorScheme: store, track } = useCore();
   const scheme = useSyncExternalStore(
     store?.subscribe ?? subscribe,
     store?.getSnapshot ?? serverSnapshot,
     serverSnapshot,
   );
-  return { scheme, toggle: () => store?.set(scheme === "light" ? "dark" : "light") };
+  const toggle = () => {
+    if (store === undefined) return;
+    const next = scheme === "light" ? "dark" : "light";
+    store.set(next);
+    track({ name: "theme_changed", to: next });
+  };
+  return { scheme, toggle };
 }

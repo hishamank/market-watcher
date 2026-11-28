@@ -37,18 +37,25 @@ function Headline({ article }: { article: ArticleView }) {
   );
 }
 
-export function NewsContent({ view }: { view: ReadyNews }) {
+export function NewsContent({
+  view,
+  onOpen,
+}: {
+  view: ReadyNews;
+  onOpen: (position: number) => void;
+}) {
   const t = useT();
   return (
     <>
       <ul id="news-stories" className="mt-8 divide-y divide-border">
-        {view.articles.map((article) => (
+        {view.articles.map((article, position) => (
           <li key={article.id} data-testid="news-story">
             {article.href ? (
               <a
                 href={article.href}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => onOpen(position)}
                 aria-label={t("news.external", { title: article.title })}
                 className="group flex gap-12 rounded-xs py-20 md:gap-16"
               >

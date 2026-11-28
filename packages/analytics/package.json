@@ -1,0 +1,23 @@
+{
+  "name": "@mini/analytics",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p .",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@mini/contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.1",
+    "react": "19.3.0"
+  },
+  "peerDependencies": {
+    "react": "^19.3.0"
+  }
+}

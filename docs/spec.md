@@ -227,7 +227,7 @@ Also show the next earnings report date (or range) and its confirmation status, 
 
 - Right-to-left readiness: logical properties only. Prices, tickers and charts are always laid out left to right [0016].
 - i18n: every string goes through `useT()` in core, backed by i18next, with English and Arabic catalogues shared by both apps and the `intl-pluralrules` polyfill for Hermes. A header toggle switches language and direction in place; web keeps the choice in a `locale` cookie so the server renders `lang` and `dir`. Formatters take the locale explicitly and avoid `formatToParts` [0016, 0051].
-- Analytics: a typed `track(event)` over a fixed union (`stock_opened`, `range_changed`, `watchlist_toggled`, `search_performed`, `connection_status_changed`) with a no-op adapter, called only from core hooks [0016].
+- Analytics: `@mini/analytics` holds a typed event catalogue and the adapters. Events fire from the core hook that owns the action, or from an app event handler through `useTrack()`, never during render. Core adds the locale and feed mode to each event. For now both apps log events to the console in development and drop them in production, and a provider adapter can replace the console sink without changing call sites [0016, 0101].
 
 ### Code rules and tooling
 

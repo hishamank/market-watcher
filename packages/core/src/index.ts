@@ -67,8 +67,6 @@ export { formatMarketDate, formatMarketDateTime, formatMarketTime } from "./form
 export type { MarketDateOptions, MarketTimeOptions } from "./format/time-format.ts";
 export { MARKET_TIME_ZONE_LABEL } from "./format/constants.ts";
 
-export type { AnalyticsAdapter, AnalyticsEvent } from "./analytics/analytics.ts";
-
 export { useChaosControls } from "./hooks/use-chaos-controls.ts";
 export type {
   ChaosControlsResult,
@@ -79,7 +77,6 @@ export type {
 export { useConnectionHealth } from "./hooks/use-connection-health.ts";
 export type { ConnectionHealth } from "./hooks/use-connection-health.ts";
 export { useSearch } from "./hooks/use-search.ts";
-export { useTrack } from "./hooks/use-track.ts";
 export type { SearchResult } from "./hooks/use-search.ts";
 
 export { useColorScheme } from "./hooks/use-color-scheme.ts";

@@ -1,3 +1,4 @@
+import { useTrack } from "@mini/analytics";
 import { useLanguage, useSearch, useWatchlist } from "@mini/core";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -13,6 +14,7 @@ export function SearchScreen() {
   const search = useSearch(query);
   const watchlist = useWatchlist();
   const router = useRouter();
+  const track = useTrack();
   const { direction } = useLanguage();
   const palette = usePalette();
   const insets = useSafeAreaInsets();
@@ -36,7 +38,15 @@ export function SearchScreen() {
         query={search.query}
         results={search.results}
         starred={(symbol) => (watchlist.isLoaded ? watchlist.isStarred(symbol) : undefined)}
-        onOpen={(symbol) => router.push(`/stocks/${symbol}`)}
+        onOpen={(symbol) => {
+          track({
+            name: "search_result_selected",
+            queryLength: search.query.length,
+            resultCount: search.results.length,
+            position: search.results.findIndex((match) => match.symbol === symbol),
+          });
+          router.push(`/stocks/${symbol}`);
+        }}
         onToggleStar={watchlist.toggle}
         onRetry={search.retry}
       />

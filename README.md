@@ -63,7 +63,8 @@ The engineering workflow is committed alongside the code: shared rules ([`CLAUDE
 | [`apps/web`](apps/web)                     | Next.js App Router views, connected hooks, web-owned table columns (`apps/web/src/columns`), SSR prefetch, nonce CSP & Lightweight Charts       |
 | [`apps/mobile`](apps/mobile)               | Expo Router / Expo Go views and native adapters sharing `packages/core`                                                                         |
 | [`packages/contracts`](packages/contracts) | Sole source of Zod wire schemas, inferred types and BigInt money math                                                                           |
-| [`packages/core`](packages/core)           | Shared platform-agnostic socket client, feed-session guard, keyed quote & availability stores, TanStack Query layer, hooks, i18n, analytics     |
+| [`packages/core`](packages/core)           | Shared platform-agnostic socket client, feed-session guard, keyed quote & availability stores, TanStack Query layer, hooks, i18n                |
+| [`packages/analytics`](packages/analytics) | Product event catalogue, `useTrack`, and the console adapter that a provider such as PostHog can replace                                        |
 | [`packages/tokens`](packages/tokens)       | Shared Graphite light/dark colours, spacing, typography, radii and motion tokens                                                                |
 
 ```mermaid

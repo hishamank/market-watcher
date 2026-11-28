@@ -97,3 +97,4 @@ All architectural decisions live in [`docs/adr/`](adr/) as `NNNN-kebab-case.md`.
 | [0098](adr/0098-a-range-switch-keeps-the-previous-chart.md) | A range switch keeps the previous chart |
 | [0099](adr/0099-the-watchlist-tab-counts-its-stars.md) | The Watchlist tab counts its stars |
 | [0100](adr/0100-the-watchlist-sorts-on-click-from-a-snapshot.md) | The watchlist sorts on click from a snapshot |
+| [0101](adr/0101-analytics-is-its-own-package-with-a-console-sink.md) | Analytics is its own package with a console sink |
