@@ -8,7 +8,8 @@ import {
 import Link from "next/link";
 import type { FlashRoll } from "../integrations/use-tick-flash.ts";
 import { ChangePill } from "./change-pill.tsx";
-import { Morph, OPEN_STOCK } from "./morph.tsx";
+import { markStockOpening } from "../integrations/opening-stock.ts";
+import { Morph } from "./morph.tsx";
 import { PriceCell } from "./price-cell.tsx";
 import { StarButton } from "./star-button.tsx";
 
@@ -118,11 +119,11 @@ export function StockRow(props: StockRowProps) {
       <Link
         prefetch={false}
         href={props.href ?? `/stocks/${symbol}`}
-        transitionTypes={[OPEN_STOCK]}
+        onNavigate={() => markStockOpening(symbol)}
         className="-ms-8 flex min-w-0 flex-1 items-center gap-12 self-stretch rounded-md ps-8 focus-visible:outline-offset-[-2px] list-table:col-span-7 list-wide:col-span-9 list-custom:col-span-(--table-span) list-custom:mx-0 list-custom:px-0 list-table:-mx-8 list-table:grid list-table:grid-cols-subgrid list-table:px-8 list-compact:col-span-4 list-compact:-mx-8 list-compact:grid list-compact:grid-cols-subgrid list-compact:px-8"
       >
         <span className="flex min-w-0 flex-1 flex-col items-start gap-[3px] list-table:contents list-compact:contents">
-          <Morph name={`stock-name-${symbol}`} enabled={props.morph}>
+          <Morph name={`stock-name-${symbol}`} symbol={symbol} enabled={props.morph}>
             <span
               className={`max-w-full overflow-x-clip whitespace-nowrap text-body-strong list-table:text-body list-table:font-medium list-compact:text-body list-compact:font-medium ${pinnedName} list-custom:leading-[56px] transition-colors duration-(--duration-fast) ease-standard list-custom:group-hover:bg-hover`}
             >
@@ -145,7 +146,7 @@ export function StockRow(props: StockRowProps) {
         <span className="flex shrink-0 flex-col items-end gap-4 list-table:contents list-compact:contents">
           <span className="list-table:text-end list-compact:text-end">
             <span className="sr-only">{t("list.column.price")}: </span>
-            <Morph name={`stock-price-${symbol}`} enabled={props.morph}>
+            <Morph name={`stock-price-${symbol}`} symbol={symbol} enabled={props.morph}>
               <PriceCell
                 price={props.price}
                 change={props.change}

@@ -2,7 +2,7 @@
 
 All architectural decisions live in [`docs/adr/`](adr/) as `NNNN-kebab-case.md`. `pnpm check:adrs` ([`scripts/check-adrs.ts`](../scripts/check-adrs.ts)) enforces unique numbering and filenames across every Markdown file inside `docs/adr/`, which is why this index sits beside that folder rather than inside it. On success `pnpm check:adrs` prints the total unique ADR count; on failure it reports problems and the next free number. Gaps in the sequence reflect non-contiguous reservations across concurrent branches.
 
-## Index (`0001`–`0100`, 91 ADRs)
+## Index (`0001`–`0102`, 93 ADRs)
 
 | ADR | Decision |
 | --- | --- |
@@ -98,3 +98,4 @@ All architectural decisions live in [`docs/adr/`](adr/) as `NNNN-kebab-case.md`.
 | [0099](adr/0099-the-watchlist-tab-counts-its-stars.md) | The Watchlist tab counts its stars |
 | [0100](adr/0100-the-watchlist-sorts-on-click-from-a-snapshot.md) | The watchlist sorts on click from a snapshot |
 | [0101](adr/0101-analytics-is-its-own-package-with-a-console-sink.md) | Analytics is its own package with a console sink |
+| [0102](adr/0102-the-morph-follows-the-opened-row.md) | The morph follows the opened row |
