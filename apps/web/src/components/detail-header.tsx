@@ -54,7 +54,7 @@ export function DetailHeader(props: DetailHeaderProps) {
           >
             {symbol}
           </bdi>
-          <Morph name={`stock-name-${symbol}`}>
+          <Morph name={`stock-name-${symbol}`} symbol={symbol}>
             <h2 data-testid="detail-name" dir="auto" className="text-body text-text-secondary">
               {name}
             </h2>
@@ -70,7 +70,7 @@ export function DetailHeader(props: DetailHeaderProps) {
       </div>
       <div className="mt-8">
         <span className="sr-only">{t("list.column.price")}: </span>
-        <Morph name={`stock-price-${symbol}`}>
+        <Morph name={`stock-price-${symbol}`} symbol={symbol}>
           <PriceCell
             price={props.price}
             change={props.change}

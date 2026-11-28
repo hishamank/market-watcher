@@ -18,6 +18,7 @@ import { ConnectedDetailFacts } from "./connected-detail-facts.tsx";
 import { useListNavigation } from "../integrations/use-list-navigation.ts";
 import { ListPane } from "./list-pane.tsx";
 import { scrubFor, type ScrubSelection } from "./scrub-selection.ts";
+import { useStockOpened } from "../integrations/opening-stock.ts";
 import { useRangeParam } from "./use-range-param.ts";
 
 function DetailCard({ symbol }: { symbol: string }) {
@@ -59,6 +60,7 @@ function DetailCard({ symbol }: { symbol: string }) {
 
 export function DetailPage({ symbol }: { symbol: string }) {
   const t = useT();
+  useStockOpened(symbol);
   const { listHref } = useListNavigation();
   return (
     <main className="flex flex-1 flex-col pb-24 md:p-24">
