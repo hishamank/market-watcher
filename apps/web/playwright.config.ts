@@ -24,7 +24,7 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: "node apps/web/e2e/support/run-gateway.ts",
+      command: "exec node apps/web/e2e/support/run-gateway.ts",
       cwd: "../..",
       url: `${gatewayUrl}/stocks`,
       reuseExistingServer: false,
