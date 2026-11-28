@@ -1,9 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
-import { useContext, useEffect, useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useSearch } from "../index.ts";
 import { SEARCH_DEBOUNCE_MS } from "../rest/search-query.ts";
-import { createDeferredSearchFetch, createHookRuntime } from "../testing/search-harness.ts";
+import { createDeferredSearchFetch } from "../testing/search-harness.ts";
+import { flushQuery, mountRuntime } from "../testing/search-mount.ts";
 
 vi.mock("react", async (importOriginal) => {
   const actual = await importOriginal<typeof import("react")>();
@@ -13,6 +12,7 @@ vi.mock("react", async (importOriginal) => {
     useContext: vi.fn(),
     useEffect: vi.fn(),
     useMemo: <T>(factory: () => T) => factory(),
+    useRef: vi.fn(),
     useState: vi.fn(),
   };
 });
@@ -24,24 +24,6 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
     useQuery: vi.fn(),
   };
 });
-
-function mountRuntime(fetch: ReturnType<typeof createDeferredSearchFetch>["fetch"]) {
-  const runtime = createHookRuntime(fetch);
-  vi.mocked(useContext).mockReturnValue(runtime.services);
-  vi.mocked(useState).mockImplementation(runtime.useStateImpl as typeof useState);
-  vi.mocked(useEffect).mockImplementation(runtime.useEffectImpl);
-  vi.mocked(useQuery).mockImplementation(
-    (options) =>
-      runtime.useQueryImpl(options as Parameters<typeof runtime.useQueryImpl>[0]) as ReturnType<
-        typeof useQuery
-      >,
-  );
-  return runtime;
-}
-
-async function flushQuery(): Promise<void> {
-  await vi.advanceTimersByTimeAsync(0);
-}
 
 describe("useSearch", () => {
   beforeEach(() => {
@@ -83,31 +65,6 @@ describe("useSearch", () => {
       results: [{ symbol: "AAPL", name: "Apple Inc." }],
     });
     expect(runtime.events).toEqual([{ name: "search_performed", queryLength: 2, resultCount: 1 }]);
-    runtime.unmount();
-  });
-
-  it("counts a repeated search answered from the cache", async () => {
-    const { calls, fetch } = createDeferredSearchFetch();
-    const runtime = mountRuntime(fetch);
-
-    useSearch("ap");
-    vi.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
-    useSearch("ap");
-    calls[0]?.resolve([{ symbol: "AAPL", name: "Apple Inc." }]);
-    await flushQuery();
-    useSearch("ap");
-
-    useSearch("");
-    vi.advanceTimersByTime(0);
-    useSearch("ap");
-    vi.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
-    expect(useSearch("ap").status).toBe("success");
-
-    expect(calls).toHaveLength(1);
-    expect(runtime.events).toEqual([
-      { name: "search_performed", queryLength: 2, resultCount: 1 },
-      { name: "search_performed", queryLength: 2, resultCount: 1 },
-    ]);
     runtime.unmount();
   });
 

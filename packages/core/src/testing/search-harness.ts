@@ -61,6 +61,8 @@ export function createHookRuntime(fetch: HttpFetch) {
 
   let state = "";
   let effectIndex = 0;
+  let refIndex = 0;
+  const refs: { current: unknown }[] = [];
   const effects: { deps: readonly unknown[] | undefined; cleanup: (() => void) | undefined }[] = [];
   let observer: QueryObserver<unknown, unknown, unknown, unknown, readonly unknown[]> | undefined;
   let unsubscribe: (() => void) | undefined;
@@ -70,6 +72,7 @@ export function createHookRuntime(fetch: HttpFetch) {
     events,
     useStateImpl: (): [string, (next: unknown) => void] => {
       effectIndex = 0;
+      refIndex = 0;
       return [
         state,
         (next: unknown) => {
@@ -77,6 +80,11 @@ export function createHookRuntime(fetch: HttpFetch) {
             typeof next === "function" ? (next as (prev: string) => string)(state) : `${next}`;
         },
       ];
+    },
+    useRefImpl: (initial: unknown) => {
+      refs[refIndex] ??= { current: initial };
+      refIndex += 1;
+      return refs[refIndex - 1];
     },
     useEffectImpl: (effect: () => void | (() => void), deps?: readonly unknown[]) => {
       const slot = effects[effectIndex];

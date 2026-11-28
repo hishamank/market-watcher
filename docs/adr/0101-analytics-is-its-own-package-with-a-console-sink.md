@@ -19,7 +19,7 @@ Analytics moves out of core into `packages/analytics` (`@mini/analytics`). It ho
 | `stock_opened` | `symbol` | Which stocks get attention? | Detail view once the stock resolves, so a 404 is not counted |
 | `range_changed` | `symbol`, `range` | Are ranges beyond 1D used? | Each app's range handler |
 | `watchlist_toggled` | `symbol`, `starred`, `watchlistSize` | Is the watchlist adopted, and how big does it get? | `useWatchlist().toggle` |
-| `search_performed` | `queryLength`, `resultCount` | How often does search return nothing? | `useSearch`, once per settled query, cached or fetched |
+| `search_performed` | `queryLength`, `resultCount` | How often does search return nothing? | `useSearch`, once per search, after it settles; a stale cached result counts once its refresh lands |
 | `search_result_selected` | `queryLength`, `resultCount`, `position` | Does search lead somewhere, and from which rank? | Web header search, mobile search screen |
 | `list_view_changed` | `view` | Is the watchlist view used? | Web view toggle, mobile tab press |
 | `language_changed` | `from`, `to` | Is Arabic used? | Web language toggle, mobile Settings |
